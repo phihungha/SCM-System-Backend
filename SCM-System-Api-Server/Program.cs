@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using SCM_System_Api_Server.Data;
 
 namespace SCM_System_Api_Server
 {
@@ -8,7 +10,9 @@ namespace SCM_System_Api_Server
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseNpgsql(GetDbConnectionString())
+                );
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -24,13 +28,19 @@ namespace SCM_System_Api_Server
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
+        }
+
+        public static string GetDbConnectionString()
+        {
+            string? dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+            string? dbName = Environment.GetEnvironmentVariable("DB_NAME");
+            string? dbUser = Environment.GetEnvironmentVariable("DB_USER");
+            string? dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            return $"Host={dbHost};Database={dbName};Username={dbUser};Password={dbPassword}";
         }
     }
 }

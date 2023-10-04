@@ -6,3 +6,17 @@ services:
     build:
       context: .
       dockerfile: SCM-System-Api-Server/Dockerfile
+    depends_on:
+      - scm-system-db
+
+  scm-system-db:
+    container_name: scm-system-db
+    image: postgres:15
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+    name: ${VOLUME_NAME:-scm-system-backend}
