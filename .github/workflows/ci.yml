@@ -26,6 +26,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore ./SCM-System-Backend.sln
       - name: Build
-        run: dotnet build -warnaserror --no-restore
+        run: dotnet build -warnaserror --no-restore ./SCM-System-Backend.sln
