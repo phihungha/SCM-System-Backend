@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SCM_System_Api_Server.Data;
+using SCM_System_Api_Server.Infrastructure;
 
 namespace SCM_System_Api_Server
 {
