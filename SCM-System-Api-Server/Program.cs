@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SCM_System_Api_Server.DomainServices;
 using SCM_System_Api_Server.Infrastructure;
 
 namespace SCM_System_Api_Server
@@ -13,6 +14,9 @@ namespace SCM_System_Api_Server
             builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseNpgsql(GetDbConnectionString())
                 );
+
+            builder.Services.AddScoped<IUsersService, UsersService>();
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
