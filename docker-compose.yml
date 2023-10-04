@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   scm-system-api-server:
+    container_name: scm-system-api-server
     image: ${DOCKER_REGISTRY-}scm-system-api-server
     build:
       context: .
@@ -11,7 +12,7 @@ services:
 
   scm-system-db:
     container_name: scm-system-db
-    image: postgres:15
+    image: postgres:16
     ports:
       - 5432:5432
     volumes:
