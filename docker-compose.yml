@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  scm-system-api-server:
+    image: ${DOCKER_REGISTRY-}scm-system-api-server
+    build:
+      context: .
+      dockerfile: SCM-System-Api-Server/Dockerfile

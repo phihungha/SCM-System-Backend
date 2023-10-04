@@ -5,6 +5,8 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCM-System-Api-Server", "SCM-System-Api-Server\SCM-System-Api-Server.csproj", "{B64E0D16-7B83-4EFB-A0DC-C9B7303D89B5}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{1A666A9A-42DF-4832-9491-BB79E17D5DFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B64E0D16-7B83-4EFB-A0DC-C9B7303D89B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B64E0D16-7B83-4EFB-A0DC-C9B7303D89B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B64E0D16-7B83-4EFB-A0DC-C9B7303D89B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A666A9A-42DF-4832-9491-BB79E17D5DFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A666A9A-42DF-4832-9491-BB79E17D5DFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A666A9A-42DF-4832-9491-BB79E17D5DFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A666A9A-42DF-4832-9491-BB79E17D5DFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
