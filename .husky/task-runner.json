@@ -1,0 +1,18 @@
+{
+   "tasks": [
+      {
+         "name": "Format code",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [
+            "format",
+            "./SCMServer.sln",
+            "--include",
+            "${staged}"
+         ],
+         "include": [
+            "**/*.cs"
+         ]
+      }
+   ]
+}
