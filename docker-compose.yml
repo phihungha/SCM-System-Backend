@@ -14,7 +14,7 @@ services:
     container_name: scm-system-db
     image: postgres:16
     ports:
-      - 5432:5432
+      - "5432"
     volumes:
       - db-data:/var/lib/postgresql/data
 

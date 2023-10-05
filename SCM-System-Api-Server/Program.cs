@@ -11,8 +11,9 @@ namespace SCM_System_Api_Server
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            string? dbConnStr = Environment.GetEnvironmentVariable("DB_CONN");
             builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseNpgsql(GetDbConnectionString())
+                    options.UseNpgsql(dbConnStr)
                 );
 
             builder.Services.AddScoped<IUsersService, UsersService>();
@@ -36,15 +37,6 @@ namespace SCM_System_Api_Server
             app.MapControllers();
 
             app.Run();
-        }
-
-        public static string GetDbConnectionString()
-        {
-            string? dbHost = Environment.GetEnvironmentVariable("DB_HOST");
-            string? dbName = Environment.GetEnvironmentVariable("DB_NAME");
-            string? dbUser = Environment.GetEnvironmentVariable("DB_USER");
-            string? dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-            return $"Host={dbHost};Database={dbName};Username={dbUser};Password={dbPassword}";
         }
     }
 }

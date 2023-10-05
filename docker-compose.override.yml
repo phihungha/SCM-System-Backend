@@ -5,10 +5,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
-      - DB_HOST=${DB_HOST:-scm-system-db:5432}
-      - DB_USER=${DB_USER:-app}
-      - DB_PASSWORD=${DB_PASSWORD:-app}
-      - DB_NAME=${DB_NAME:-app}
+      - DB_CONN=${DB_CONN:-Host=scm-system-db:5432;Database=app;Username=app;Password=app}
     ports:
       - "80"
       - "443"
