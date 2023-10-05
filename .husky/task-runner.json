@@ -6,7 +6,7 @@
          "command": "dotnet",
          "args": [
             "format",
-            "./SCMServer.sln",
+            "./SCM-System-Backend.sln",
             "--include",
             "${staged}"
          ],
