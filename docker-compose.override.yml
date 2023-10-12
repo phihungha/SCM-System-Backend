@@ -6,12 +6,14 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - DB_CONN=${DB_CONN:-Host=scm-system-db:5432;Database=app;Username=app;Password=app}
+      - AWS_PROFILE=${AWS_PROFILE}
     ports:
       - "80"
       - "443"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ${userprofile}/.aws:/root/.aws:ro
 
   scm-system-db:
     environment:

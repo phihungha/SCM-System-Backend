@@ -23,5 +23,12 @@ namespace SCM_System_Api_Server.Controllers
         {
             return await _usersService.GetUsers();
         }
+
+        // GET: api/<UsersController>/profileImageUploadUrl
+        [HttpGet("{id}/profileImageUploadUrl")]
+        public string GetProfileImageUploadUrl(long id)
+        {
+            return _usersService.GetUserProfileImageUploadUrl(id);
+        }
     }
 }

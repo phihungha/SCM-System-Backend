@@ -5,5 +5,7 @@ namespace SCM_System_Api_Server.DomainServices
     public interface IUsersService
     {
         Task<List<User>> GetUsers();
+
+        string GetUserProfileImageUploadUrl(long userId);
     }
 }

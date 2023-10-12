@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.205.6" />
+    <PackageReference Include="AWSSDK.SSO" Version="3.7.201.2" />
+    <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.201.8" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.11">
       <PrivateAssets>all</PrivateAssets>
