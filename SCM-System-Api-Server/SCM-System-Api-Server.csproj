@@ -25,4 +25,10 @@
     <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
     <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory=".." />
   </Target>
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\LearnDev\SCM-System-Backend\SCM-System-Api-Server\.editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\LearnDev\SCM-System-Backend\SCM-System-Api-Server\.editorconfig" />
+  </ItemGroup>
 </Project>
