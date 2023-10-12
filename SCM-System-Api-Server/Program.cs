@@ -12,14 +12,29 @@ namespace SCM_System_Api_Server
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            using var loggerFactory = LoggerFactory.Create(loggingBuilder => loggingBuilder
+                .SetMinimumLevel(LogLevel.Trace)
+                .AddConsole());
+            ILogger logger = loggerFactory.CreateLogger<Program>();
 
             // Add external services.
             string? dbConnectionString = Environment.GetEnvironmentVariable("DB_CONN");
             builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseNpgsql(dbConnectionString)
                 );
-            AWSCredentials ssoCredential = LoadSsoCredential();
-            builder.Services.AddSingleton<IAmazonS3>(i => new AmazonS3Client(ssoCredential));
+
+            AWSCredentials? ssoCredential = LoadAwsSsoCredential();
+            if (ssoCredential == null && builder.Environment.IsDevelopment())
+            {
+                builder.Services.AddSingleton<IAmazonS3>(i => new AmazonS3Client());
+                logger.LogWarning(
+                    "No AWS credential from SSO found. " +
+                    "Do not use any API endpoint that needs AWS.");
+            }
+            else
+            {
+                builder.Services.AddSingleton<IAmazonS3>(i => new AmazonS3Client(ssoCredential));
+            }
 
             // Add infrastructure services
             builder.Services.AddSingleton<IImageService, ImageService>();
@@ -49,12 +64,16 @@ namespace SCM_System_Api_Server
             app.Run();
         }
 
-        private static AWSCredentials LoadSsoCredential()
+        /// <summary>
+        /// Load AWS credentials from SSO.
+        /// </summary>
+        /// <returns>AWS credentials. Null if none found.</returns>
+        private static AWSCredentials? LoadAwsSsoCredential()
         {
-            string? awsProfile = Environment.GetEnvironmentVariable("AWS_PROFILE");
+            string? awsProfileName = Environment.GetEnvironmentVariable("AWS_PROFILE");
             var chain = new CredentialProfileStoreChain();
-            if (!chain.TryGetAWSCredentials(awsProfile, out var credentials))
-                throw new Exception($"Failed to find the {awsProfile} profile");
+            if (!chain.TryGetAWSCredentials(awsProfileName, out var credentials))
+                return null;
             return credentials;
         }
     }
