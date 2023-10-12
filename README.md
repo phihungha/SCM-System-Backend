@@ -1,12 +1,12 @@
-﻿# Supply Chain Management System Backend
+﻿# Backend for Supply Chain Management Support System
 
 Course project for SE310
 
-Technologies:
+**Technologies:**
 * ASP.NET Core
 * Entity Framework Core
 
-Members:
+**Members:**
 * Hà Phi Hùng
 * Lê Quang Trung
 * Hồ Minh Ngân
