@@ -2,7 +2,22 @@ version: '3.4'
 
 services:
   scmss-api-server:
+    container_name: scmss-api-server
     image: ${DOCKER_REGISTRY-}scmss-api-server
     build:
       context: .
       dockerfile: ScmssApiServer/Dockerfile
+    depends_on:
+      - scmss-db
+
+  scmss-db:
+    container_name: scmss-db
+    image: postgres:16
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+    name: ${DB_DATA_VOLUME:-scmss-backend}
