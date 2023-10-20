@@ -12,7 +12,7 @@ namespace ScmssApiServer.Data
         /// <param name="userManager">User manager</param>
         /// <exception cref="Exception">Failed to create root admin user</exception>
         public static void SeedRootAdminUser(UserManager<User> userManager,
-                                                    WebApplication app)
+                                             WebApplication app)
         {
             ILogger logger = app.Logger;
             IConfiguration configuration = app.Configuration;
