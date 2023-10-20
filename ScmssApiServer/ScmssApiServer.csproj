@@ -28,7 +28,9 @@
     <None Include="D:\LearnDev\ScmssBackend\ScmssApiServer\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <Folder Include="DomainExceptions\" />
+    <Folder Include="IServices\" />
+    <Folder Include="Services\" />
   </ItemGroup>
   <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
     <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
