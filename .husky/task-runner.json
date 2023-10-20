@@ -2,10 +2,15 @@
    "tasks": [
       {
          "name": "Format code",
+         "group": "pre-commit",
          "command": "dotnet",
          "args": [
             "format",
-            "ScmssBackend.sln"
+            "--include",
+            "${staged}"
+         ],
+         "include": [
+            "**/*.cs"
          ]
       }
    ]
