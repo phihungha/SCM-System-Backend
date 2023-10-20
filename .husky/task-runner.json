@@ -1,0 +1,12 @@
+{
+   "tasks": [
+      {
+         "name": "Format code",
+         "command": "dotnet",
+         "args": [
+            "format",
+            "ScmssBackend.sln"
+         ]
+      }
+   ]
+}

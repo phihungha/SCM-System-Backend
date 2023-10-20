@@ -8,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["ScmssApiServer/ScmssApiServer.csproj", "ScmssApiServer/"]
+ARG HUSKY=0
 RUN dotnet restore "ScmssApiServer/ScmssApiServer.csproj"
 COPY . .
 WORKDIR "/src/ScmssApiServer"
