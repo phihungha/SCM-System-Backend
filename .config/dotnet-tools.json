@@ -7,6 +7,12 @@
       "commands": [
         "husky"
       ]
+    },
+    "dotnet-ef": {
+      "version": "7.0.12",
+      "commands": [
+        "dotnet-ef"
+      ]
     }
   }
 }
