@@ -16,7 +16,6 @@ namespace ScmssApiServer.Controllers
             _authService = authService;
         }
 
-        // POST api/auth/signin
         [HttpPost]
         [Route("SignIn")]
         public async Task<ActionResult> SignIn([FromBody] AuthSignInDto body)
@@ -29,7 +28,6 @@ namespace ScmssApiServer.Controllers
             return Forbid();
         }
 
-        // POST api/auth/signout
         [HttpPost]
         [Route("SignOut")]
         public new async Task<ActionResult> SignOut()

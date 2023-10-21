@@ -1,33 +1,39 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
+﻿using ScmssApiServer.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace ScmssApiServer.Models
+namespace ScmssApiServer.DTOs
 {
-    public class User : IdentityUser, IUpdateTrackable
+    public class UserCreateDto
     {
-        [PersonalData]
+        [Required]
+        [StringLength(maximumLength: 20, MinimumLength = 5)]
+        public required string UserName { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public required string Email { get; set; }
+
+        [Required]
+        public required string Password { get; set; }
+
+        [Required]
         [StringLength(maximumLength: 50, MinimumLength = 5)]
         public required string Name { get; set; }
 
-        [PersonalData]
+        [Required]
         public required Gender Gender { get; set; }
 
-        [PersonalData]
+        [Required]
         public required DateTime DateOfBirth { get; set; }
 
-        [PersonalData]
+        [Required]
         [StringLength(maximumLength: 12, MinimumLength = 12)]
         [Column(TypeName = "char(12)")]
         public required string IdCardNumber { get; set; }
 
-        [PersonalData]
         public string? Address { get; set; }
 
         public string? Description { get; set; }
-
-        public bool IsActive { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime? UpdatedTime { get; set; }
     }
 }

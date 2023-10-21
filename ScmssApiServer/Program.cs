@@ -37,6 +37,7 @@ namespace ScmssApiServer
 
             // Add domain services
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IUsersService, UsersService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -74,7 +75,11 @@ namespace ScmssApiServer
         /// <param name="builder">Web application builder</param>
         private static void AddAuthentication(WebApplicationBuilder builder)
         {
-            builder.Services.AddIdentity<User, IdentityRole>()
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+                    {
+                        options.User.RequireUniqueEmail = true;
+                    }
+                )
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
