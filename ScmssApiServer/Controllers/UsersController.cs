@@ -72,6 +72,20 @@ namespace ScmssApiServer.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<User>> Delete(string id)
+        {
+            try
+            {
+                await _usersService.DeleteUserAsync(id);
+                return Ok();
+            }
+            catch (EntityNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpGet("{id}/profileImageUploadUrl")]
         public string GetProfileImageUploadUrl(string id)
         {
