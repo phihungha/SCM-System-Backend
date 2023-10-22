@@ -69,6 +69,16 @@ namespace ScmssApiServer.DomainServices
             return user;
         }
 
+        public async Task DeleteUserAsync(string id)
+        {
+            User? user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                throw new EntityNotFoundException();
+            }
+            await _userManager.DeleteAsync(user);
+        }
+
         public string GetProfileImageUploadUrl(string userId)
         {
             string key = $"user-profile-images/{userId}";
