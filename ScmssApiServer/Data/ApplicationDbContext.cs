@@ -5,8 +5,14 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Data
 {
+    /// <summary>
+    /// Database context for this app.
+    /// </summary>
     public class ApplicationDbContext : IdentityDbContext<User>
     {
+        public DbSet<Position> Positions { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
@@ -14,6 +20,9 @@ namespace ScmssApiServer.Data
             ChangeTracker.StateChanged += ChangeTracker_StateChanged;
         }
 
+        /// <summary>
+        /// Set creation info on new update-trackable entity.
+        /// </summary>
         private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
         {
             EntityEntry entry = e.Entry;
@@ -25,6 +34,9 @@ namespace ScmssApiServer.Data
             }
         }
 
+        /// <summary>
+        /// Set update info on updated update-trackable entity.
+        /// </summary>
         private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
         {
             EntityEntry entry = e.Entry;
@@ -37,11 +49,6 @@ namespace ScmssApiServer.Data
             if (e.NewState == EntityState.Modified || e.NewState == EntityState.Deleted)
             {
                 entity.UpdatedTime = DateTime.UtcNow;
-            }
-
-            if (e.NewState == EntityState.Deleted)
-            {
-                entity.IsActive = false;
             }
         }
 
