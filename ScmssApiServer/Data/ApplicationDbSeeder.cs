@@ -11,8 +11,7 @@ namespace ScmssApiServer.Data
         /// </summary>
         /// <param name="userManager">User manager</param>
         /// <exception cref="Exception">Failed to create root admin user</exception>
-        public static void SeedRootAdminUser(UserManager<User> userManager,
-                                             WebApplication app)
+        public static void SeedRootAdminUser(WebApplication app)
         {
             ILogger logger = app.Logger;
             IConfiguration configuration = app.Configuration;
@@ -39,28 +38,34 @@ namespace ScmssApiServer.Data
                 }
             }
 
-            User? user = userManager.FindByNameAsync(userName).Result;
-            if (user != null)
+            using (var scope = app.Services.CreateScope())
             {
-                return;
-            }
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-            var newUser = new User()
-            {
-                UserName = userName,
-                Email = email,
-                Name = name,
-                Gender = Gender.Male,
-                DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
-                IdCardNumber = "000000000000",
-                Description = ""
-            };
+                User? user = userManager.FindByNameAsync(userName).Result;
+                if (user != null)
+                {
+                    return;
+                }
 
-            IdentityResult result = userManager.CreateAsync(newUser, password).Result;
+                var newUser = new User()
+                {
+                    UserName = userName,
+                    Email = email,
+                    Name = name,
+                    Gender = Gender.Male,
+                    DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
+                    IdCardNumber = "000000000000",
+                    Description = description,
+                    PositionId = 1,
+                };
 
-            if (!result.Succeeded)
-            {
-                throw new ApplicationException("Failed to create root admin user.");
+                IdentityResult result = userManager.CreateAsync(newUser, password).Result;
+
+                if (!result.Succeeded)
+                {
+                    throw new ApplicationException("Failed to create root admin user.");
+                }
             }
         }
     }

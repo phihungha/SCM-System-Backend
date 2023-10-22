@@ -92,8 +92,20 @@ namespace ScmssApiServer.Controllers
             return _usersService.GetProfileImageUploadUrl(id);
         }
 
+        // TODO: Use automapping later
         private UserDto ToUserGetDto(User user)
         {
+            Position position = user.Position;
+            var positionDto = new PositionDto
+            {
+                Id = position.Id,
+                Name = position.Name,
+                Description = position.Description,
+                IsActive = position.IsActive,
+                CreatedTime = position.CreatedTime,
+                UpdatedTime = position.UpdatedTime,
+            };
+
             return new UserDto
             {
                 Id = user.Id,
@@ -105,6 +117,7 @@ namespace ScmssApiServer.Controllers
                 IdCardNumber = user.IdCardNumber,
                 Address = user.Address,
                 Description = user.Description,
+                Position = positionDto,
                 IsActive = user.IsActive,
                 CreatedTime = user.CreatedTime,
                 UpdatedTime = user.UpdatedTime

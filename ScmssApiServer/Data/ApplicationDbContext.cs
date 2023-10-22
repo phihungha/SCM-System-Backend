@@ -58,5 +58,40 @@ namespace ScmssApiServer.Data
                 .Properties<Gender>()
                 .HaveConversion<string>();
         }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Position>()
+                .HasMany(i => i.Permissions)
+                .WithMany(i => i.Positions)
+                .UsingEntity<PositionPermission>();
+
+            builder.Entity<Permission>().HasData(
+                new Permission
+                {
+                    Id = "admin",
+                    DisplayName = "Administration",
+                    Description = "Full permissions"
+                });
+
+            builder.Entity<Position>().HasData(
+                new Position
+                {
+                    Id = 1,
+                    Name = "Administrator",
+                    Description = "Administrator for the system",
+                    IsActive = true,
+                    CreatedTime = DateTime.UtcNow
+                });
+
+            builder.Entity<PositionPermission>().HasData(
+                new PositionPermission()
+                {
+                    PermissionId = "admin",
+                    PositionId = 1,
+                });
+        }
     }
 }

@@ -36,6 +36,9 @@ namespace ScmssApiServer.DTOs
         [Column(TypeName = "char(12)")]
         public required string IdCardNumber { get; set; }
 
+        [Required]
+        public int PostitionId { get; set; }
+
         public string? Address { get; set; }
 
         public string? Description { get; set; }

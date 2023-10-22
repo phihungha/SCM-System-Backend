@@ -46,12 +46,7 @@ namespace ScmssApiServer
 
             var app = builder.Build();
 
-            // Seed database
-            using (var scope = app.Services.CreateScope())
-            {
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                ApplicationDbSeeder.SeedRootAdminUser(userManager, app);
-            }
+            ApplicationDbSeeder.SeedRootAdminUser(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

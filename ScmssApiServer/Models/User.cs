@@ -26,6 +26,9 @@ namespace ScmssApiServer.Models
 
         public string? Description { get; set; }
 
+        public int PositionId { get; set; }
+        public Position Position { get; set; } = null!;
+
         public bool IsActive { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }

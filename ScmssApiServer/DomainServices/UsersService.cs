@@ -27,17 +27,19 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<IList<User>> GetUsersAsync()
         {
-            return await _dbContext.Users.ToListAsync();
+            return await _dbContext.Users.Include(i => i.Position)
+                                         .ToListAsync();
         }
 
         public async Task<User?> GetUserAsync(string id)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Users.Include(i => i.Position)
+                                         .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<User> CreateUserAsync(UserCreateDto dto)
         {
-            var newUser = new User()
+            var newUser = new User
             {
                 UserName = dto.UserName,
                 Email = dto.Email,
@@ -46,7 +48,8 @@ namespace ScmssApiServer.DomainServices
                 DateOfBirth = dto.DateOfBirth,
                 IdCardNumber = dto.IdCardNumber,
                 Address = dto.Address,
-                Description = dto.Description
+                Description = dto.Description,
+                PositionId = dto.PostitionId
             };
 
             IdentityResult? result = await _userManager.CreateAsync(newUser, dto.Password);

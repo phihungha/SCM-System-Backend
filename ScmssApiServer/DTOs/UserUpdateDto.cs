@@ -28,6 +28,8 @@ namespace ScmssApiServer.DTOs
         [Column(TypeName = "char(12)")]
         public string? IdCardNumber { get; set; }
 
+        public int? PositionId { get; set; }
+
         public string? Address { get; set; }
 
         public string? Description { get; set; }

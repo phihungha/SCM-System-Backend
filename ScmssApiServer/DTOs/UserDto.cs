@@ -22,9 +22,11 @@ namespace ScmssApiServer.DTOs
 
         public string? Description { get; set; }
 
+        public required PositionDto Position { get; set; }
+
         public bool IsActive { get; set; }
 
-        public DateTime CreatedTime { get; set; }
+        public required DateTime CreatedTime { get; set; }
 
         public DateTime? UpdatedTime { get; set; }
     }
