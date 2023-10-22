@@ -22,22 +22,22 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IList<UserGetDto>>> Get()
+        public async Task<ActionResult<IList<UserDto>>> Get()
         {
             IList<User> users = await _usersService.GetUsersAsync();
-            IList<UserGetDto> userDtos = users.Select(ToUserGetDto).ToList();
+            IList<UserDto> userDtos = users.Select(ToUserGetDto).ToList();
             return Ok(userDtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserGetDto>> GetId(string id)
+        public async Task<ActionResult<UserDto>> GetId(string id)
         {
             User? user = await _usersService.GetUserAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
-            UserGetDto userDto = ToUserGetDto(user);
+            UserDto userDto = ToUserGetDto(user);
             return Ok(userDto);
         }
 
@@ -46,8 +46,9 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                User newData = await _usersService.CreateUserAsync(body);
-                return Ok(newData);
+                User newUser = await _usersService.CreateUserAsync(body);
+                UserDto newUserDto = ToUserGetDto(newUser);
+                return Ok(newUserDto);
             }
             catch (IdentityException ex)
             {
@@ -61,8 +62,9 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                User updatedData = await _usersService.UpdateUserAsync(id, body);
-                return Ok(updatedData);
+                User updatedUser = await _usersService.UpdateUserAsync(id, body);
+                UserDto updatedUserDto = ToUserGetDto(updatedUser);
+                return Ok(updatedUserDto);
             }
             catch (EntityNotFoundException)
             {
@@ -76,9 +78,9 @@ namespace ScmssApiServer.Controllers
             return _usersService.GetProfileImageUploadUrl(id);
         }
 
-        private UserGetDto ToUserGetDto(User user)
+        private UserDto ToUserGetDto(User user)
         {
-            return new UserGetDto
+            return new UserDto
             {
                 Id = user.Id,
                 UserName = user.UserName,
