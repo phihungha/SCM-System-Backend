@@ -56,12 +56,12 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpPatch]
-        public async Task<ActionResult<User>> Update([FromBody] UserUpdateDto body)
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<User>> Update(string id, [FromBody] UserUpdateDto body)
         {
             try
             {
-                User updatedData = await _usersService.UpdateUserAsync(body);
+                User updatedData = await _usersService.UpdateUserAsync(id, body);
                 return Ok(updatedData);
             }
             catch (EntityNotFoundException)

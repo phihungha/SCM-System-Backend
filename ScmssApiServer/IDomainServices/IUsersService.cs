@@ -11,7 +11,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<User> CreateUserAsync(UserCreateDto dto);
 
-        Task<User> UpdateUserAsync(UserUpdateDto dto);
+        Task<User> UpdateUserAsync(string id, UserUpdateDto dto);
 
         string GetProfileImageUploadUrl(string userId);
     }
