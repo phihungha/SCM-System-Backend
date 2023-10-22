@@ -7,6 +7,8 @@ namespace ScmssApiServer.IDomainServices
     {
         Task<IList<User>> GetUsersAsync();
 
+        Task<User?> GetUserAsync(string id);
+
         Task<User> CreateUserAsync(UserCreateDto dto);
 
         string GetProfileImageUploadUrl(string userId);

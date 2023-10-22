@@ -21,9 +21,23 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IList<User>>> Get()
+        public async Task<ActionResult<IList<UserGetDto>>> Get()
         {
-            return Ok(await _usersService.GetUsersAsync());
+            IList<User> users = await _usersService.GetUsersAsync();
+            IList<UserGetDto> userDtos = users.Select(ToUserGetDto).ToList();
+            return Ok(userDtos);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserGetDto>> GetId(string id)
+        {
+            User? user = await _usersService.GetUserAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            UserGetDto userDto = ToUserGetDto(user);
+            return Ok(userDto);
         }
 
         [HttpPost]
@@ -45,6 +59,25 @@ namespace ScmssApiServer.Controllers
         public string GetProfileImageUploadUrl(string id)
         {
             return _usersService.GetProfileImageUploadUrl(id);
+        }
+
+        private UserGetDto ToUserGetDto(User user)
+        {
+            return new UserGetDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Name = user.Name,
+                Gender = user.Gender,
+                DateOfBirth = user.DateOfBirth,
+                IdCardNumber = user.IdCardNumber,
+                Address = user.Address,
+                Description = user.Description,
+                IsActive = user.IsActive,
+                CreatedTime = user.CreatedTime,
+                UpdatedTime = user.UpdatedTime
+            };
         }
     }
 }

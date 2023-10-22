@@ -29,6 +29,11 @@ namespace ScmssApiServer.DomainServices
             return await _dbContext.Users.ToListAsync();
         }
 
+        public async Task<User?> GetUserAsync(string id)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
         public async Task<User> CreateUserAsync(UserCreateDto dto)
         {
             var newUser = new User()
