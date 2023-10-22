@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
+using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
@@ -48,7 +49,7 @@ namespace ScmssApiServer.DomainServices
                 Description = dto.Description
             };
 
-            var result = await _userManager.CreateAsync(newUser, dto.Password);
+            IdentityResult? result = await _userManager.CreateAsync(newUser, dto.Password);
 
             if (!result.Succeeded)
             {
@@ -56,6 +57,16 @@ namespace ScmssApiServer.DomainServices
             }
 
             return newUser;
+        }
+
+        public async Task<User> UpdateUserAsync(string id, UserUpdateDto dto)
+        {
+            User? user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                throw new EntityNotFoundException();
+            }
+            return user;
         }
 
         public string GetProfileImageUploadUrl(string userId)

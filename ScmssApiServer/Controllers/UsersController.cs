@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
@@ -52,6 +53,20 @@ namespace ScmssApiServer.Controllers
             {
                 ex.AddToModelState(ModelState);
                 return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPatch]
+        public async Task<ActionResult<User>> Update([FromBody] UserUpdateDto body)
+        {
+            try
+            {
+                User updatedData = await _usersService.UpdateUserAsync(body);
+                return Ok(updatedData);
+            }
+            catch (EntityNotFoundException)
+            {
+                return NotFound();
             }
         }
 

@@ -15,6 +15,10 @@ namespace ScmssApiServer.DTOs
         public required string Email { get; set; }
 
         [Required]
+        [Phone]
+        public required string Phone { get; set; }
+
+        [Required]
         public required string Password { get; set; }
 
         [Required]
