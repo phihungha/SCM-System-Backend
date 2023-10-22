@@ -76,7 +76,8 @@ namespace ScmssApiServer.DomainServices
             {
                 throw new EntityNotFoundException();
             }
-            await _userManager.DeleteAsync(user);
+            user.IsActive = false;
+            await _userManager.UpdateAsync(user);
         }
 
         public string GetProfileImageUploadUrl(string userId)
