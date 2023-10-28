@@ -6,7 +6,6 @@ namespace ScmssApiServer.DTOs
 {
     public class UserUpdateDto
     {
-        [StringLength(maximumLength: 20, MinimumLength = 5)]
         public string? UserName { get; set; }
 
         [EmailAddress]

@@ -1,17 +1,16 @@
 ﻿using ScmssApiServer.DTOs;
-using ScmssApiServer.Models;
 
 namespace ScmssApiServer.IDomainServices
 {
     public interface IUsersService
     {
-        Task<IList<User>> GetUsersAsync();
+        Task<IList<UserDto>> GetUsersAsync();
 
-        Task<User?> GetUserAsync(string id);
+        Task<UserDto?> GetUserAsync(string id);
 
-        Task<User> CreateUserAsync(UserCreateDto dto);
+        Task<UserDto> CreateUserAsync(UserCreateDto dto);
 
-        Task<User> UpdateUserAsync(string id, UserUpdateDto dto);
+        Task<UserDto> UpdateUserAsync(string id, UserUpdateDto dto);
 
         Task DeleteUserAsync(string id);
 

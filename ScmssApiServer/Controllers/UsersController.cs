@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
@@ -16,32 +15,28 @@ namespace ScmssApiServer.Controllers
     public class UsersController : CustomControllerBase
     {
         private readonly IUsersService _usersService;
-        private readonly IMapper _mapper;
 
-        public UsersController(IMapper mapper, IUsersService usersService)
+        public UsersController(IUsersService usersService)
         {
-            _mapper = mapper;
             _usersService = usersService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IList<UserDto>>> Get()
         {
-            IList<User> users = await _usersService.GetUsersAsync();
-            IList<UserDto> userDtos = _mapper.Map<IList<UserDto>>(users);
-            return Ok(userDtos);
+            IList<UserDto> result = await _usersService.GetUsersAsync();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetId(string id)
         {
-            User? user = await _usersService.GetUserAsync(id);
-            if (user == null)
+            UserDto? result = await _usersService.GetUserAsync(id);
+            if (result == null)
             {
                 return NotFound();
             }
-            UserDto userDto = ToUserGetDto(user);
-            return Ok(userDto);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -49,9 +44,8 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                User newUser = await _usersService.CreateUserAsync(body);
-                UserDto newUserDto = ToUserGetDto(newUser);
-                return Ok(newUserDto);
+                UserDto result = await _usersService.CreateUserAsync(body);
+                return Ok(result);
             }
             catch (IdentityException ex)
             {
@@ -65,13 +59,17 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                User updatedUser = await _usersService.UpdateUserAsync(id, body);
-                UserDto updatedUserDto = ToUserGetDto(updatedUser);
-                return Ok(updatedUserDto);
+                UserDto result = await _usersService.UpdateUserAsync(id, body);
+                return Ok(result);
             }
             catch (EntityNotFoundException)
             {
                 return NotFound();
+            }
+            catch (IdentityException ex)
+            {
+                ex.AddToModelState(ModelState);
+                return BadRequest(ModelState);
             }
         }
 
@@ -93,38 +91,6 @@ namespace ScmssApiServer.Controllers
         public string GetProfileImageUploadUrl(string id)
         {
             return _usersService.GetProfileImageUploadUrl(id);
-        }
-
-        // TODO: Use automapping later
-        private UserDto ToUserGetDto(User user)
-        {
-            Position position = user.Position;
-            var positionDto = new PositionDto
-            {
-                Id = position.Id,
-                Name = position.Name,
-                Description = position.Description,
-                IsActive = position.IsActive,
-                CreatedTime = position.CreatedTime,
-                UpdatedTime = position.UpdatedTime,
-            };
-
-            return new UserDto
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                Name = user.Name,
-                Gender = user.Gender,
-                DateOfBirth = user.DateOfBirth,
-                IdCardNumber = user.IdCardNumber,
-                Address = user.Address,
-                Description = user.Description,
-                Position = positionDto,
-                IsActive = user.IsActive,
-                CreatedTime = user.CreatedTime,
-                UpdatedTime = user.UpdatedTime
-            };
         }
     }
 }
