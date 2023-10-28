@@ -11,6 +11,7 @@ using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
+using System.Text.Json.Serialization;
 
 namespace ScmssApiServer
 {
@@ -30,7 +31,7 @@ namespace ScmssApiServer
 
             string? dbConnectionString = builder.Configuration.GetConnectionString("AppDb");
             builder.Services.AddDbContext<ApplicationDbContext>(
-                    options => options.UseNpgsql(dbConnectionString)
+                    o => o.UseNpgsql(dbConnectionString)
                 );
             AddAuthentication(builder);
             AddAwsS3(builder, logger);
@@ -41,7 +42,11 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(
+                    o => o.JsonSerializerOptions
+                          .Converters
+                          .Add(new JsonStringEnumConverter())
+                );
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
