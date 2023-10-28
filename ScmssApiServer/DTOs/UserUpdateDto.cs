@@ -23,7 +23,7 @@ namespace ScmssApiServer.DTOs
 
         public DateTime? DateOfBirth { get; set; }
 
-        [IdentityCardNumber]
+        [IdCardNumber]
         public string? IdCardNumber { get; set; }
 
         public int? PositionId { get; set; }

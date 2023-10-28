@@ -3,27 +3,27 @@ using System.Text.RegularExpressions;
 
 namespace ScmssApiServer.Validators
 {
-    public class IdentityCardNumberAttribute : ValidationAttribute
+    public class IdCardNumberAttribute : ValidationAttribute
     {
         public const string GeneralErrorMessage = "Invalid identity card number.";
 
-        private const string CardNumberPattern = @"^\d{12}$";
+        private const string IdCardNumberPattern = @"^\d{12}$";
 
         protected override ValidationResult? IsValid(object? value,
                                                      ValidationContext validationContext)
         {
             if (value == null)
             {
-                return new ValidationResult(GeneralErrorMessage);
+                return ValidationResult.Success;
             }
 
-            var cardNumber = (string)value;
-            if (cardNumber == null)
+            var idCardNumber = (string)value;
+            if (idCardNumber == null)
             {
                 return new ValidationResult(GeneralErrorMessage);
             }
 
-            var match = Regex.Match(cardNumber, CardNumberPattern);
+            var match = Regex.Match(idCardNumber, IdCardNumberPattern);
             if (!match.Success)
             {
                 return new ValidationResult("Identity card number must have 12 digits");

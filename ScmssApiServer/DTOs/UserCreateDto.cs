@@ -32,7 +32,7 @@ namespace ScmssApiServer.DTOs
         public required DateTime DateOfBirth { get; set; }
 
         [Required]
-        [IdentityCardNumber]
+        [IdCardNumber]
         public required string IdCardNumber { get; set; }
 
         [Required]
