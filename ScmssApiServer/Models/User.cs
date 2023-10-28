@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using ScmssApiServer.DTOs;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -32,5 +34,15 @@ namespace ScmssApiServer.Models
         public bool IsActive { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }
+    }
+
+    public class UserMappingProfile : Profile
+    {
+        public UserMappingProfile()
+        {
+            CreateMap<User, UserDto>();
+            CreateMap<UserCreateDto, User>();
+            CreateMap<UserUpdateDto, User>();
+        }
     }
 }

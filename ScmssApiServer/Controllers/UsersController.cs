@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
@@ -14,10 +15,12 @@ namespace ScmssApiServer.Controllers
     [Authorize]
     public class UsersController : CustomControllerBase
     {
-        private IUsersService _usersService;
+        private readonly IUsersService _usersService;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUsersService usersService)
+        public UsersController(IMapper mapper, IUsersService usersService)
         {
+            _mapper = mapper;
             _usersService = usersService;
         }
 
@@ -25,7 +28,7 @@ namespace ScmssApiServer.Controllers
         public async Task<ActionResult<IList<UserDto>>> Get()
         {
             IList<User> users = await _usersService.GetUsersAsync();
-            IList<UserDto> userDtos = users.Select(ToUserGetDto).ToList();
+            IList<UserDto> userDtos = _mapper.Map<IList<UserDto>>(users);
             return Ok(userDtos);
         }
 

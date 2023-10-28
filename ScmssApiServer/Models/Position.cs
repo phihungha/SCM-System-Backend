@@ -1,4 +1,7 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     /// <summary>
     /// The position a user holds in the company.
@@ -16,5 +19,13 @@
         public bool IsActive { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }
+    }
+
+    public class PositionMappingProfile : Profile
+    {
+        public PositionMappingProfile()
+        {
+            CreateMap<Position, PositionDto>();
+        }
     }
 }

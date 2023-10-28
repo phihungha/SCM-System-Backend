@@ -26,6 +26,10 @@ namespace ScmssApiServer
             ILogger logger = loggerFactory.CreateLogger<Program>();
 
             // Add external services.
+            builder.Services.AddAutoMapper(typeof(UserMappingProfile),
+                                           typeof(PositionMappingProfile),
+                                           typeof(PermissionMappingProfile));
+
             string? dbConnectionString = builder.Configuration.GetConnectionString("AppDb");
             builder.Services.AddDbContext<ApplicationDbContext>(
                     options => options.UseNpgsql(dbConnectionString)

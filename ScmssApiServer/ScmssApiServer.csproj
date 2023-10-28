@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.205.19" />
     <PackageReference Include="AWSSDK.SSO" Version="3.7.201.14" />
     <PackageReference Include="AWSSDK.SSOOIDC" Version="3.7.201.20" />
