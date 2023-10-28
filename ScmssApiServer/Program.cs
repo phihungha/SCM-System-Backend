@@ -26,9 +26,7 @@ namespace ScmssApiServer
             ILogger logger = loggerFactory.CreateLogger<Program>();
 
             // Add external services.
-            builder.Services.AddAutoMapper(typeof(UserMappingProfile),
-                                           typeof(PositionMappingProfile),
-                                           typeof(PermissionMappingProfile));
+            builder.Services.AddAutoMapper(typeof(Program));
 
             string? dbConnectionString = builder.Configuration.GetConnectionString("AppDb");
             builder.Services.AddDbContext<ApplicationDbContext>(
