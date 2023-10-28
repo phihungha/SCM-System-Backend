@@ -1,6 +1,6 @@
 ﻿using ScmssApiServer.Models;
+using ScmssApiServer.Validators;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.DTOs
 {
@@ -24,8 +24,7 @@ namespace ScmssApiServer.DTOs
 
         public DateTime? DateOfBirth { get; set; }
 
-        [StringLength(maximumLength: 12, MinimumLength = 12)]
-        [Column(TypeName = "char(12)")]
+        [IdentityCardNumber]
         public string? IdCardNumber { get; set; }
 
         public int? PositionId { get; set; }
