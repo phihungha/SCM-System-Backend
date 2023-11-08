@@ -5,15 +5,21 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    /// <summary>
+    /// Database context for this app.
+    /// </summary>
+    public class AppDbContext : IdentityDbContext<User>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
             ChangeTracker.Tracked += ChangeTracker_Tracked;
             ChangeTracker.StateChanged += ChangeTracker_StateChanged;
         }
 
+        /// <summary>
+        /// Set creation info on new update-trackable entity.
+        /// </summary>
         private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
         {
             EntityEntry entry = e.Entry;
@@ -25,6 +31,9 @@ namespace ScmssApiServer.Data
             }
         }
 
+        /// <summary>
+        /// Set update info on updated update-trackable entity.
+        /// </summary>
         private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
         {
             EntityEntry entry = e.Entry;
@@ -38,11 +47,6 @@ namespace ScmssApiServer.Data
             {
                 entity.UpdatedTime = DateTime.UtcNow;
             }
-
-            if (e.NewState == EntityState.Deleted)
-            {
-                entity.IsActive = false;
-            }
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
@@ -50,6 +54,11 @@ namespace ScmssApiServer.Data
             builder
                 .Properties<Gender>()
                 .HaveConversion<string>();
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
         }
     }
 }

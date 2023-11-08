@@ -10,6 +10,8 @@ namespace ScmssApiServer.DTOs
 
         public string? Email { get; set; }
 
+        public string? PhoneNumber { get; set; }
+
         public required string Name { get; set; }
 
         public required Gender Gender { get; set; }
@@ -24,7 +26,7 @@ namespace ScmssApiServer.DTOs
 
         public bool IsActive { get; set; }
 
-        public DateTime CreatedTime { get; set; }
+        public required DateTime CreatedTime { get; set; }
 
         public DateTime? UpdatedTime { get; set; }
     }

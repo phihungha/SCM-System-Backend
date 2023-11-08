@@ -14,7 +14,7 @@ namespace ScmssApiServer.Controllers
     [Authorize]
     public class UsersController : CustomControllerBase
     {
-        private IUsersService _usersService;
+        private readonly IUsersService _usersService;
 
         public UsersController(IUsersService usersService)
         {
@@ -24,21 +24,19 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<UserDto>>> Get()
         {
-            IList<User> users = await _usersService.GetUsersAsync();
-            IList<UserDto> userDtos = users.Select(ToUserGetDto).ToList();
-            return Ok(userDtos);
+            IList<UserDto> items = await _usersService.GetUsersAsync();
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetId(string id)
         {
-            User? user = await _usersService.GetUserAsync(id);
-            if (user == null)
+            UserDto? item = await _usersService.GetUserAsync(id);
+            if (item == null)
             {
                 return NotFound();
             }
-            UserDto userDto = ToUserGetDto(user);
-            return Ok(userDto);
+            return Ok(item);
         }
 
         [HttpPost]
@@ -46,9 +44,8 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                User newUser = await _usersService.CreateUserAsync(body);
-                UserDto newUserDto = ToUserGetDto(newUser);
-                return Ok(newUserDto);
+                UserDto item = await _usersService.CreateUserAsync(body);
+                return Ok(item);
             }
             catch (IdentityException ex)
             {
@@ -57,18 +54,41 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpPatch("{id}")]
-        public async Task<ActionResult<User>> Update(string id, [FromBody] UserUpdateDto body)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<User>> Update(string id, [FromBody] UserInputDto body)
         {
             try
             {
-                User updatedUser = await _usersService.UpdateUserAsync(id, body);
-                UserDto updatedUserDto = ToUserGetDto(updatedUser);
-                return Ok(updatedUserDto);
+                UserDto item = await _usersService.UpdateUserAsync(id, body);
+                return Ok(item);
             }
             catch (EntityNotFoundException)
             {
                 return NotFound();
+            }
+            catch (IdentityException ex)
+            {
+                ex.AddToModelState(ModelState);
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPut("{id}/change-password")]
+        public async Task<ActionResult<User>> Update(string id, [FromBody] UserPasswordChangeDto body)
+        {
+            try
+            {
+                await _usersService.ChangePasswordAsync(id, body);
+                return Ok();
+            }
+            catch (EntityNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (IdentityException ex)
+            {
+                ex.AddToModelState(ModelState);
+                return BadRequest(ModelState);
             }
         }
 
@@ -86,29 +106,10 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpGet("{id}/profileImageUploadUrl")]
+        [HttpGet("{id}/profile-image-upload-url")]
         public string GetProfileImageUploadUrl(string id)
         {
             return _usersService.GetProfileImageUploadUrl(id);
-        }
-
-        private UserDto ToUserGetDto(User user)
-        {
-            return new UserDto
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
-                Name = user.Name,
-                Gender = user.Gender,
-                DateOfBirth = user.DateOfBirth,
-                IdCardNumber = user.IdCardNumber,
-                Address = user.Address,
-                Description = user.Description,
-                IsActive = user.IsActive,
-                CreatedTime = user.CreatedTime,
-                UpdatedTime = user.UpdatedTime
-            };
         }
     }
 }

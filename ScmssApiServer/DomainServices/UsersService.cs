@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
@@ -12,61 +12,79 @@ namespace ScmssApiServer.DomainServices
 {
     public class UsersService : IUsersService
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IMapper _mapper;
         private readonly IImageHostService _imageService;
         private readonly UserManager<User> _userManager;
 
         public UsersService(UserManager<User> userManager,
-                            ApplicationDbContext dbContext,
+                            IMapper mapper,
                             IImageHostService imageService)
         {
-            _dbContext = dbContext;
+            _mapper = mapper;
             _imageService = imageService;
             _userManager = userManager;
         }
 
-        public async Task<IList<User>> GetUsersAsync()
+        public async Task<IList<UserDto>> GetUsersAsync()
         {
-            return await _dbContext.Users.ToListAsync();
+            IList<User> users = await _userManager.Users.ToListAsync();
+            return _mapper.Map<IList<UserDto>>(users);
         }
 
-        public async Task<User?> GetUserAsync(string id)
+        public async Task<UserDto?> GetUserAsync(string id)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return _mapper.Map<UserDto?>(user);
         }
 
-        public async Task<User> CreateUserAsync(UserCreateDto dto)
+        public async Task<UserDto> CreateUserAsync(UserCreateDto dto)
         {
-            var newUser = new User()
-            {
-                UserName = dto.UserName,
-                Email = dto.Email,
-                Name = dto.Name,
-                Gender = dto.Gender,
-                DateOfBirth = dto.DateOfBirth,
-                IdCardNumber = dto.IdCardNumber,
-                Address = dto.Address,
-                Description = dto.Description
-            };
+            var user = _mapper.Map<User>(dto);
 
-            IdentityResult? result = await _userManager.CreateAsync(newUser, dto.Password);
-
+            IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
                 throw new IdentityException(result);
             }
 
-            return newUser;
+            return GetUserDto(user);
         }
 
-        public async Task<User> UpdateUserAsync(string id, UserUpdateDto dto)
+        public async Task<UserDto> UpdateUserAsync(string id, UserInputDto dto)
+        {
+            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            _mapper.Map(dto, user);
+
+            IdentityResult result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new IdentityException(result);
+            }
+
+            return GetUserDto(user);
+        }
+
+        public async Task ChangePasswordAsync(string id, UserPasswordChangeDto dto)
         {
             User? user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 throw new EntityNotFoundException();
             }
-            return user;
+
+            IdentityResult result = await _userManager
+                .ChangePasswordAsync(user,
+                                     dto.CurrentPassword,
+                                     dto.NewPassword);
+            if (!result.Succeeded)
+            {
+                throw new IdentityException(result);
+            }
         }
 
         public async Task DeleteUserAsync(string id)
@@ -76,13 +94,19 @@ namespace ScmssApiServer.DomainServices
             {
                 throw new EntityNotFoundException();
             }
-            await _userManager.DeleteAsync(user);
+            user.IsActive = false;
+            await _userManager.UpdateAsync(user);
         }
 
         public string GetProfileImageUploadUrl(string userId)
         {
             string key = $"user-profile-images/{userId}";
             return _imageService.GenerateUploadUrl(key);
+        }
+
+        private UserDto GetUserDto(User user)
+        {
+            return _mapper.Map<UserDto>(user);
         }
     }
 }
