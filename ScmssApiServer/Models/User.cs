@@ -41,10 +41,8 @@ namespace ScmssApiServer.Models
         public UserMappingProfile()
         {
             CreateMap<User, UserDto>();
+            CreateMap<UserInputDto, User>();
             CreateMap<UserCreateDto, User>();
-            CreateMap<UserUpdateDto, User>().ForAllMembers(
-                    o => o.Condition((src, dest, srcMember) => srcMember != null)
-                );
         }
     }
 }

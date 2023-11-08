@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
@@ -13,17 +12,14 @@ namespace ScmssApiServer.DomainServices
 {
     public class UsersService : IUsersService
     {
-        private readonly ApplicationDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IImageHostService _imageService;
         private readonly UserManager<User> _userManager;
 
         public UsersService(UserManager<User> userManager,
                             IMapper mapper,
-                            ApplicationDbContext dbContext,
                             IImageHostService imageService)
         {
-            _dbContext = dbContext;
             _mapper = mapper;
             _imageService = imageService;
             _userManager = userManager;
@@ -31,34 +27,35 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<IList<UserDto>> GetUsersAsync()
         {
-            IList<User> users = await _dbContext.Users.Include(i => i.Position)
-                                                      .ToListAsync();
+            IList<User> users = await _userManager.Users.Include(i => i.Position)
+                                                        .ToListAsync();
             return _mapper.Map<IList<UserDto>>(users);
         }
 
         public async Task<UserDto?> GetUserAsync(string id)
         {
-            User? user = await _dbContext.Users.Include(i => i.Position)
-                                         .FirstOrDefaultAsync(x => x.Id == id);
+            User? user = await _userManager.Users.Include(i => i.Position)
+                                                 .FirstOrDefaultAsync(x => x.Id == id);
             return _mapper.Map<UserDto?>(user);
         }
 
         public async Task<UserDto> CreateUserAsync(UserCreateDto dto)
         {
-            var newUser = _mapper.Map<User>(dto);
+            var user = _mapper.Map<User>(dto);
 
-            IdentityResult? result = await _userManager.CreateAsync(newUser, dto.Password);
+            IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
                 throw new IdentityException(result);
             }
 
-            return _mapper.Map<UserDto>(newUser);
+            return GetUserDto(user);
         }
 
-        public async Task<UserDto> UpdateUserAsync(string id, UserUpdateDto dto)
+        public async Task<UserDto> UpdateUserAsync(string id, UserInputDto dto)
         {
-            User? user = await _userManager.FindByIdAsync(id);
+            User? user = await _userManager.Users.Include(i => i.Position)
+                                                 .FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
             {
                 throw new EntityNotFoundException();
@@ -66,13 +63,31 @@ namespace ScmssApiServer.DomainServices
 
             _mapper.Map(dto, user);
 
-            IdentityResult? result = await _userManager.UpdateAsync(user);
+            IdentityResult result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
                 throw new IdentityException(result);
             }
 
-            return _mapper.Map<UserDto>(user);
+            return GetUserDto(user);
+        }
+
+        public async Task ChangePasswordAsync(string id, UserPasswordChangeDto dto)
+        {
+            User? user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            IdentityResult result = await _userManager
+                .ChangePasswordAsync(user,
+                                     dto.CurrentPassword,
+                                     dto.NewPassword);
+            if (!result.Succeeded)
+            {
+                throw new IdentityException(result);
+            }
         }
 
         public async Task DeleteUserAsync(string id)
@@ -90,6 +105,11 @@ namespace ScmssApiServer.DomainServices
         {
             string key = $"user-profile-images/{userId}";
             return _imageService.GenerateUploadUrl(key);
+        }
+
+        private UserDto GetUserDto(User user)
+        {
+            return _mapper.Map<UserDto>(user);
         }
     }
 }

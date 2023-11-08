@@ -10,7 +10,9 @@ namespace ScmssApiServer.IDomainServices
 
         Task<UserDto> CreateUserAsync(UserCreateDto dto);
 
-        Task<UserDto> UpdateUserAsync(string id, UserUpdateDto dto);
+        Task<UserDto> UpdateUserAsync(string id, UserInputDto dto);
+
+        Task ChangePasswordAsync(string id, UserPasswordChangeDto dto);
 
         Task DeleteUserAsync(string id);
 

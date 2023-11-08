@@ -33,8 +33,10 @@ namespace ScmssApiServer
             builder.Services.AddDbContext<ApplicationDbContext>(
                     o => o.UseNpgsql(dbConnectionString)
                 );
+
             AddAuthentication(builder);
             AddAwsS3(builder, logger);
+
             // Add infrastructure services
             builder.Services.AddSingleton<IImageHostService, ImageHostService>();
 

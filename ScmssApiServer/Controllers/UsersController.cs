@@ -24,19 +24,19 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<UserDto>>> Get()
         {
-            IList<UserDto> result = await _usersService.GetUsersAsync();
-            return Ok(result);
+            IList<UserDto> items = await _usersService.GetUsersAsync();
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetId(string id)
         {
-            UserDto? result = await _usersService.GetUserAsync(id);
-            if (result == null)
+            UserDto? item = await _usersService.GetUserAsync(id);
+            if (item == null)
             {
                 return NotFound();
             }
-            return Ok(result);
+            return Ok(item);
         }
 
         [HttpPost]
@@ -44,8 +44,8 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                UserDto result = await _usersService.CreateUserAsync(body);
-                return Ok(result);
+                UserDto item = await _usersService.CreateUserAsync(body);
+                return Ok(item);
             }
             catch (IdentityException ex)
             {
@@ -54,13 +54,32 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpPatch("{id}")]
-        public async Task<ActionResult<User>> Update(string id, [FromBody] UserUpdateDto body)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<User>> Update(string id, [FromBody] UserInputDto body)
         {
             try
             {
-                UserDto result = await _usersService.UpdateUserAsync(id, body);
-                return Ok(result);
+                UserDto item = await _usersService.UpdateUserAsync(id, body);
+                return Ok(item);
+            }
+            catch (EntityNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (IdentityException ex)
+            {
+                ex.AddToModelState(ModelState);
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPut("{id}/change-password")]
+        public async Task<ActionResult<User>> Update(string id, [FromBody] UserPasswordChangeDto body)
+        {
+            try
+            {
+                await _usersService.ChangePasswordAsync(id, body);
+                return Ok();
             }
             catch (EntityNotFoundException)
             {
@@ -87,7 +106,7 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpGet("{id}/profileImageUploadUrl")]
+        [HttpGet("{id}/profile-image-upload-url")]
         public string GetProfileImageUploadUrl(string id)
         {
             return _usersService.GetProfileImageUploadUrl(id);
