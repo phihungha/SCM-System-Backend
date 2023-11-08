@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Hosting;
 using ScmssApiServer.Models;
+using System.Reflection.Emit;
 
 namespace ScmssApiServer.Data
 {
@@ -54,6 +56,20 @@ namespace ScmssApiServer.Data
             builder
                 .Properties<Gender>()
                 .HaveConversion<string>();
+
+            builder
+                .Properties<OrderStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<OrderPaymentStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<PurchaseRequisitionStatus>()
+                .HaveConversion<string>();
+
+
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
