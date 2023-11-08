@@ -21,15 +21,12 @@ namespace ScmssApiServer.Models
         [PersonalData]
         [StringLength(maximumLength: 12, MinimumLength = 12)]
         [Column(TypeName = "char(12)")]
-        public required string IdCardNumber { get; set; }
+        public string? IdCardNumber { get; set; }
 
         [PersonalData]
         public string? Address { get; set; }
 
         public string? Description { get; set; }
-
-        public int PositionId { get; set; }
-        public Position Position { get; set; } = null!;
 
         public bool IsActive { get; set; }
         public DateTime CreatedTime { get; set; }

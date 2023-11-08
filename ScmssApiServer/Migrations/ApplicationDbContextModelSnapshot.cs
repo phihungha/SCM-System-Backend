@@ -10,14 +10,14 @@ using ScmssApiServer.Data;
 
 namespace ScmssApiServer.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(AppDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "7.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -154,94 +154,6 @@ namespace ScmssApiServer.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ScmssApiServer.Models.Permission", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Permissions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "admin",
-                            Description = "Full permissions",
-                            DisplayName = "Administration"
-                        });
-                });
-
-            modelBuilder.Entity("ScmssApiServer.Models.Position", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Positions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedTime = new DateTime(2023, 10, 22, 18, 13, 34, 504, DateTimeKind.Utc).AddTicks(9491),
-                            Description = "Administrator for the system",
-                            IsActive = true,
-                            Name = "Administrator"
-                        });
-                });
-
-            modelBuilder.Entity("ScmssApiServer.Models.PositionPermission", b =>
-                {
-                    b.Property<string>("PermissionId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("PositionId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PermissionId", "PositionId");
-
-                    b.HasIndex("PositionId");
-
-                    b.ToTable("PositionPermission");
-
-                    b.HasData(
-                        new
-                        {
-                            PermissionId = "admin",
-                            PositionId = 1
-                        });
-                });
-
             modelBuilder.Entity("ScmssApiServer.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -278,7 +190,6 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("IdCardNumber")
-                        .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("char(12)");
 
@@ -313,9 +224,6 @@ namespace ScmssApiServer.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("PositionId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -337,8 +245,6 @@ namespace ScmssApiServer.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("PositionId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -392,48 +298,6 @@ namespace ScmssApiServer.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("ScmssApiServer.Models.PositionPermission", b =>
-                {
-                    b.HasOne("ScmssApiServer.Models.Permission", "Permission")
-                        .WithMany("PositionPermissions")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ScmssApiServer.Models.Position", "Position")
-                        .WithMany("PositionPermissions")
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Position");
-                });
-
-            modelBuilder.Entity("ScmssApiServer.Models.User", b =>
-                {
-                    b.HasOne("ScmssApiServer.Models.Position", "Position")
-                        .WithMany("Users")
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Position");
-                });
-
-            modelBuilder.Entity("ScmssApiServer.Models.Permission", b =>
-                {
-                    b.Navigation("PositionPermissions");
-                });
-
-            modelBuilder.Entity("ScmssApiServer.Models.Position", b =>
-                {
-                    b.Navigation("PositionPermissions");
-
-                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

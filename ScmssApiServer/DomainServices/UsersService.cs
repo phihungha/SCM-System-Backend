@@ -27,15 +27,13 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<IList<UserDto>> GetUsersAsync()
         {
-            IList<User> users = await _userManager.Users.Include(i => i.Position)
-                                                        .ToListAsync();
+            IList<User> users = await _userManager.Users.ToListAsync();
             return _mapper.Map<IList<UserDto>>(users);
         }
 
         public async Task<UserDto?> GetUserAsync(string id)
         {
-            User? user = await _userManager.Users.Include(i => i.Position)
-                                                 .FirstOrDefaultAsync(x => x.Id == id);
+            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
             return _mapper.Map<UserDto?>(user);
         }
 
@@ -54,8 +52,7 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<UserDto> UpdateUserAsync(string id, UserInputDto dto)
         {
-            User? user = await _userManager.Users.Include(i => i.Position)
-                                                 .FirstOrDefaultAsync(x => x.Id == id);
+            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
             {
                 throw new EntityNotFoundException();

@@ -11,8 +11,8 @@ using ScmssApiServer.Data;
 
 namespace ScmssApiServer.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231020113206_Initial")]
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20231108164858_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace ScmssApiServer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.12")
+                .HasAnnotation("ProductVersion", "7.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -193,7 +193,6 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("IdCardNumber")
-                        .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("char(12)");
 

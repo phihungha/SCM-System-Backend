@@ -4,7 +4,7 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Data
 {
-    public static class ApplicationDbSeeder
+    public static class AppDbSeeder
     {
         /// <summary>
         /// Create initial root admin user if it doesn't exist yet.
@@ -55,9 +55,7 @@ namespace ScmssApiServer.Data
                     Name = name,
                     Gender = Gender.Male,
                     DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
-                    IdCardNumber = "000000000000",
                     Description = description,
-                    PositionId = 1,
                 };
 
                 IdentityResult result = userManager.CreateAsync(newUser, password).Result;

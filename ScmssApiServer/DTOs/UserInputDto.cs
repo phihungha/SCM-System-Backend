@@ -32,9 +32,6 @@ namespace ScmssApiServer.DTOs
         [IdCardNumber]
         public required string IdCardNumber { get; set; }
 
-        [Required]
-        public int PositionId { get; set; }
-
         public string? Address { get; set; }
 
         public string? Description { get; set; }

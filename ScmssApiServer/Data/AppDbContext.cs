@@ -8,12 +8,9 @@ namespace ScmssApiServer.Data
     /// <summary>
     /// Database context for this app.
     /// </summary>
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public class AppDbContext : IdentityDbContext<User>
     {
-        public DbSet<Position> Positions { get; set; }
-        public DbSet<Permission> Permissions { get; set; }
-
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
             ChangeTracker.Tracked += ChangeTracker_Tracked;
@@ -62,36 +59,6 @@ namespace ScmssApiServer.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
-            builder.Entity<Position>()
-                .HasMany(i => i.Permissions)
-                .WithMany(i => i.Positions)
-                .UsingEntity<PositionPermission>();
-
-            builder.Entity<Permission>().HasData(
-                new Permission
-                {
-                    Id = "admin",
-                    DisplayName = "Administration",
-                    Description = "Full permissions"
-                });
-
-            builder.Entity<Position>().HasData(
-                new Position
-                {
-                    Id = 1,
-                    Name = "Administrator",
-                    Description = "Administrator for the system",
-                    IsActive = true,
-                    CreatedTime = DateTime.UtcNow
-                });
-
-            builder.Entity<PositionPermission>().HasData(
-                new PositionPermission()
-                {
-                    PermissionId = "admin",
-                    PositionId = 1,
-                });
         }
     }
 }

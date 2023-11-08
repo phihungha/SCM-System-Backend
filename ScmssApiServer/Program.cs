@@ -30,7 +30,7 @@ namespace ScmssApiServer
             builder.Services.AddAutoMapper(typeof(Program));
 
             string? dbConnectionString = builder.Configuration.GetConnectionString("AppDb");
-            builder.Services.AddDbContext<ApplicationDbContext>(
+            builder.Services.AddDbContext<AppDbContext>(
                     o => o.UseNpgsql(dbConnectionString)
                 );
 
@@ -55,7 +55,7 @@ namespace ScmssApiServer
 
             var app = builder.Build();
 
-            ApplicationDbSeeder.SeedRootAdminUser(app);
+            AppDbSeeder.SeedRootAdminUser(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -84,7 +84,7 @@ namespace ScmssApiServer
                         options.User.RequireUniqueEmail = true;
                     }
                 )
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                         {

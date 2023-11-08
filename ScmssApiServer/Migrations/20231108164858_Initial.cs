@@ -34,7 +34,7 @@ namespace ScmssApiServer.Migrations
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Gender = table.Column<string>(type: "text", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IdCardNumber = table.Column<string>(type: "char(12)", maxLength: 12, nullable: false),
+                    IdCardNumber = table.Column<string>(type: "char(12)", maxLength: 12, nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
