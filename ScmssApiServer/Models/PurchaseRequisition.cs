@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public class PurchaseRequisition : IUpdateTrackable
+    public class PurchaseRequisition : ILifecycle
     {
         public int Id { get; set; }
 
@@ -32,7 +32,6 @@
         public string? FinishUserId { get; set; }
         public User? FinishUser { get; set; }
 
-        public bool IsActive { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
         public DateTime? FinishTime { get; set; }

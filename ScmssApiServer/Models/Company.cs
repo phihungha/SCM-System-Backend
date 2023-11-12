@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public class Company
+    public class Company : IUpdateTrackable
     {
         public int Id { get; set; }
 
@@ -15,5 +15,9 @@
         public string? PhoneNumber { get; set; }
 
         public string? ContactPerson { get; set; }
+
+        public bool IsActive { get; set; }
+        public DateTime CreateTime { get; set; }
+        public DateTime? UpdateTime { get; set; }
     }
 }

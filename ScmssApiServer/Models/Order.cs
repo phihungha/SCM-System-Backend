@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public abstract class Order : IUpdateTrackable
+    public abstract class Order : ILifecycle
     {
         public int Id { get; set; }
 
@@ -17,7 +17,6 @@
         public string? FinishUserId { get; set; }
         public User? FinishUser { get; set; }
 
-        public bool IsActive { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
         public DateTime? DeliverTime { get; set; }

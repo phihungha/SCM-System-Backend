@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public class ProductionFacility
+    public class ProductionFacility : IUpdateTrackable
     {
         public int Id { get; set; }
         public required string Name { get; set; }
@@ -19,5 +19,9 @@
             = new List<WarehouseProductItem>();
 
         public ICollection<Product> WarehouseProducts { get; } = new List<Product>();
+
+        public bool IsActive { get; set; }
+        public DateTime CreateTime { get; set; }
+        public DateTime? UpdateTime { get; set; }
     }
 }
