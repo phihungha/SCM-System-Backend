@@ -12,6 +12,9 @@ namespace ScmssApiServer.Models
         public double Quantity { get; set; }
 
         [NotMapped]
+        public string Unit => Supply.Unit;
+
+        [NotMapped]
         public decimal UnitCost => Supply.Price;
 
         [NotMapped]
