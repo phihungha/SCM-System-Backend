@@ -9,7 +9,8 @@
 
         public int VendorId { get; set; }
         public Vendor Vendor { get; set; } = null!;
-        public required string Location { get; set; }
+        public int ProductionFacilityId { get; set; }
+        public ProductionFacility ProductionFacility { get; set; } = null!;
 
         public int? PurchaseRequisitionId { get; set; }
         public PurchaseRequisition? PurchaseRequisition { get; set; }

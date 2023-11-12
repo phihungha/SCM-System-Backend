@@ -18,6 +18,8 @@
 
         public int VendorId { get; set; }
         public Vendor Vendor { get; set; } = null!;
+        public int ProductionFacilityId { get; set; }
+        public ProductionFacility ProductionFacility { get; set; } = null!;
 
         public PurchaseOrder? PurchaseOrder { get; set; }
 

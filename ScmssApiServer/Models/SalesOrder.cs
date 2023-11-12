@@ -10,7 +10,9 @@
         public ICollection<Product> Products { get; set; }
             = new List<Product>();
 
-        public int RetailerId { get; set; }
-        public Retailer Retailer { get; set; } = null!;
+        public int CustomerId { get; set; }
+        public Customer Customer { get; set; } = null!;
+        public int ProductionFacilityId { get; set; }
+        public ProductionFacility ProductionFacility { get; set; } = null!;
     }
 }

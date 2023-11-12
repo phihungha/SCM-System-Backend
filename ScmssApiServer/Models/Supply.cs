@@ -22,5 +22,8 @@
 
         public ICollection<PurchaseOrderItem> PurchaseOrderItems { get; set; }
             = new List<PurchaseOrderItem>();
+
+        public ICollection<WarehouseSupplyItem> WarehouseSupplyItems { get; set; }
+            = new List<WarehouseSupplyItem>();
     }
 }

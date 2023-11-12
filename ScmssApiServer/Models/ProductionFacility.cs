@@ -9,5 +9,15 @@
 
         public ICollection<ProductionOrder> ProductionOrder { get; set; }
             = new List<ProductionOrder>();
+
+        public ICollection<WarehouseSupplyItem> WarehouseSupplyItems { get; }
+            = new List<WarehouseSupplyItem>();
+
+        public ICollection<Supply> WarehouseSupplies { get; } = new List<Supply>();
+
+        public ICollection<WarehouseProductItem> WarehouseProductItems { get; }
+            = new List<WarehouseProductItem>();
+
+        public ICollection<Product> WarehouseProducts { get; } = new List<Product>();
     }
 }

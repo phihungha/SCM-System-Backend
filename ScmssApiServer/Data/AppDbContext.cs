@@ -18,7 +18,7 @@ namespace ScmssApiServer.Data
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<Supply> Supplies { get; set; }
-        public DbSet<Retailer> Retailers { get; set; }
+        public DbSet<Customer> Retailers { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -185,6 +185,22 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.FinishUserId);
 
             #endregion ProductionOrder
+
+            #region ProductionFacility
+
+            // Many-to-many with Supply via WarehouseSupplyItem
+            builder.Entity<ProductionFacility>()
+                .HasMany(e => e.WarehouseSupplies)
+                .WithMany(e => e.ProductionFacilities)
+                .UsingEntity<WarehouseSupplyItem>();
+
+            // Many-to-many with Product via WarehouseProductItem
+            builder.Entity<ProductionFacility>()
+                .HasMany(e => e.WarehouseProducts)
+                .WithMany(e => e.ProductionFacilities)
+                .UsingEntity<WarehouseProductItem>();
+
+            #endregion ProductionFacility
         }
     }
 }
