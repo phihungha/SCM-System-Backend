@@ -31,7 +31,7 @@ namespace ScmssApiServer.Data
             if (!e.FromQuery && entry.State == EntityState.Added
                 && entry.Entity is IUpdateTrackable entity)
             {
-                entity.CreatedTime = DateTime.UtcNow;
+                entity.CreateTime = DateTime.UtcNow;
                 entity.IsActive = true;
             }
         }
@@ -50,7 +50,7 @@ namespace ScmssApiServer.Data
 
             if (e.NewState == EntityState.Modified || e.NewState == EntityState.Deleted)
             {
-                entity.UpdatedTime = DateTime.UtcNow;
+                entity.UpdateTime = DateTime.UtcNow;
             }
         }
 

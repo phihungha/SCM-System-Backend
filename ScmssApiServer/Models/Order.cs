@@ -18,8 +18,8 @@
         public User? FinishUser { get; set; }
 
         public bool IsActive { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime? UpdatedTime { get; set; }
+        public DateTime CreateTime { get; set; }
+        public DateTime? UpdateTime { get; set; }
         public DateTime? FinishTime { get; set; }
     }
 }
