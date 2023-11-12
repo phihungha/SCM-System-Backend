@@ -46,6 +46,12 @@ namespace ScmssApiServer.Models
         public ICollection<PurchaseOrder> FinishedPurchaseOrders { get; set; }
             = new List<PurchaseOrder>();
 
+        public ICollection<SalesOrder> CreatedSalesOrders { get; set; }
+            = new List<SalesOrder>();
+
+        public ICollection<SalesOrder> FinishedSalesOrders { get; set; }
+            = new List<SalesOrder>();
+
         public bool IsActive { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }

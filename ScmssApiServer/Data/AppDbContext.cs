@@ -13,7 +13,10 @@ namespace ScmssApiServer.Data
         public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
+        public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<Supply> Supplies { get; set; }
+        public DbSet<Retailer> Retailers { get; set; }
+        public DbSet<Product> Products { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -78,6 +81,7 @@ namespace ScmssApiServer.Data
             base.OnModelCreating(builder);
 
             #region PurchaseRequisition
+
             // Many-to-many with Supply via PurchaseRequisitionItem
             builder.Entity<PurchaseRequisition>()
                 .HasMany(e => e.Supplies)
@@ -103,9 +107,11 @@ namespace ScmssApiServer.Data
                 .HasOne(e => e.FinishUser)
                 .WithMany(e => e.FinishedPurchaseRequisitions)
                 .HasForeignKey(e => e.FinishUserId);
-            #endregion
+
+            #endregion PurchaseRequisition
 
             #region PurchaseOrder
+
             // Many-to-many with Supply via PurchaseOrderItem
             builder.Entity<PurchaseOrder>()
                 .HasMany(e => e.Supplies)
@@ -121,8 +127,28 @@ namespace ScmssApiServer.Data
                 .HasOne(e => e.FinishUser)
                 .WithMany(e => e.FinishedPurchaseOrders)
                 .HasForeignKey(e => e.FinishUserId);
-            #endregion
 
+            #endregion PurchaseOrder
+
+            #region SalesOrder
+
+            // Many-to-many with Supply via PurchaseOrderItem
+            builder.Entity<SalesOrder>()
+                .HasMany(e => e.Products)
+                .WithMany(e => e.SalesOrders)
+                .UsingEntity<SalesOrderItem>();
+
+            builder.Entity<SalesOrder>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedSalesOrders)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<SalesOrder>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedSalesOrders)
+                .HasForeignKey(e => e.FinishUserId);
+
+            #endregion SalesOrder
         }
     }
 }
