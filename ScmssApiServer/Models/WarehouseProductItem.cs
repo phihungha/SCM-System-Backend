@@ -12,8 +12,5 @@ namespace ScmssApiServer.Models
 
         [NotMapped]
         public override decimal UnitValue => Product.Price;
-
-        public ICollection<WarehouseProductItem> WarehouseProductItems { get; set; }
-            = new List<WarehouseProductItem>();
     }
 }

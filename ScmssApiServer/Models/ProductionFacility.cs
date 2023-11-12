@@ -10,15 +10,15 @@
         public ICollection<ProductionOrder> ProductionOrder { get; set; }
             = new List<ProductionOrder>();
 
-        public ICollection<WarehouseSupplyItem> WarehouseSupplyItems { get; }
+        public ICollection<WarehouseSupplyItem> WarehouseSupplyItems { get; set; }
             = new List<WarehouseSupplyItem>();
 
-        public ICollection<Supply> WarehouseSupplies { get; } = new List<Supply>();
+        public ICollection<Supply> WarehouseSupplies { get; set; } = new List<Supply>();
 
-        public ICollection<WarehouseProductItem> WarehouseProductItems { get; }
+        public ICollection<WarehouseProductItem> WarehouseProductItems { get; set; }
             = new List<WarehouseProductItem>();
 
-        public ICollection<Product> WarehouseProducts { get; } = new List<Product>();
+        public ICollection<Product> WarehouseProducts { get; set; } = new List<Product>();
 
         public bool IsActive { get; set; }
         public DateTime CreateTime { get; set; }
