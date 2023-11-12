@@ -10,13 +10,15 @@ namespace ScmssApiServer.Data
     /// </summary>
     public class AppDbContext : IdentityDbContext<User>
     {
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductionOrder> ProductionOrders { get; set; }
+        public DbSet<ProductionFacility> ProductionFacilities { get; set; }
         public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<Supply> Supplies { get; set; }
         public DbSet<Retailer> Retailers { get; set; }
-        public DbSet<Product> Products { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -149,6 +151,40 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.FinishUserId);
 
             #endregion SalesOrder
+
+            #region Product
+
+            builder.Entity<Product>()
+                .HasMany(e => e.Supplies)
+                .WithMany(e => e.Products)
+                .UsingEntity<ProductionCostItem>();
+
+            #endregion Product
+
+            #region ProductionOrder
+
+            // Many-to-many with Supply via PurchaseOrderItem
+            builder.Entity<ProductionOrder>()
+                .HasMany(e => e.Products)
+                .WithMany(e => e.ProductionOrders)
+                .UsingEntity<ProductionOrderItem>();
+
+            builder.Entity<ProductionOrder>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedProductionOrders)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<ProductionOrder>()
+                .HasOne(e => e.ApproveProductionManager)
+                .WithMany(e => e.ApprovedProductionOrdersAsManager)
+                .HasForeignKey(e => e.ApproveProductionManagerId);
+
+            builder.Entity<ProductionOrder>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedProductionOrders)
+                .HasForeignKey(e => e.FinishUserId);
+
+            #endregion ProductionOrder
         }
     }
 }
