@@ -14,6 +14,8 @@
         public decimal TotalCost { get; set; }
         public decimal TotalProfit { get; set; }
 
+        public ProductionOrderStatus Status { get; set; }
+
         public int ProductionFacilityId { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
 
