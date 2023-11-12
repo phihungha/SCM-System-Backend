@@ -2,13 +2,13 @@
 {
     public class Vendor : Company
     {
-        public IList<Supply> Supplies { get; set; }
+        public ICollection<Supply> Supplies { get; set; }
             = new List<Supply>();
 
-        public IList<PurchaseRequisition> PurchaseRequisitions { get; set; }
+        public ICollection<PurchaseRequisition> PurchaseRequisitions { get; set; }
             = new List<PurchaseRequisition>();
 
-        public IList<PurchaseOrder> PurchaseOrders { get; set; }
+        public ICollection<PurchaseOrder> PurchaseOrders { get; set; }
             = new List<PurchaseOrder>();
     }
 }

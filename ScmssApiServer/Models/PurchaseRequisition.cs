@@ -4,8 +4,10 @@
     {
         public int Id { get; set; }
 
-        public IList<PurchaseRequisitionItem> Items { get; set; }
+        public ICollection<PurchaseRequisitionItem> PurchaseRequisitionItems { get; set; }
             = new List<PurchaseRequisitionItem>();
+
+        public ICollection<Supply> Supplies { get; set; } = new List<Supply>();
 
         public decimal SubTotal { get; set; }
         public double VatRate { get; set; }
@@ -17,21 +19,20 @@
         public int VendorId { get; set; }
         public Vendor Vendor { get; set; } = null!;
 
-        public int? PurchaseOrderId { get; set; }
         public PurchaseOrder? PurchaseOrder { get; set; }
 
-        public int CreatedUserId { get; set; }
-        public User CreatedUser { get; set; } = null!;
-        public int? ApprovedProductionManagerId { get; set; }
-        public User? ApprovedProductionManager { get; set; }
-        public int? ApprovedFinanceId { get; set; }
-        public User? ApprovedFinance { get; set; }
-        public int? FinishedUserId { get; set; }
-        public User? FinishedUser { get; set; }
+        public required string CreateUserId { get; set; }
+        public User CreateUser { get; set; } = null!;
+        public string? ApproveProductionManagerId { get; set; }
+        public User? ApproveProductionManager { get; set; }
+        public string? ApproveFinanceId { get; set; }
+        public User? ApproveFinance { get; set; }
+        public string? FinishUserId { get; set; }
+        public User? FinishUser { get; set; }
 
         public bool IsActive { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }
-        public DateTime? FinishedTime { get; set; }
+        public DateTime? FinishTime { get; set; }
     }
 }

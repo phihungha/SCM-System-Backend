@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Hosting;
 using ScmssApiServer.Models;
-using System.Reflection.Emit;
 
 namespace ScmssApiServer.Data
 {
@@ -12,6 +10,11 @@ namespace ScmssApiServer.Data
     /// </summary>
     public class AppDbContext : IdentityDbContext<User>
     {
+        public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<Vendor> Vendors { get; set; }
+        public DbSet<Supply> Supplies { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
@@ -68,13 +71,58 @@ namespace ScmssApiServer.Data
             builder
                 .Properties<PurchaseRequisitionStatus>()
                 .HaveConversion<string>();
-
-
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            #region PurchaseRequisition
+            // Many-to-many with Supply via PurchaseRequisitionItem
+            builder.Entity<PurchaseRequisition>()
+                .HasMany(e => e.Supplies)
+                .WithMany(e => e.PurchaseRequisitions)
+                .UsingEntity<PurchaseRequisitionItem>();
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedPurchaseRequisitions)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.ApproveProductionManager)
+                .WithMany(e => e.ApprovedPurchaseRequisitionsAsManager)
+                .HasForeignKey(e => e.ApproveProductionManagerId);
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.ApproveFinance)
+                .WithMany(e => e.ApprovedPurchaseRequisitionsAsFinance)
+                .HasForeignKey(e => e.ApproveFinanceId);
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedPurchaseRequisitions)
+                .HasForeignKey(e => e.FinishUserId);
+            #endregion
+
+            #region PurchaseOrder
+            // Many-to-many with Supply via PurchaseOrderItem
+            builder.Entity<PurchaseOrder>()
+                .HasMany(e => e.Supplies)
+                .WithMany(e => e.PurchaseOrders)
+                .UsingEntity<PurchaseOrderItem>();
+
+            builder.Entity<PurchaseOrder>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedPurchaseOrders)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<PurchaseOrder>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedPurchaseOrders)
+                .HasForeignKey(e => e.FinishUserId);
+            #endregion
+
         }
     }
 }

@@ -12,14 +12,14 @@
         public OrderStatus Status { get; set; }
         public OrderPaymentStatus PaymentStatus { get; set; }
 
-        public int CreatedUserId { get; set; }
-        public User CreatedUser { get; set; } = null!;
-        public int? FinishedUserId { get; set; }
-        public User? FinishedUser { get; set; }
+        public required string CreateUserId { get; set; }
+        public User CreateUser { get; set; } = null!;
+        public string? FinishUserId { get; set; }
+        public User? FinishUser { get; set; }
 
         public bool IsActive { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }
-        public DateTime? FinishedTime { get; set; }
+        public DateTime? FinishTime { get; set; }
     }
 }

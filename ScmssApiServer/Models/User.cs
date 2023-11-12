@@ -28,6 +28,24 @@ namespace ScmssApiServer.Models
 
         public string? Description { get; set; }
 
+        public ICollection<PurchaseRequisition> CreatedPurchaseRequisitions { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseRequisition> ApprovedPurchaseRequisitionsAsManager { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseRequisition> ApprovedPurchaseRequisitionsAsFinance { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseRequisition> FinishedPurchaseRequisitions { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseOrder> CreatedPurchaseOrders { get; set; }
+            = new List<PurchaseOrder>();
+
+        public ICollection<PurchaseOrder> FinishedPurchaseOrders { get; set; }
+            = new List<PurchaseOrder>();
+
         public bool IsActive { get; set; }
         public DateTime CreatedTime { get; set; }
         public DateTime? UpdatedTime { get; set; }
