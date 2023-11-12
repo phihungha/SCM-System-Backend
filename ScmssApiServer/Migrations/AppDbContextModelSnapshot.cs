@@ -193,7 +193,7 @@ namespace ScmssApiServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Retailers");
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.Product", b =>
@@ -314,8 +314,9 @@ namespace ScmssApiServer.Migrations
                     b.Property<DateTime?>("StartTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("numeric");
@@ -374,6 +375,38 @@ namespace ScmssApiServer.Migrations
                     b.HasIndex("ProductionOrderId");
 
                     b.ToTable("ProductionOrderItem");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.ProductionOrderProgressUpdate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProductionOrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionOrderId");
+
+                    b.ToTable("ProductionOrderProgressUpdate");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrder", b =>
@@ -483,6 +516,38 @@ namespace ScmssApiServer.Migrations
                     b.HasIndex("SupplyId");
 
                     b.ToTable("PurchaseOrderItem");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrderProgressUpdate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PurchaseOrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.ToTable("PurchaseOrderProgressUpdate");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisition", b =>
@@ -680,6 +745,38 @@ namespace ScmssApiServer.Migrations
                     b.ToTable("SalesOrderItem");
                 });
 
+            modelBuilder.Entity("ScmssApiServer.Models.SalesOrderProgressUpdate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<int>("SalesOrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SalesOrderId");
+
+                    b.ToTable("SalesOrderProgressUpdate");
+                });
+
             modelBuilder.Entity("ScmssApiServer.Models.Supply", b =>
                 {
                     b.Property<int>("Id")
@@ -791,6 +888,9 @@ namespace ScmssApiServer.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("ProductionFacilityId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -812,6 +912,8 @@ namespace ScmssApiServer.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("ProductionFacilityId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -1022,12 +1124,23 @@ namespace ScmssApiServer.Migrations
                         .IsRequired();
 
                     b.HasOne("ScmssApiServer.Models.ProductionOrder", "ProductionOrder")
-                        .WithMany("ProductionOrderItems")
+                        .WithMany("Items")
                         .HasForeignKey("ProductionOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductionOrder");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.ProductionOrderProgressUpdate", b =>
+                {
+                    b.HasOne("ScmssApiServer.Models.ProductionOrder", "ProductionOrder")
+                        .WithMany("ProgressUpdates")
+                        .HasForeignKey("ProductionOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ProductionOrder");
                 });
@@ -1074,7 +1187,7 @@ namespace ScmssApiServer.Migrations
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrderItem", b =>
                 {
                     b.HasOne("ScmssApiServer.Models.PurchaseOrder", "PurchaseOrder")
-                        .WithMany("PurchaseOrderItems")
+                        .WithMany("Items")
                         .HasForeignKey("PurchaseOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1088,6 +1201,17 @@ namespace ScmssApiServer.Migrations
                     b.Navigation("PurchaseOrder");
 
                     b.Navigation("Supply");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrderProgressUpdate", b =>
+                {
+                    b.HasOne("ScmssApiServer.Models.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("ProgressUpdates")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseOrder");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisition", b =>
@@ -1138,7 +1262,7 @@ namespace ScmssApiServer.Migrations
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisitionItem", b =>
                 {
                     b.HasOne("ScmssApiServer.Models.PurchaseRequisition", "PurchaseRequisition")
-                        .WithMany("PurchaseRequisitionItems")
+                        .WithMany("Items")
                         .HasForeignKey("PurchaseRequisitionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1196,12 +1320,23 @@ namespace ScmssApiServer.Migrations
                         .IsRequired();
 
                     b.HasOne("ScmssApiServer.Models.SalesOrder", "SalesOrder")
-                        .WithMany("SalesOrderItems")
+                        .WithMany("Items")
                         .HasForeignKey("SalesOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("SalesOrder");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.SalesOrderProgressUpdate", b =>
+                {
+                    b.HasOne("ScmssApiServer.Models.SalesOrder", "SalesOrder")
+                        .WithMany("ProgressUpdates")
+                        .HasForeignKey("SalesOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("SalesOrder");
                 });
@@ -1215,6 +1350,15 @@ namespace ScmssApiServer.Migrations
                         .IsRequired();
 
                     b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.User", b =>
+                {
+                    b.HasOne("ScmssApiServer.Models.ProductionFacility", "Facility")
+                        .WithMany("Users")
+                        .HasForeignKey("ProductionFacilityId");
+
+                    b.Navigation("Facility");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.WarehouseProductItem", b =>
@@ -1273,6 +1417,8 @@ namespace ScmssApiServer.Migrations
                 {
                     b.Navigation("ProductionOrder");
 
+                    b.Navigation("Users");
+
                     b.Navigation("WarehouseProductItems");
 
                     b.Navigation("WarehouseSupplyItems");
@@ -1280,24 +1426,30 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.ProductionOrder", b =>
                 {
-                    b.Navigation("ProductionOrderItems");
+                    b.Navigation("Items");
+
+                    b.Navigation("ProgressUpdates");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrder", b =>
                 {
-                    b.Navigation("PurchaseOrderItems");
+                    b.Navigation("Items");
+
+                    b.Navigation("ProgressUpdates");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisition", b =>
                 {
-                    b.Navigation("PurchaseOrder");
+                    b.Navigation("Items");
 
-                    b.Navigation("PurchaseRequisitionItems");
+                    b.Navigation("PurchaseOrder");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.SalesOrder", b =>
                 {
-                    b.Navigation("SalesOrderItems");
+                    b.Navigation("Items");
+
+                    b.Navigation("ProgressUpdates");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.Supply", b =>

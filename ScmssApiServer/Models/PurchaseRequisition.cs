@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
 
-        public ICollection<PurchaseRequisitionItem> PurchaseRequisitionItems { get; set; }
+        public ICollection<PurchaseRequisitionItem> Items { get; set; }
             = new List<PurchaseRequisitionItem>();
 
         public ICollection<Supply> Supplies { get; set; } = new List<Supply>();

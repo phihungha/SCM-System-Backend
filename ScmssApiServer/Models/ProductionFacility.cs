@@ -20,6 +20,8 @@
 
         public ICollection<Product> WarehouseProducts { get; set; } = new List<Product>();
 
+        public ICollection<User> Users { get; set; } = new List<User>();
+
         public bool IsActive { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }

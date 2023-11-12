@@ -28,6 +28,9 @@ namespace ScmssApiServer.Models
 
         public string? Description { get; set; }
 
+        public int? ProductionFacilityId { get; set; }
+        public ProductionFacility? Facility { get; set; }
+
         public ICollection<PurchaseRequisition> CreatedPurchaseRequisitions { get; set; }
             = new List<PurchaseRequisition>();
 

@@ -10,6 +10,7 @@ namespace ScmssApiServer.Data
     /// </summary>
     public class AppDbContext : IdentityDbContext<User>
     {
+        public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductionOrder> ProductionOrders { get; set; }
         public DbSet<ProductionFacility> ProductionFacilities { get; set; }
@@ -18,7 +19,6 @@ namespace ScmssApiServer.Data
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<Supply> Supplies { get; set; }
-        public DbSet<Customer> Retailers { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
@@ -75,6 +75,14 @@ namespace ScmssApiServer.Data
 
             builder
                 .Properties<PurchaseRequisitionStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<ProductionOrderStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<OrderProgressUpdateType>()
                 .HaveConversion<string>();
         }
 

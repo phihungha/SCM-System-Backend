@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
 
-        public ICollection<ProductionOrderItem> ProductionOrderItems { get; set; }
+        public ICollection<ProductionOrderItem> Items { get; set; }
             = new List<ProductionOrderItem>();
 
         public ICollection<Product> Products { get; set; }
@@ -15,6 +15,8 @@
         public decimal TotalProfit { get; set; }
 
         public ProductionOrderStatus Status { get; set; }
+        public ICollection<ProductionOrderProgressUpdate> ProgressUpdates { get; set; }
+            = new List<ProductionOrderProgressUpdate>();
 
         public int ProductionFacilityId { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
