@@ -43,6 +43,7 @@ namespace ScmssApiServer
             // Add domain services
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
+            builder.Services.AddScoped<ISalesOrdersService, SalesOrdersService>();
 
             builder.Services.AddControllers().AddJsonOptions(
                     o => o.JsonSerializerOptions
