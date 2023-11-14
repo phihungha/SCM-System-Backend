@@ -13,11 +13,14 @@ namespace ScmssApiServer.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductionOrder> ProductionOrders { get; set; }
+        public DbSet<ProductionOrderProgressUpdate> ProductionOrderProgressUpdates { get; set; }
         public DbSet<ProductionFacility> ProductionFacilities { get; set; }
         public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<PurchaseOrderProgressUpdate> PurchaseOrderProgressUpdates { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<SalesOrder> SalesOrders { get; set; }
+        public DbSet<SalesOrderProgressUpdate> SalesOrderProgressUpdates { get; set; }
         public DbSet<Supply> Supplies { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)

@@ -15,11 +15,12 @@
         public decimal TotalProfit { get; set; }
 
         public ProductionOrderStatus Status { get; set; }
-        public ICollection<ProductionOrderProgressUpdate> ProgressUpdates { get; set; }
-            = new List<ProductionOrderProgressUpdate>();
 
         public int ProductionFacilityId { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
+
+        public ICollection<ProductionOrderProgressUpdate> ProgressUpdates { get; }
+            = new List<ProductionOrderProgressUpdate>();
 
         public required string CreateUserId { get; set; }
         public User CreateUser { get; set; } = null!;
