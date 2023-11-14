@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using ScmssApiServer.DTOs;
-
-namespace ScmssApiServer.Models
+﻿namespace ScmssApiServer.Models
 {
     public class ProductionOrderItem
     {
@@ -16,14 +13,5 @@ namespace ScmssApiServer.Models
         public decimal UnitCost { get; set; }
         public decimal TotalValue { get; set; }
         public decimal TotalCost { get; set; }
-    }
-
-    public class ProductionOrderItemMappingProfile : Profile
-    {
-        public ProductionOrderItemMappingProfile()
-        {
-            CreateMap<OrderItemInputDto, ProductionOrderItem>()
-                .ForMember(d => d.ProductId, o => o.MapFrom(s => s.ItemId));
-        }
     }
 }

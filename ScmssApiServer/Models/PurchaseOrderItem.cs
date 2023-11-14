@@ -13,13 +13,4 @@ namespace ScmssApiServer.Models
         public decimal Discount { get; set; }
         public decimal NetPrice { get; set; }
     }
-
-    public class PurchaseOrderItemMappingProfile : Profile
-    {
-        public PurchaseOrderItemMappingProfile()
-        {
-            CreateMap<OrderItemInputDto, PurchaseOrderItem>()
-                .ForMember(d => d.SupplyId, o => o.MapFrom(s => s.ItemId));
-        }
-    }
 }
