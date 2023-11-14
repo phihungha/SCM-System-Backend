@@ -629,8 +629,6 @@ namespace ScmssApiServer.Migrations
                 name: "PurchaseRequisitionItem",
                 columns: table => new
                 {
-                    SupplyId = table.Column<int>(type: "integer", nullable: false),
-                    PurchaseRequisitionId = table.Column<int>(type: "integer", nullable: false),
                     ItemId = table.Column<int>(type: "integer", nullable: false),
                     OrderId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
@@ -640,16 +638,16 @@ namespace ScmssApiServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PurchaseRequisitionItem", x => new { x.PurchaseRequisitionId, x.SupplyId });
+                    table.PrimaryKey("PK_PurchaseRequisitionItem", x => new { x.ItemId, x.OrderId });
                     table.ForeignKey(
-                        name: "FK_PurchaseRequisitionItem_PurchaseRequisitions_PurchaseRequis~",
-                        column: x => x.PurchaseRequisitionId,
+                        name: "FK_PurchaseRequisitionItem_PurchaseRequisitions_OrderId",
+                        column: x => x.OrderId,
                         principalTable: "PurchaseRequisitions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PurchaseRequisitionItem_Supplies_SupplyId",
-                        column: x => x.SupplyId,
+                        name: "FK_PurchaseRequisitionItem_Supplies_ItemId",
+                        column: x => x.ItemId,
                         principalTable: "Supplies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -659,8 +657,6 @@ namespace ScmssApiServer.Migrations
                 name: "SalesOrderItem",
                 columns: table => new
                 {
-                    ProductId = table.Column<int>(type: "integer", nullable: false),
-                    SalesOrderId = table.Column<int>(type: "integer", nullable: false),
                     ItemId = table.Column<int>(type: "integer", nullable: false),
                     OrderId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
@@ -670,16 +666,16 @@ namespace ScmssApiServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SalesOrderItem", x => new { x.ProductId, x.SalesOrderId });
+                    table.PrimaryKey("PK_SalesOrderItem", x => new { x.ItemId, x.OrderId });
                     table.ForeignKey(
-                        name: "FK_SalesOrderItem_Products_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK_SalesOrderItem_Products_ItemId",
+                        column: x => x.ItemId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SalesOrderItem_SalesOrders_SalesOrderId",
-                        column: x => x.SalesOrderId,
+                        name: "FK_SalesOrderItem_SalesOrders_OrderId",
+                        column: x => x.OrderId,
                         principalTable: "SalesOrders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -712,12 +708,10 @@ namespace ScmssApiServer.Migrations
                 name: "PurchaseOrderItem",
                 columns: table => new
                 {
-                    SupplyId = table.Column<int>(type: "integer", nullable: false),
-                    PurchaseOrderId = table.Column<int>(type: "integer", nullable: false),
-                    Discount = table.Column<decimal>(type: "numeric", nullable: false),
-                    NetPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     ItemId = table.Column<int>(type: "integer", nullable: false),
                     OrderId = table.Column<int>(type: "integer", nullable: false),
+                    Discount = table.Column<decimal>(type: "numeric", nullable: false),
+                    NetPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
@@ -725,16 +719,16 @@ namespace ScmssApiServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PurchaseOrderItem", x => new { x.PurchaseOrderId, x.SupplyId });
+                    table.PrimaryKey("PK_PurchaseOrderItem", x => new { x.ItemId, x.OrderId });
                     table.ForeignKey(
-                        name: "FK_PurchaseOrderItem_PurchaseOrders_PurchaseOrderId",
-                        column: x => x.PurchaseOrderId,
+                        name: "FK_PurchaseOrderItem_PurchaseOrders_OrderId",
+                        column: x => x.OrderId,
                         principalTable: "PurchaseOrders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PurchaseOrderItem_Supplies_SupplyId",
-                        column: x => x.SupplyId,
+                        name: "FK_PurchaseOrderItem_Supplies_ItemId",
+                        column: x => x.ItemId,
                         principalTable: "Supplies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -841,9 +835,9 @@ namespace ScmssApiServer.Migrations
                 column: "ProductionFacilityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PurchaseOrderItem_SupplyId",
+                name: "IX_PurchaseOrderItem_OrderId",
                 table: "PurchaseOrderItem",
-                column: "SupplyId");
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrderProgressUpdates_PurchaseOrderId",
@@ -877,9 +871,9 @@ namespace ScmssApiServer.Migrations
                 column: "VendorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PurchaseRequisitionItem_SupplyId",
+                name: "IX_PurchaseRequisitionItem_OrderId",
                 table: "PurchaseRequisitionItem",
-                column: "SupplyId");
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseRequisitions_ApproveFinanceId",
@@ -912,9 +906,9 @@ namespace ScmssApiServer.Migrations
                 column: "VendorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SalesOrderItem_SalesOrderId",
+                name: "IX_SalesOrderItem_OrderId",
                 table: "SalesOrderItem",
-                column: "SalesOrderId");
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SalesOrderProgressUpdates_SalesOrderId",

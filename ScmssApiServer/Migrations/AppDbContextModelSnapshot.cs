@@ -493,23 +493,17 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrderItem", b =>
                 {
-                    b.Property<int>("PurchaseOrderId")
+                    b.Property<int>("ItemId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("SupplyId")
+                    b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Discount")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("integer");
-
                     b.Property<decimal>("NetPrice")
                         .HasColumnType("numeric");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("integer");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
@@ -524,9 +518,9 @@ namespace ScmssApiServer.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
-                    b.HasKey("PurchaseOrderId", "SupplyId");
+                    b.HasKey("ItemId", "OrderId");
 
-                    b.HasIndex("SupplyId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("PurchaseOrderItem");
                 });
@@ -635,12 +629,6 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisitionItem", b =>
                 {
-                    b.Property<int>("PurchaseRequisitionId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SupplyId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ItemId")
                         .HasColumnType("integer");
 
@@ -660,9 +648,9 @@ namespace ScmssApiServer.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
-                    b.HasKey("PurchaseRequisitionId", "SupplyId");
+                    b.HasKey("ItemId", "OrderId");
 
-                    b.HasIndex("SupplyId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("PurchaseRequisitionItem");
                 });
@@ -745,12 +733,6 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.SalesOrderItem", b =>
                 {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SalesOrderId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ItemId")
                         .HasColumnType("integer");
 
@@ -770,9 +752,9 @@ namespace ScmssApiServer.Migrations
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
-                    b.HasKey("ProductId", "SalesOrderId");
+                    b.HasKey("ItemId", "OrderId");
 
-                    b.HasIndex("SalesOrderId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("SalesOrderItem");
                 });
@@ -1219,15 +1201,15 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrderItem", b =>
                 {
-                    b.HasOne("ScmssApiServer.Models.PurchaseOrder", "PurchaseOrder")
-                        .WithMany("Items")
-                        .HasForeignKey("PurchaseOrderId")
+                    b.HasOne("ScmssApiServer.Models.Supply", "Supply")
+                        .WithMany("PurchaseOrderItems")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ScmssApiServer.Models.Supply", "Supply")
-                        .WithMany("PurchaseOrderItems")
-                        .HasForeignKey("SupplyId")
+                    b.HasOne("ScmssApiServer.Models.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1294,15 +1276,15 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisitionItem", b =>
                 {
-                    b.HasOne("ScmssApiServer.Models.PurchaseRequisition", "PurchaseRequisition")
-                        .WithMany("Items")
-                        .HasForeignKey("PurchaseRequisitionId")
+                    b.HasOne("ScmssApiServer.Models.Supply", "Supply")
+                        .WithMany("PurchaseRequisitionItems")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ScmssApiServer.Models.Supply", "Supply")
-                        .WithMany("PurchaseRequisitionItems")
-                        .HasForeignKey("SupplyId")
+                    b.HasOne("ScmssApiServer.Models.PurchaseRequisition", "PurchaseRequisition")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1346,13 +1328,13 @@ namespace ScmssApiServer.Migrations
                 {
                     b.HasOne("ScmssApiServer.Models.Product", "Product")
                         .WithMany("SalesOrderItems")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ScmssApiServer.Models.SalesOrder", "SalesOrder")
                         .WithMany("Items")
-                        .HasForeignKey("SalesOrderId")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
