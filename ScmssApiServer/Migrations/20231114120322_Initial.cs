@@ -417,14 +417,16 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ToLocation = table.Column<string>(type: "text", nullable: false),
+                    ProductionFacilityId = table.Column<int>(type: "integer", nullable: true),
                     CustomerId = table.Column<int>(type: "integer", nullable: false),
-                    ProductionFacilityId = table.Column<int>(type: "integer", nullable: false),
                     SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
                     VatRate = table.Column<double>(type: "double precision", nullable: false),
                     VatAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     PaymentStatus = table.Column<string>(type: "text", nullable: false),
+                    InvoiceUrl = table.Column<string>(type: "text", nullable: true),
+                    ReceiptUrl = table.Column<string>(type: "text", nullable: true),
                     CreateUserId = table.Column<string>(type: "text", nullable: false),
                     FinishUserId = table.Column<string>(type: "text", nullable: true),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -456,8 +458,7 @@ namespace ScmssApiServer.Migrations
                         name: "FK_SalesOrders_ProductionFacilities_ProductionFacilityId",
                         column: x => x.ProductionFacilityId,
                         principalTable: "ProductionFacilities",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -544,7 +545,7 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductionOrderProgressUpdate",
+                name: "ProductionOrderProgressUpdates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -557,9 +558,9 @@ namespace ScmssApiServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductionOrderProgressUpdate", x => x.Id);
+                    table.PrimaryKey("PK_ProductionOrderProgressUpdates", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductionOrderProgressUpdate_ProductionOrders_ProductionOr~",
+                        name: "FK_ProductionOrderProgressUpdates_ProductionOrders_ProductionO~",
                         column: x => x.ProductionOrderId,
                         principalTable: "ProductionOrders",
                         principalColumn: "Id",
@@ -582,6 +583,8 @@ namespace ScmssApiServer.Migrations
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     PaymentStatus = table.Column<string>(type: "text", nullable: false),
+                    InvoiceUrl = table.Column<string>(type: "text", nullable: true),
+                    ReceiptUrl = table.Column<string>(type: "text", nullable: true),
                     CreateUserId = table.Column<string>(type: "text", nullable: false),
                     FinishUserId = table.Column<string>(type: "text", nullable: true),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -628,6 +631,8 @@ namespace ScmssApiServer.Migrations
                 {
                     SupplyId = table.Column<int>(type: "integer", nullable: false),
                     PurchaseRequisitionId = table.Column<int>(type: "integer", nullable: false),
+                    ItemId = table.Column<int>(type: "integer", nullable: false),
+                    OrderId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
@@ -656,6 +661,8 @@ namespace ScmssApiServer.Migrations
                 {
                     ProductId = table.Column<int>(type: "integer", nullable: false),
                     SalesOrderId = table.Column<int>(type: "integer", nullable: false),
+                    ItemId = table.Column<int>(type: "integer", nullable: false),
+                    OrderId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
@@ -679,7 +686,7 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SalesOrderProgressUpdate",
+                name: "SalesOrderProgressUpdates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -692,9 +699,9 @@ namespace ScmssApiServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SalesOrderProgressUpdate", x => x.Id);
+                    table.PrimaryKey("PK_SalesOrderProgressUpdates", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SalesOrderProgressUpdate_SalesOrders_SalesOrderId",
+                        name: "FK_SalesOrderProgressUpdates_SalesOrders_SalesOrderId",
                         column: x => x.SalesOrderId,
                         principalTable: "SalesOrders",
                         principalColumn: "Id",
@@ -709,6 +716,8 @@ namespace ScmssApiServer.Migrations
                     PurchaseOrderId = table.Column<int>(type: "integer", nullable: false),
                     Discount = table.Column<decimal>(type: "numeric", nullable: false),
                     NetPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    ItemId = table.Column<int>(type: "integer", nullable: false),
+                    OrderId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
@@ -732,7 +741,7 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PurchaseOrderProgressUpdate",
+                name: "PurchaseOrderProgressUpdates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -745,9 +754,9 @@ namespace ScmssApiServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PurchaseOrderProgressUpdate", x => x.Id);
+                    table.PrimaryKey("PK_PurchaseOrderProgressUpdates", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PurchaseOrderProgressUpdate_PurchaseOrders_PurchaseOrderId",
+                        name: "FK_PurchaseOrderProgressUpdates_PurchaseOrders_PurchaseOrderId",
                         column: x => x.PurchaseOrderId,
                         principalTable: "PurchaseOrders",
                         principalColumn: "Id",
@@ -807,8 +816,8 @@ namespace ScmssApiServer.Migrations
                 column: "ProductionOrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductionOrderProgressUpdate_ProductionOrderId",
-                table: "ProductionOrderProgressUpdate",
+                name: "IX_ProductionOrderProgressUpdates_ProductionOrderId",
+                table: "ProductionOrderProgressUpdates",
                 column: "ProductionOrderId");
 
             migrationBuilder.CreateIndex(
@@ -837,8 +846,8 @@ namespace ScmssApiServer.Migrations
                 column: "SupplyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PurchaseOrderProgressUpdate_PurchaseOrderId",
-                table: "PurchaseOrderProgressUpdate",
+                name: "IX_PurchaseOrderProgressUpdates_PurchaseOrderId",
+                table: "PurchaseOrderProgressUpdates",
                 column: "PurchaseOrderId");
 
             migrationBuilder.CreateIndex(
@@ -908,8 +917,8 @@ namespace ScmssApiServer.Migrations
                 column: "SalesOrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SalesOrderProgressUpdate_SalesOrderId",
-                table: "SalesOrderProgressUpdate",
+                name: "IX_SalesOrderProgressUpdates_SalesOrderId",
+                table: "SalesOrderProgressUpdates",
                 column: "SalesOrderId");
 
             migrationBuilder.CreateIndex(
@@ -973,13 +982,13 @@ namespace ScmssApiServer.Migrations
                 name: "ProductionOrderItem");
 
             migrationBuilder.DropTable(
-                name: "ProductionOrderProgressUpdate");
+                name: "ProductionOrderProgressUpdates");
 
             migrationBuilder.DropTable(
                 name: "PurchaseOrderItem");
 
             migrationBuilder.DropTable(
-                name: "PurchaseOrderProgressUpdate");
+                name: "PurchaseOrderProgressUpdates");
 
             migrationBuilder.DropTable(
                 name: "PurchaseRequisitionItem");
@@ -988,7 +997,7 @@ namespace ScmssApiServer.Migrations
                 name: "SalesOrderItem");
 
             migrationBuilder.DropTable(
-                name: "SalesOrderProgressUpdate");
+                name: "SalesOrderProgressUpdates");
 
             migrationBuilder.DropTable(
                 name: "WarehouseProductItem");

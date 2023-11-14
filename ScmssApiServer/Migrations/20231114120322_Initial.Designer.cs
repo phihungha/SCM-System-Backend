@@ -12,7 +12,7 @@ using ScmssApiServer.Data;
 namespace ScmssApiServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231112171614_Initial")]
+    [Migration("20231114120322_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -399,6 +399,7 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
@@ -409,7 +410,7 @@ namespace ScmssApiServer.Migrations
 
                     b.HasIndex("ProductionOrderId");
 
-                    b.ToTable("ProductionOrderProgressUpdate");
+                    b.ToTable("ProductionOrderProgressUpdates");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrder", b =>
@@ -439,6 +440,9 @@ namespace ScmssApiServer.Migrations
                     b.Property<string>("FinishUserId")
                         .HasColumnType("text");
 
+                    b.Property<string>("InvoiceUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
                         .HasColumnType("text");
@@ -448,6 +452,9 @@ namespace ScmssApiServer.Migrations
 
                     b.Property<int?>("PurchaseRequisitionId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ReceiptUrl")
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -498,8 +505,14 @@ namespace ScmssApiServer.Migrations
                     b.Property<decimal>("Discount")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("NetPrice")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
@@ -540,6 +553,7 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
@@ -550,7 +564,7 @@ namespace ScmssApiServer.Migrations
 
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("PurchaseOrderProgressUpdate");
+                    b.ToTable("PurchaseOrderProgressUpdates");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisition", b =>
@@ -630,6 +644,12 @@ namespace ScmssApiServer.Migrations
                     b.Property<int>("SupplyId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
 
@@ -677,12 +697,18 @@ namespace ScmssApiServer.Migrations
                     b.Property<string>("FinishUserId")
                         .HasColumnType("text");
 
+                    b.Property<string>("InvoiceUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("PaymentStatus")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ProductionFacilityId")
+                    b.Property<int?>("ProductionFacilityId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ReceiptUrl")
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -728,6 +754,12 @@ namespace ScmssApiServer.Migrations
                     b.Property<int>("SalesOrderId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
 
@@ -767,6 +799,7 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
@@ -777,7 +810,7 @@ namespace ScmssApiServer.Migrations
 
                     b.HasIndex("SalesOrderId");
 
-                    b.ToTable("SalesOrderProgressUpdate");
+                    b.ToTable("SalesOrderProgressUpdates");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.Supply", b =>
@@ -1301,9 +1334,7 @@ namespace ScmssApiServer.Migrations
 
                     b.HasOne("ScmssApiServer.Models.ProductionFacility", "ProductionFacility")
                         .WithMany()
-                        .HasForeignKey("ProductionFacilityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductionFacilityId");
 
                     b.Navigation("CreateUser");
 
