@@ -99,7 +99,15 @@ namespace ScmssApiServer.Data
             builder.Entity<PurchaseRequisition>()
                 .HasMany(e => e.Supplies)
                 .WithMany(e => e.PurchaseRequisitions)
-                .UsingEntity<PurchaseRequisitionItem>();
+                .UsingEntity<PurchaseRequisitionItem>(
+                    l => l.HasOne(e => e.Supply)
+                    .WithMany(e => e.PurchaseRequisitionItems)
+                    .HasForeignKey(e => e.ItemId),
+
+                    r => r.HasOne(e => e.PurchaseRequisition)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
 
             builder.Entity<PurchaseRequisition>()
                 .HasOne(e => e.CreateUser)
@@ -129,7 +137,15 @@ namespace ScmssApiServer.Data
             builder.Entity<PurchaseOrder>()
                 .HasMany(e => e.Supplies)
                 .WithMany(e => e.PurchaseOrders)
-                .UsingEntity<PurchaseOrderItem>();
+                .UsingEntity<PurchaseOrderItem>(
+                    l => l.HasOne(e => e.Supply)
+                    .WithMany(e => e.PurchaseOrderItems)
+                    .HasForeignKey(e => e.ItemId),
+
+                    r => r.HasOne(e => e.PurchaseOrder)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
 
             builder.Entity<PurchaseOrder>()
                 .HasOne(e => e.CreateUser)
@@ -149,7 +165,15 @@ namespace ScmssApiServer.Data
             builder.Entity<SalesOrder>()
                 .HasMany(e => e.Products)
                 .WithMany(e => e.SalesOrders)
-                .UsingEntity<SalesOrderItem>();
+                .UsingEntity<SalesOrderItem>(
+                    l => l.HasOne(e => e.Product)
+                    .WithMany(e => e.SalesOrderItems)
+                    .HasForeignKey(e => e.ItemId),
+
+                    r => r.HasOne(e => e.SalesOrder)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
 
             builder.Entity<SalesOrder>()
                 .HasOne(e => e.CreateUser)

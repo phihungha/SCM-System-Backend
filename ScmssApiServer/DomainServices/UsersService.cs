@@ -7,6 +7,7 @@ using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
+using System.Security.Claims;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -23,6 +24,11 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
             _imageService = imageService;
             _userManager = userManager;
+        }
+
+        public string? GetUserIdFromPrincipal(ClaimsPrincipal principal)
+        {
+            return _userManager.GetUserId(principal);
         }
 
         public async Task<IList<UserDto>> GetUsersAsync()
