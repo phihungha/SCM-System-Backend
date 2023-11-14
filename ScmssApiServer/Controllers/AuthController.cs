@@ -11,7 +11,8 @@ namespace ScmssApiServer.Controllers
     {
         private readonly IAuthService _authService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IUsersService usersService)
+            : base(usersService)
         {
             _authService = authService;
         }

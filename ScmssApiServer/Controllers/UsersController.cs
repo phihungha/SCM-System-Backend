@@ -14,11 +14,9 @@ namespace ScmssApiServer.Controllers
     [Authorize]
     public class UsersController : CustomControllerBase
     {
-        private readonly IUsersService _usersService;
-
         public UsersController(IUsersService usersService)
+            : base(usersService)
         {
-            _usersService = usersService;
         }
 
         [HttpGet]
