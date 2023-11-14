@@ -1,4 +1,7 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     public class ProductionFacility : IUpdateTrackable
     {
@@ -25,5 +28,13 @@
         public bool IsActive { get; set; }
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
+    }
+
+    public class ProductionFacilityMappingProfile : Profile
+    {
+        public ProductionFacilityMappingProfile()
+        {
+            CreateMap<ProductionFacility, ProductionFacilityDto>();
+        }
     }
 }

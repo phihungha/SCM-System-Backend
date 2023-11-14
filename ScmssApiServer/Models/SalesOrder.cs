@@ -23,7 +23,9 @@ namespace ScmssApiServer.Models
     {
         public SalesOrderMappingProfile()
         {
-            CreateMap<SalesOrderInputDto, SalesOrder>();
+            CreateMap<SalesOrder, SalesOrderDto>();
+            CreateMap<SalesOrderInputDto, SalesOrder>().ForMember(i => i.Items, o => o.Ignore());
+            CreateMap<SalesOrderCreateDto, SalesOrder>().ForMember(i => i.Items, o => o.Ignore());
         }
     }
 }

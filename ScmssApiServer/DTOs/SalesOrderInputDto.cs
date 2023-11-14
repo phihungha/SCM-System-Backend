@@ -5,9 +5,6 @@ namespace ScmssApiServer.DTOs
     public class SalesOrderInputDto
     {
         [Required]
-        public int CustomerId { get; set; }
-
-        [Required]
         public required string ToLocation { get; set; }
 
         [Required]
