@@ -4,6 +4,7 @@ using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainServices;
 using ScmssApiServer.Exceptions;
@@ -17,6 +18,8 @@ namespace ScmssApiServer
 {
     public class Program
     {
+        private const string CorsPolicyName = "Main";
+
         public static void Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -45,6 +48,13 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<ISalesOrdersService, SalesOrdersService>();
 
+            builder.Services.AddCors(o => o.AddPolicy(
+                name: CorsPolicyName,
+                builder => builder.WithHeaders(HeaderNames.ContentType)
+                                  .AllowCredentials()
+                                  .WithOrigins("http://localhost:3000"))
+            );
+
             builder.Services.AddControllers().AddJsonOptions(
                     o => o.JsonSerializerOptions
                           .Converters
@@ -66,6 +76,8 @@ namespace ScmssApiServer
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors(CorsPolicyName);
 
             app.UseAuthorization();
 
