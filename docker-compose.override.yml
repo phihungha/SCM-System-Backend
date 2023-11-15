@@ -8,8 +8,8 @@ services:
       - ConnectionStrings__AppDb=${DB_CONNECTION:-Host=scmss-db:5432;Database=${DB_NAME:-app};Username=${DB_USER:-app};Password=${DB_PASSWORD:-app}}
       - AWS_PROFILE=${AWS_PROFILE}
     ports:
-      - "80"
-      - "443"
+      - 5000:80
+      - 5001:443
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
