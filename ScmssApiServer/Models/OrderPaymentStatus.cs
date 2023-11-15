@@ -5,5 +5,6 @@
         Pending,
         Due,
         Completed,
+        Canceled,
     }
 }

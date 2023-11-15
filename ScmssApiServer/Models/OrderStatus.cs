@@ -6,6 +6,7 @@
         Delivering,
         Interrupted,
         Delivered,
+        Completed,
         Canceled,
         Returned,
     }

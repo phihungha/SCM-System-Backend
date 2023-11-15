@@ -1,4 +1,6 @@
-﻿namespace ScmssApiServer.Models
+﻿using ScmssApiServer.DomainExceptions;
+
+namespace ScmssApiServer.Models
 {
     public abstract class Order<T> : ILifecycle where T : OrderItem
     {
@@ -11,8 +13,8 @@
         public decimal VatAmount { get; set; }
         public decimal TotalAmount { get; set; }
 
-        public OrderStatus Status { get; set; }
-        public OrderPaymentStatus PaymentStatus { get; set; }
+        public OrderStatus Status { get; set; } = OrderStatus.Processing;
+        public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.Pending;
 
         public string? InvoiceUrl { get; set; }
         public string? ReceiptUrl { get; set; }
@@ -34,47 +36,59 @@
                 ) != null;
             if (idAlreadyExists)
             {
-                throw new InvalidOperationException("An order item with this ID already exists");
+                throw new InvalidDomainOperationException("An order item with this ID already exists");
             }
             Items.Add(item);
             CalculateTotals();
         }
 
-        public void CompletePayment(string userId)
+        public void CompletePayment()
         {
-            if (Status == OrderStatus.Canceled || Status == OrderStatus.Returned)
+            if (PaymentStatus != OrderPaymentStatus.Due)
             {
-                throw new InvalidOperationException(
-                    "Cannot complete payment of order after it has been canceled or returned"
-                    );
-            }
-            else if (PaymentStatus != OrderPaymentStatus.Due)
-            {
-                throw new InvalidOperationException(
+                throw new InvalidDomainOperationException(
                     "Cannot complete payment of order if there is no due payment"
                     );
             }
-
             PaymentStatus = OrderPaymentStatus.Completed;
+        }
+
+        public void Complete(string userId)
+        {
+            if (Status == OrderStatus.Canceled || Status == OrderStatus.Returned)
+            {
+                throw new InvalidDomainOperationException(
+                    "Cannot complete order if it has been canceled or returned"
+                    );
+            }
+            Status = OrderStatus.Completed;
+            PaymentStatus = OrderPaymentStatus.Due;
             Finish(userId);
         }
 
         public void Cancel(string userId)
         {
-            if (Status == OrderStatus.Delivered)
+            if (Status == OrderStatus.Delivered || Status == OrderStatus.Completed)
             {
                 throw new InvalidOperationException(
                     "Cannot cancel order after it has been delivered"
                     );
             }
-            else if (PaymentStatus == OrderPaymentStatus.Completed)
+            Status = OrderStatus.Canceled;
+            PaymentStatus = OrderPaymentStatus.Canceled;
+            Finish(userId);
+        }
+
+        public void Return(string userId)
+        {
+            if (Status != OrderStatus.Delivered)
             {
                 throw new InvalidOperationException(
-                    "Cannot cancel order after it has been paid"
+                    "Cannot return order if it has been completed or hasn't finished delivery."
                     );
             }
-
-            Status = OrderStatus.Canceled;
+            Status = OrderStatus.Returned;
+            PaymentStatus = OrderPaymentStatus.Canceled;
             Finish(userId);
         }
 
