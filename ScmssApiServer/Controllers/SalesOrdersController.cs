@@ -45,7 +45,7 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<SalesOrderDto>> Update(int id, [FromBody] SalesOrderInputDto body)
         {
             SalesOrderDto item = await _salesOrdersService.UpdateSalesOrderAsync(id, body);

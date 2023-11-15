@@ -52,7 +52,7 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<User>> Update(string id, [FromBody] UserInputDto body)
         {
             try
