@@ -19,22 +19,6 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<SalesOrderDto> CancelSalesOrderAsync(int id, string userId)
-        {
-            SalesOrder item = await GetSalesOrderOrThrowAsync(id);
-            item.Cancel(userId);
-            _dbContext.SaveChanges();
-            return GetSalesOrderDto(item);
-        }
-
-        public async Task<SalesOrderDto> CompleteSalesOrderAsync(int id, string userId)
-        {
-            SalesOrder item = await GetSalesOrderOrThrowAsync(id);
-            item.CompletePayment(userId);
-            _dbContext.SaveChanges();
-            return GetSalesOrderDto(item);
-        }
-
         public async Task<SalesOrderProgressUpdate> CreateProgressUpdateAsync(int id, OrderProgressUpdateInputDto dto)
         {
             var item = _mapper.Map<SalesOrderProgressUpdate>(dto);

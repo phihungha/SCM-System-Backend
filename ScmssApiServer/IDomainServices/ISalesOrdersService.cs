@@ -13,10 +13,6 @@ namespace ScmssApiServer.IDomainServices
 
         Task<SalesOrderDto> UpdateSalesOrderAsync(int id, SalesOrderInputDto dto);
 
-        Task<SalesOrderDto> CancelSalesOrderAsync(int id, string userId);
-
-        Task<SalesOrderDto> CompleteSalesOrderAsync(int id, string userId);
-
         Task<SalesOrderProgressUpdate> CreateProgressUpdateAsync(int id, OrderProgressUpdateInputDto dto);
 
         Task<SalesOrderProgressUpdate> EditProgressUpdateAsync(int id, OrderProgressUpdateInputDto dto);
