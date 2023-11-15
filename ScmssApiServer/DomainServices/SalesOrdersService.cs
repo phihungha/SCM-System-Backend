@@ -19,9 +19,9 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<SalesOrderProgressUpdate> CreateProgressUpdateAsync(int id, OrderProgressUpdateInputDto dto)
+        public async Task<SalesOrderEvent> CreateProgressUpdateAsync(int id, OrderEventInputDto dto)
         {
-            var item = _mapper.Map<SalesOrderProgressUpdate>(dto);
+            var item = _mapper.Map<SalesOrderEvent>(dto);
             item.SalesOrderId = id;
             _dbContext.SalesOrderProgressUpdates.Add(item);
             await _dbContext.SaveChangesAsync();
@@ -39,9 +39,9 @@ namespace ScmssApiServer.DomainServices
             return GetSalesOrderDto(item);
         }
 
-        public async Task<SalesOrderProgressUpdate> EditProgressUpdateAsync(int id, OrderProgressUpdateInputDto dto)
+        public async Task<SalesOrderEvent> EditProgressUpdateAsync(int id, OrderEventInputDto dto)
         {
-            var item = _mapper.Map<SalesOrderProgressUpdate>(dto);
+            var item = _mapper.Map<SalesOrderEvent>(dto);
             _dbContext.SalesOrderProgressUpdates.Update(item);
             await _dbContext.SaveChangesAsync();
             return item;

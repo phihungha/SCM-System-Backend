@@ -3,7 +3,7 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class PurchaseOrderProgressUpdate : OrderProgressUpdate
+    public class PurchaseOrderEvent : OrderEvent
     {
         public int PurchaseOrderId { get; set; }
         public PurchaseOrder PurchaseOrder { get; set; } = null!;
@@ -13,7 +13,7 @@ namespace ScmssApiServer.Models
     {
         public PurchaseOrderProgressUpdateMappingProfile()
         {
-            CreateMap<OrderProgressUpdateInputDto, PurchaseOrderProgressUpdate>();
+            CreateMap<OrderEventInputDto, PurchaseOrderEvent>();
         }
     }
 }

@@ -1,11 +1,12 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public enum OrderProgressUpdateType
+    public enum OrderEventType
     {
         Processing,
         Left,
         Arrived,
         Delivered,
+        Completed,
         PaymentDue,
         PaymentCompleted,
         Canceled,

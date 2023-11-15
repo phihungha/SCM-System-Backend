@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public class PurchaseOrder : Order<PurchaseOrderItem>
+    public class PurchaseOrder : Order<PurchaseOrderItem, PurchaseOrderEvent>
     {
         public ICollection<Supply> Supplies { get; set; } = new List<Supply>();
 
@@ -11,10 +11,15 @@
         public int ProductionFacilityId { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
 
+        public override required string? FromLocation { get; set; }
+
+        public override string ToLocation
+        {
+            get => ProductionFacility.Location;
+            set => _ = value;
+        }
+
         public int? PurchaseRequisitionId { get; set; }
         public PurchaseRequisition? PurchaseRequisition { get; set; }
-
-        public ICollection<PurchaseOrderProgressUpdate> ProgressUpdates { get; }
-            = new List<PurchaseOrderProgressUpdate>();
     }
 }

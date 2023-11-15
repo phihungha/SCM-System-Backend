@@ -12,7 +12,7 @@
         public decimal TotalPrice
         {
             get => UnitPrice * (decimal)Quantity;
-            set => _ = value;
+            private set => _ = value;
         }
     }
 }

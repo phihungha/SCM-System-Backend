@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ScmssApiServer.DTOs
 {
-    public class OrderProgressUpdateInputDto
+    public class OrderEventInputDto
     {
         [Required]
-        public OrderProgressUpdateType Type { get; set; }
+        public OrderEventType Type { get; set; }
 
         [Required]
         public required string Location { get; set; }

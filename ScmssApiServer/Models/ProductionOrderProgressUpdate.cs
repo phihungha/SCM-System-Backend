@@ -3,7 +3,7 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class ProductionOrderProgressUpdate : OrderProgressUpdate
+    public class ProductionOrderProgressUpdate : OrderEvent
     {
         public int ProductionOrderId { get; set; }
         public ProductionOrder ProductionOrder { get; set; } = null!;
@@ -13,7 +13,7 @@ namespace ScmssApiServer.Models
     {
         public ProductionOrderProgressUpdateMappingProfile()
         {
-            CreateMap<OrderProgressUpdateInputDto, ProductionOrderProgressUpdate>();
+            CreateMap<OrderEventInputDto, ProductionOrderProgressUpdate>();
         }
     }
 }
