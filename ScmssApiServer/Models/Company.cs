@@ -6,7 +6,7 @@
 
         public required string Name { get; set; }
 
-        public required string Location { get; set; }
+        public required string DefaultLocation { get; set; }
 
         public string? Description { get; set; }
 
