@@ -16,11 +16,11 @@ namespace ScmssApiServer.Models
         public decimal VatAmount { get; private set; }
         public decimal TotalAmount { get; private set; }
 
-        public abstract string? FromLocation { get; set; }
-        public abstract string ToLocation { get; set; }
+        public string? FromLocation { get; set; }
+        public required string ToLocation { get; set; }
 
-        public OrderStatus Status { get; set; } = OrderStatus.Processing;
-        public OrderPaymentStatus PaymentStatus { get; set; } = OrderPaymentStatus.Pending;
+        public OrderStatus Status { get; set; }
+        public OrderPaymentStatus PaymentStatus { get; set; }
 
         public string? InvoiceUrl { get; set; }
         public string? ReceiptUrl { get; set; }
@@ -95,11 +95,24 @@ namespace ScmssApiServer.Models
                 || item.Type != OrderEventType.Arrived
                 || item.Type != OrderEventType.Interrupted)
                 {
-                    throw new InvalidDomainOperationException("Cannot edit location of automatic event.");
+                    throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
                 }
                 item.Location = location;
             }
             item.Message = message;
+        }
+
+        public void Start(string userId)
+        {
+            if (Id == 0)
+            {
+                throw new InvalidDomainOperationException("Cannot start an already created order");
+            }
+
+            Status = OrderStatus.Processing;
+            PaymentStatus = OrderPaymentStatus.Pending;
+            CreateUserId = userId;
+            AddEvent(OrderEventType.Processing);
         }
 
         public void Complete(string userId)
@@ -178,7 +191,7 @@ namespace ScmssApiServer.Models
             TotalAmount = SubTotal + VatAmount;
         }
 
-        protected void AddEvent(OrderEventType type, string location, string? message = null)
+        protected void AddEvent(OrderEventType type, string? location = null, string? message = null)
         {
             var item = new TEvent
             {
@@ -189,7 +202,7 @@ namespace ScmssApiServer.Models
             Events.Add(item);
         }
 
-        private void Finish(string userId)
+        public void Finish(string userId)
         {
             FinishTime = DateTime.UtcNow;
             FinishUserId = userId;

@@ -19,11 +19,11 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<SalesOrderEvent> CreateProgressUpdateAsync(int id, OrderEventInputDto dto)
+        public async Task<SalesOrderEvent> AddManualEvent(int orderId, OrderEventInputDto dto)
         {
             var item = _mapper.Map<SalesOrderEvent>(dto);
-            item.SalesOrderId = id;
-            _dbContext.SalesOrderProgressUpdates.Add(item);
+            SalesOrder order = await GetSalesOrderOrThrowAsync(orderId);
+            order.AddManualEvent(dto.Type, dto.Location, dto.Message);
             await _dbContext.SaveChangesAsync();
             return item;
         }
@@ -31,18 +31,18 @@ namespace ScmssApiServer.DomainServices
         public async Task<SalesOrderDto> CreateSalesOrderAsync(SalesOrderInputDto dto, string userId)
         {
             var item = _mapper.Map<SalesOrder>(dto);
-            item.CreateUserId = userId;
             await AddOrderItemsFromDtos(item, dto.Items);
+            item.Start(userId);
             _dbContext.SalesOrders.Add(item);
-
             await _dbContext.SaveChangesAsync();
             return GetSalesOrderDto(item);
         }
 
-        public async Task<SalesOrderEvent> EditProgressUpdateAsync(int id, OrderEventInputDto dto)
+        public async Task<SalesOrderEvent> EditEvent(int id, int orderId, OrderEventInputDto dto)
         {
             var item = _mapper.Map<SalesOrderEvent>(dto);
-            _dbContext.SalesOrderProgressUpdates.Update(item);
+            SalesOrder order = await GetSalesOrderOrThrowAsync(id);
+            order.EditEvent(id, dto.Location, dto.Message);
             await _dbContext.SaveChangesAsync();
             return item;
         }
@@ -52,7 +52,7 @@ namespace ScmssApiServer.DomainServices
             SalesOrder? item = await _dbContext.SalesOrders
                 .Include(i => i.CreateUser)
                 .Include(i => i.FinishUser)
-                .Include(i => i.ProgressUpdates)
+                .Include(i => i.Events)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Items)
                 .FirstOrDefaultAsync(i => i.Id == id);
@@ -64,7 +64,7 @@ namespace ScmssApiServer.DomainServices
             IList<SalesOrder> items = await _dbContext.SalesOrders
                 .Include(i => i.CreateUser)
                 .Include(i => i.FinishUser)
-                .Include(i => i.ProgressUpdates)
+                .Include(i => i.Events)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Items)
                 .ToListAsync();

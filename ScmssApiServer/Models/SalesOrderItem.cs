@@ -9,11 +9,11 @@ namespace ScmssApiServer.Models
         public SalesOrder SalesOrder { get; set; } = null!;
     }
 
-    public class SalesOrderItemMappingProfile : Profile
+    public class SalesOrderItemMp : Profile
     {
-        public SalesOrderItemMappingProfile()
+        public SalesOrderItemMp()
         {
-            CreateMap<SalesOrderItem, OrderItemDto>();
+            CreateMap<SalesOrderItem, SalesOrderItemDto>();
         }
     }
 }

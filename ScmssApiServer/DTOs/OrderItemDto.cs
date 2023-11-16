@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public class OrderItemDto
+    public abstract class OrderItemDto
     {
         public int ItemId { get; set; }
         public double Quantity { get; set; }

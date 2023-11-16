@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.Models
 {
@@ -24,5 +26,13 @@ namespace ScmssApiServer.Models
 
         public IList<SalesOrderItem> SalesOrderItems { get; set; }
             = new List<SalesOrderItem>();
+    }
+
+    public class ProductMp : Profile
+    {
+        public ProductMp()
+        {
+            CreateMap<Product, GoodsDto>();
+        }
     }
 }

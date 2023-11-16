@@ -19,8 +19,8 @@
         public int ProductionFacilityId { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
 
-        public ICollection<ProductionOrderProgressUpdate> ProgressUpdates { get; }
-            = new List<ProductionOrderProgressUpdate>();
+        public ICollection<ProductionOrderEvent> Events { get; }
+            = new List<ProductionOrderEvent>();
 
         public required string CreateUserId { get; set; }
         public User CreateUser { get; set; } = null!;
@@ -33,5 +33,15 @@
         public DateTime? UpdateTime { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? FinishTime { get; set; }
+
+        public void Finish(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Start(string userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -10,5 +10,8 @@
         public DateTime CreateTime { get; }
         public DateTime? UpdateTime { get; set; }
         public DateTime? FinishTime { get; }
+
+        public void Start(string userId);
+        public void Finish(string userId);
     }
 }

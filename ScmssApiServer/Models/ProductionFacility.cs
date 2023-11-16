@@ -30,9 +30,9 @@ namespace ScmssApiServer.Models
         public DateTime? UpdateTime { get; set; }
     }
 
-    public class ProductionFacilityMappingProfile : Profile
+    public class ProductionFacilityMP : Profile
     {
-        public ProductionFacilityMappingProfile()
+        public ProductionFacilityMP()
         {
             CreateMap<ProductionFacility, ProductionFacilityDto>();
         }

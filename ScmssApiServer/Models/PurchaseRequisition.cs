@@ -35,5 +35,15 @@
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
         public DateTime? FinishTime { get; set; }
+
+        public void Finish(string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Start(string userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

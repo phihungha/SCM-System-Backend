@@ -3,10 +3,8 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class SalesOrder : Order<SalesOrderItem>
+    public class SalesOrder : Order<SalesOrderItem, SalesOrderEvent>
     {
-        public required string ToLocation { get; set; }
-
         public ICollection<Product> Products { get; set; }
             = new List<Product>();
 
@@ -14,14 +12,11 @@ namespace ScmssApiServer.Models
         public ProductionFacility? ProductionFacility { get; set; }
         public int CustomerId { get; set; }
         public Customer Customer { get; set; } = null!;
-
-        public ICollection<SalesOrderProgressUpdate> ProgressUpdates { get; }
-            = new List<SalesOrderProgressUpdate>();
     }
 
-    public class SalesOrderMappingProfile : Profile
+    public class SalesOrderMp : Profile
     {
-        public SalesOrderMappingProfile()
+        public SalesOrderMp()
         {
             CreateMap<SalesOrder, SalesOrderDto>();
             CreateMap<SalesOrderInputDto, SalesOrder>().ForMember(i => i.Items, o => o.Ignore());

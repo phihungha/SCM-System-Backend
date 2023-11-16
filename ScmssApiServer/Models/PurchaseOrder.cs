@@ -11,14 +11,6 @@
         public int ProductionFacilityId { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
 
-        public override required string? FromLocation { get; set; }
-
-        public override string ToLocation
-        {
-            get => ProductionFacility.Location;
-            set => _ = value;
-        }
-
         public int? PurchaseRequisitionId { get; set; }
         public PurchaseRequisition? PurchaseRequisition { get; set; }
     }

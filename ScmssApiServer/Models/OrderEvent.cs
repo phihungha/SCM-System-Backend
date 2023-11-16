@@ -12,7 +12,7 @@ namespace ScmssApiServer.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime Time { get; set; }
 
-        public string Location { get; set; }
+        public string? Location { get; set; }
         public string? Message { get; set; }
     }
 }

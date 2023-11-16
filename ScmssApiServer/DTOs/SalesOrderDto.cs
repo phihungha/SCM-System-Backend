@@ -2,7 +2,7 @@
 {
     public class SalesOrderDto : OrderDto
     {
-        public required string ToLocation { get; set; }
+        public string? ToLocation { get; set; }
 
         public int? ProductionFacilityId { get; set; }
         public ProductionFacilityDto? ProductionFacility { get; set; }

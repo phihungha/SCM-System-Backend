@@ -33,7 +33,7 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
+                    DefaultLocation = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: true),
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
@@ -91,7 +91,7 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
+                    DefaultLocation = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: true),
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
@@ -416,13 +416,14 @@ namespace ScmssApiServer.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ToLocation = table.Column<string>(type: "text", nullable: false),
                     ProductionFacilityId = table.Column<int>(type: "integer", nullable: true),
                     CustomerId = table.Column<int>(type: "integer", nullable: false),
                     SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
                     VatRate = table.Column<double>(type: "double precision", nullable: false),
                     VatAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    FromLocation = table.Column<string>(type: "text", nullable: true),
+                    ToLocation = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     PaymentStatus = table.Column<string>(type: "text", nullable: false),
                     InvoiceUrl = table.Column<string>(type: "text", nullable: true),
@@ -515,6 +516,29 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductionOrderEvent",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductionOrderId = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: true),
+                    Message = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductionOrderEvent", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductionOrderEvent_ProductionOrders_ProductionOrderId",
+                        column: x => x.ProductionOrderId,
+                        principalTable: "ProductionOrders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductionOrderItem",
                 columns: table => new
                 {
@@ -545,29 +569,6 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductionOrderProgressUpdates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProductionOrderId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
-                    Message = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductionOrderProgressUpdates", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductionOrderProgressUpdates_ProductionOrders_ProductionO~",
-                        column: x => x.ProductionOrderId,
-                        principalTable: "ProductionOrders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PurchaseOrders",
                 columns: table => new
                 {
@@ -581,6 +582,8 @@ namespace ScmssApiServer.Migrations
                     VatRate = table.Column<double>(type: "double precision", nullable: false),
                     VatAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    FromLocation = table.Column<string>(type: "text", nullable: true),
+                    ToLocation = table.Column<string>(type: "text", nullable: false),
                     Status = table.Column<string>(type: "text", nullable: false),
                     PaymentStatus = table.Column<string>(type: "text", nullable: false),
                     InvoiceUrl = table.Column<string>(type: "text", nullable: true),
@@ -654,6 +657,29 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SalesOrderEvent",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SalesOrderId = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: true),
+                    Message = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SalesOrderEvent", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SalesOrderEvent_SalesOrders_SalesOrderId",
+                        column: x => x.SalesOrderId,
+                        principalTable: "SalesOrders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SalesOrderItem",
                 columns: table => new
                 {
@@ -682,24 +708,24 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SalesOrderProgressUpdates",
+                name: "PurchaseOrderEvent",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SalesOrderId = table.Column<int>(type: "integer", nullable: false),
+                    PurchaseOrderId = table.Column<int>(type: "integer", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
                     Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: true),
                     Message = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SalesOrderProgressUpdates", x => x.Id);
+                    table.PrimaryKey("PK_PurchaseOrderEvent", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SalesOrderProgressUpdates_SalesOrders_SalesOrderId",
-                        column: x => x.SalesOrderId,
-                        principalTable: "SalesOrders",
+                        name: "FK_PurchaseOrderEvent_PurchaseOrders_PurchaseOrderId",
+                        column: x => x.PurchaseOrderId,
+                        principalTable: "PurchaseOrders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -730,29 +756,6 @@ namespace ScmssApiServer.Migrations
                         name: "FK_PurchaseOrderItem_Supplies_ItemId",
                         column: x => x.ItemId,
                         principalTable: "Supplies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PurchaseOrderProgressUpdates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PurchaseOrderId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
-                    Message = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PurchaseOrderProgressUpdates", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PurchaseOrderProgressUpdates_PurchaseOrders_PurchaseOrderId",
-                        column: x => x.PurchaseOrderId,
-                        principalTable: "PurchaseOrders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -805,13 +808,13 @@ namespace ScmssApiServer.Migrations
                 column: "SupplyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductionOrderItem_ProductionOrderId",
-                table: "ProductionOrderItem",
+                name: "IX_ProductionOrderEvent_ProductionOrderId",
+                table: "ProductionOrderEvent",
                 column: "ProductionOrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductionOrderProgressUpdates_ProductionOrderId",
-                table: "ProductionOrderProgressUpdates",
+                name: "IX_ProductionOrderItem_ProductionOrderId",
+                table: "ProductionOrderItem",
                 column: "ProductionOrderId");
 
             migrationBuilder.CreateIndex(
@@ -835,14 +838,14 @@ namespace ScmssApiServer.Migrations
                 column: "ProductionFacilityId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PurchaseOrderEvent_PurchaseOrderId",
+                table: "PurchaseOrderEvent",
+                column: "PurchaseOrderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrderItem_OrderId",
                 table: "PurchaseOrderItem",
                 column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PurchaseOrderProgressUpdates_PurchaseOrderId",
-                table: "PurchaseOrderProgressUpdates",
-                column: "PurchaseOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrders_CreateUserId",
@@ -906,14 +909,14 @@ namespace ScmssApiServer.Migrations
                 column: "VendorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SalesOrderEvent_SalesOrderId",
+                table: "SalesOrderEvent",
+                column: "SalesOrderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SalesOrderItem_OrderId",
                 table: "SalesOrderItem",
                 column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SalesOrderProgressUpdates_SalesOrderId",
-                table: "SalesOrderProgressUpdates",
-                column: "SalesOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SalesOrders_CreateUserId",
@@ -973,25 +976,25 @@ namespace ScmssApiServer.Migrations
                 name: "ProductionCostItem");
 
             migrationBuilder.DropTable(
+                name: "ProductionOrderEvent");
+
+            migrationBuilder.DropTable(
                 name: "ProductionOrderItem");
 
             migrationBuilder.DropTable(
-                name: "ProductionOrderProgressUpdates");
+                name: "PurchaseOrderEvent");
 
             migrationBuilder.DropTable(
                 name: "PurchaseOrderItem");
 
             migrationBuilder.DropTable(
-                name: "PurchaseOrderProgressUpdates");
-
-            migrationBuilder.DropTable(
                 name: "PurchaseRequisitionItem");
 
             migrationBuilder.DropTable(
-                name: "SalesOrderItem");
+                name: "SalesOrderEvent");
 
             migrationBuilder.DropTable(
-                name: "SalesOrderProgressUpdates");
+                name: "SalesOrderItem");
 
             migrationBuilder.DropTable(
                 name: "WarehouseProductItem");
