@@ -10,8 +10,10 @@
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
         public DateTime? FinishTime { get; }
+        public bool Finished { get => FinishTime != null; }
 
         public void Start(string userId);
+
         public void Finish(string userId);
     }
 }

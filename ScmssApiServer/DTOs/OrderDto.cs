@@ -17,6 +17,8 @@ namespace ScmssApiServer.DTOs
         public string? InvoiceUrl { get; set; }
         public string? ReceiptUrl { get; set; }
 
+        public ICollection<OrderEvent> Events { get; set; } = new List<OrderEvent>();
+
         public required string CreateUserId { get; set; }
         public UserDto CreateUser { get; set; } = null!;
         public string? FinishUserId { get; set; }

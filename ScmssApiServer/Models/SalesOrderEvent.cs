@@ -13,7 +13,8 @@ namespace ScmssApiServer.Models
     {
         public SalesOrderEventMappingProfile()
         {
-            CreateMap<OrderEventInputDto, SalesOrderEvent>();
+            CreateMap<SalesOrderEvent, OrderEventDto>();
+            CreateMap<OrderEventCreateDto, SalesOrderEvent>();
         }
     }
 }

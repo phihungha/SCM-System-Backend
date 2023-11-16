@@ -1,4 +1,5 @@
 ﻿using ScmssApiServer.DomainExceptions;
+using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
@@ -35,9 +36,17 @@ namespace ScmssApiServer.Models
         public DateTime? UpdateTime { get; set; }
         public DateTime? DeliverTime { get; protected set; }
         public DateTime? FinishTime { get; private set; }
+        public bool Finished { get => FinishTime != null; }
 
         public void AddItem(TItem item)
         {
+            if (Status != OrderStatus.Processing)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot add order item after order has started delivery."
+                    );
+            }
+
             bool idAlreadyExists = Items.FirstOrDefault(
                     i => i.ItemId == item.ItemId
                 ) != null;
@@ -45,12 +54,20 @@ namespace ScmssApiServer.Models
             {
                 throw new InvalidDomainOperationException("An order item with this ID already exists");
             }
+
             Items.Add(item);
             CalculateTotals();
         }
 
-        public void AddManualEvent(OrderEventTypeSelection typeSel, string location, string? message)
+        public TEvent AddManualEvent(OrderEventTypeSelection typeSel, string location, string? message)
         {
+            if (Status != OrderStatus.Delivering)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot add manual event when order is not being delivered."
+                    );
+            }
+
             OrderEventType type;
             switch (typeSel)
             {
@@ -62,10 +79,6 @@ namespace ScmssApiServer.Models
                     type = OrderEventType.Arrived;
                     break;
 
-                case OrderEventTypeSelection.Delivered:
-                    type = OrderEventType.Delivered;
-                    break;
-
                 case OrderEventTypeSelection.Interrupted:
                     type = OrderEventType.Interrupted;
                     break;
@@ -73,11 +86,19 @@ namespace ScmssApiServer.Models
                 default:
                     throw new ArgumentException("Invalid event type");
             }
-            AddEvent(type, location, message);
+
+            return AddEvent(type, location, message);
         }
 
-        public void EditEvent(int id, string? location = null, string? message = null)
+        public TEvent UpdateEvent(int id, string? message = null, string? location = null)
         {
+            if (FinishTime != null)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot update event because the order is finished."
+                    );
+            }
+
             TEvent? item = Events.FirstOrDefault(i => i.Id == id);
             if (item == null)
             {
@@ -87,14 +108,16 @@ namespace ScmssApiServer.Models
             if (location != null)
             {
                 if (item.Type != OrderEventType.Left
-                || item.Type != OrderEventType.Arrived
-                || item.Type != OrderEventType.Interrupted)
+                    && item.Type != OrderEventType.Arrived
+                    && item.Type != OrderEventType.Interrupted)
                 {
                     throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
                 }
                 item.Location = location;
             }
             item.Message = message;
+
+            return item;
         }
 
         public void Start(string userId)
@@ -110,18 +133,22 @@ namespace ScmssApiServer.Models
             AddEvent(OrderEventType.Processing);
         }
 
-        public void Complete(string userId)
+        public virtual void StartDelivery()
         {
-            if (Status != OrderStatus.Delivered)
+            if (Status != OrderStatus.Processing)
             {
                 throw new InvalidDomainOperationException(
-                    "Cannot complete order if it hasn't finished delivery or was canceled/returned."
+                        "Cannot start delivery of order again."
                     );
             }
-            Status = OrderStatus.Completed;
-            PaymentStatus = OrderPaymentStatus.Due;
-            Finish(userId);
-            AddEvent(OrderEventType.Completed, ToLocation);
+            if (FromLocation == null)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot start delivery of order without destination location."
+                    );
+            }
+            Status = OrderStatus.Delivering;
+            AddEvent(OrderEventType.DeliveryStarted, FromLocation);
         }
 
         public void FinishDelivery()
@@ -129,12 +156,26 @@ namespace ScmssApiServer.Models
             if (Status != OrderStatus.Delivering)
             {
                 throw new InvalidDomainOperationException(
-                    "Cannot finish delivery of order if it is not being delivered."
+                        "Cannot finish delivery of order if it is not being delivered."
                     );
             }
             Status = OrderStatus.Delivered;
-            PaymentStatus = OrderPaymentStatus.Due;
             DeliverTime = DateTime.UtcNow;
+            AddEvent(OrderEventType.Delivered, ToLocation);
+        }
+
+        public void Complete(string userId)
+        {
+            if (Status != OrderStatus.Delivered)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot complete order if it hasn't finished delivery."
+                    );
+            }
+            Status = OrderStatus.Completed;
+            AddEvent(OrderEventType.Completed, ToLocation);
+            CreateDuePayment();
+            Finish(userId);
         }
 
         public void Cancel(string userId)
@@ -142,7 +183,7 @@ namespace ScmssApiServer.Models
             if (Status == OrderStatus.Delivered || Status == OrderStatus.Completed)
             {
                 throw new InvalidOperationException(
-                    "Cannot cancel order after it has been delivered."
+                        "Cannot cancel order after it has been delivered."
                     );
             }
             Status = OrderStatus.Canceled;
@@ -158,7 +199,7 @@ namespace ScmssApiServer.Models
             if (Status != OrderStatus.Delivered)
             {
                 throw new InvalidOperationException(
-                    "Cannot return order if it has been completed or hasn't finished delivery."
+                        "Cannot return order if it has been completed or hasn't finished delivery."
                     );
             }
             Status = OrderStatus.Returned;
@@ -172,11 +213,17 @@ namespace ScmssApiServer.Models
             if (PaymentStatus != OrderPaymentStatus.Due)
             {
                 throw new InvalidDomainOperationException(
-                    "Cannot complete payment of order if there is no due payment"
+                        "Cannot complete payment of order if there is no due payment."
                     );
             }
             PaymentStatus = OrderPaymentStatus.Completed;
-            AddEvent(OrderEventType.PaymentCompleted, ToLocation);
+            AddEvent(OrderEventType.PaymentCompleted);
+        }
+
+        private void CreateDuePayment()
+        {
+            PaymentStatus = OrderPaymentStatus.Due;
+            AddEvent(OrderEventType.PaymentDue);
         }
 
         protected void CalculateTotals()
@@ -186,7 +233,7 @@ namespace ScmssApiServer.Models
             TotalAmount = SubTotal + VatAmount;
         }
 
-        protected void AddEvent(OrderEventType type, string? location = null, string? message = null)
+        protected TEvent AddEvent(OrderEventType type, string? location = null, string? message = null)
         {
             var item = new TEvent
             {
@@ -196,10 +243,16 @@ namespace ScmssApiServer.Models
                 Message = message
             };
             Events.Add(item);
+            return item;
         }
 
         public void Finish(string userId)
         {
+            if (FinishTime != null)
+            {
+                throw new InvalidDomainOperationException("Order is finished");
+            }
+
             FinishTime = DateTime.UtcNow;
             FinishUserId = userId;
         }

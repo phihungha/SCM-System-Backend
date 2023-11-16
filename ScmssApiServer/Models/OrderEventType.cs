@@ -3,6 +3,7 @@
     public enum OrderEventType
     {
         Processing,
+        DeliveryStarted,
         Left,
         Arrived,
         Delivered,

@@ -1,10 +1,9 @@
-﻿namespace ScmssApiServer.Models
+﻿namespace ScmssApiServer.DTOs
 {
     public enum OrderEventTypeSelection
     {
         Left,
         Arrived,
-        Delivered,
         Interrupted,
     }
 }

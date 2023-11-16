@@ -1,7 +1,9 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public enum SalesOrderStatusSelection
+    public enum OrderStatusSelection
     {
+        Delivering,
+        Delivered,
         Completed,
         Canceled,
         Returned,

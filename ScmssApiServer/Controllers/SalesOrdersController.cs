@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Models;
 using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
@@ -46,9 +47,23 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<ActionResult<SalesOrderDto>> Update(int id, [FromBody] SalesOrderInputDto body)
+        public async Task<ActionResult<SalesOrderDto>> Update(int id, [FromBody] SalesOrderUpdateDto body)
         {
             SalesOrderDto item = await _salesOrdersService.UpdateSalesOrderAsync(id, body, CurrentUserId);
+            return Ok(item);
+        }
+
+        [HttpPost("{orderId}/events")]
+        public async Task<ActionResult<OrderEventDto>> AddManualEvent(int orderId, [FromBody] OrderEventCreateDto body)
+        {
+            OrderEventDto item = await _salesOrdersService.AddEvent(orderId, body);
+            return Ok(item);
+        }
+
+        [HttpPatch("{orderId}/events/{id}")]
+        public async Task<ActionResult<OrderEventDto>> AddManualEvent(int orderId, int id, [FromBody] OrderEventUpdateDto body)
+        {
+            OrderEventDto item = await _salesOrdersService.UpdateEvent(id, orderId, body);
             return Ok(item);
         }
     }
