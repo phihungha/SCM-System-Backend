@@ -6,8 +6,6 @@ namespace ScmssApiServer.DTOs
     {
         public int Id { get; set; }
 
-        public ICollection<OrderItemDto> Items { get; set; } = new List<OrderItemDto>();
-
         public decimal SubTotal { get; set; }
         public double VatRate { get; set; }
         public decimal VatAmount { get; set; }

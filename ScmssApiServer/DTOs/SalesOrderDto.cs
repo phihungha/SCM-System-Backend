@@ -2,6 +2,9 @@
 {
     public class SalesOrderDto : OrderDto
     {
+        public ICollection<SalesOrderItemDto> Items { get; set; }
+            = new List<SalesOrderItemDto>();
+
         public string? ToLocation { get; set; }
 
         public int? ProductionFacilityId { get; set; }

@@ -39,7 +39,7 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<SalesOrderDto>> Create([FromBody] SalesOrderInputDto body)
+        public async Task<ActionResult<SalesOrderDto>> Create([FromBody] SalesOrderCreateDto body)
         {
             SalesOrderDto item = await _salesOrdersService.CreateSalesOrderAsync(body, CurrentUserId);
             return Ok(item);
@@ -48,7 +48,7 @@ namespace ScmssApiServer.Controllers
         [HttpPatch("{id}")]
         public async Task<ActionResult<SalesOrderDto>> Update(int id, [FromBody] SalesOrderInputDto body)
         {
-            SalesOrderDto item = await _salesOrdersService.UpdateSalesOrderAsync(id, body);
+            SalesOrderDto item = await _salesOrdersService.UpdateSalesOrderAsync(id, body, CurrentUserId);
             return Ok(item);
         }
     }

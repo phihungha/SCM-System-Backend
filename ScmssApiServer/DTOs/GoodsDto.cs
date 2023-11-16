@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public abstract class GoodsDto : IUpdateTrackableDto
+    public class GoodsDto : IUpdateTrackableDto
     {
         public int Id { get; set; }
         public required string Name { get; set; }

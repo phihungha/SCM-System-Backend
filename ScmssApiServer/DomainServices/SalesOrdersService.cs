@@ -28,7 +28,7 @@ namespace ScmssApiServer.DomainServices
             return item;
         }
 
-        public async Task<SalesOrderDto> CreateSalesOrderAsync(SalesOrderInputDto dto, string userId)
+        public async Task<SalesOrderDto> CreateSalesOrderAsync(SalesOrderCreateDto dto, string userId)
         {
             var item = _mapper.Map<SalesOrder>(dto);
             await AddOrderItemsFromDtos(item, dto.Items);
@@ -71,10 +71,11 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<SalesOrderDto>>(items);
         }
 
-        public async Task<SalesOrderDto> UpdateSalesOrderAsync(int id, SalesOrderInputDto dto)
+        public async Task<SalesOrderDto> UpdateSalesOrderAsync(int id, SalesOrderInputDto dto, string userId)
         {
             SalesOrder? item = await _dbContext.SalesOrders
                 .Include(i => i.Items)
+                .Include(i => i.Events)
                 .FirstOrDefaultAsync(i => i.Id == id);
             if (item == null)
             {
@@ -82,6 +83,22 @@ namespace ScmssApiServer.DomainServices
             }
 
             _mapper.Map(dto, item);
+            switch (dto.Status)
+            {
+                case SalesOrderStatusSelection.Completed:
+                    item.Complete(userId);
+                    break;
+                case SalesOrderStatusSelection.Canceled:
+                    item.Cancel(userId);
+                    break;
+                case SalesOrderStatusSelection.Returned:
+                    item.Return(userId);
+                    break;
+            }
+            if (dto.PaymentCompleted ?? false)
+            {
+                item.CompletePayment();
+            }
 
             _dbContext.RemoveRange(item.Items);
             await AddOrderItemsFromDtos(item, dto.Items);
