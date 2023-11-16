@@ -1,5 +1,4 @@
 ﻿using ScmssApiServer.DomainExceptions;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.Models
 {
@@ -19,8 +18,8 @@ namespace ScmssApiServer.Models
         public string? FromLocation { get; set; }
         public required string ToLocation { get; set; }
 
-        public OrderStatus Status { get; set; }
-        public OrderPaymentStatus PaymentStatus { get; set; }
+        public OrderStatus Status { get; private set; }
+        public OrderPaymentStatus PaymentStatus { get; private set; }
 
         public string? InvoiceUrl { get; set; }
         public string? ReceiptUrl { get; set; }
@@ -32,12 +31,8 @@ namespace ScmssApiServer.Models
         public string? FinishUserId { get; private set; }
         public User? FinishUser { get; private set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreateTime { get; private set; }
-
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
-
         public DateTime? DeliverTime { get; protected set; }
         public DateTime? FinishTime { get; private set; }
 
@@ -104,7 +99,7 @@ namespace ScmssApiServer.Models
 
         public void Start(string userId)
         {
-            if (Id == 0)
+            if (Id != 0)
             {
                 throw new InvalidDomainOperationException("Cannot start an already created order");
             }
@@ -197,6 +192,7 @@ namespace ScmssApiServer.Models
             {
                 Type = type,
                 Location = location,
+                Time = DateTime.UtcNow,
                 Message = message
             };
             Events.Add(item);

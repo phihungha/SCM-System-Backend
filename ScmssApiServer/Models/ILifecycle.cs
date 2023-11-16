@@ -7,7 +7,7 @@
         public string? FinishUserId { get; }
         public User? FinishUser { get; }
 
-        public DateTime CreateTime { get; }
+        public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
         public DateTime? FinishTime { get; }
 
