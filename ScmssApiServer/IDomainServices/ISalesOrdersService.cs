@@ -13,7 +13,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<SalesOrderDto> UpdateSalesOrderAsync(int id, SalesOrderUpdateDto dto, string userId);
 
-        Task<OrderEventDto> AddEvent(int orderId, OrderEventCreateDto dto);
+        Task<OrderEventDto> AddManualEvent(int orderId, OrderEventCreateDto dto);
 
         Task<OrderEventDto> UpdateEvent(int id, int orderId, OrderEventUpdateDto dto);
     }

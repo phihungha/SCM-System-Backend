@@ -19,7 +19,7 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<OrderEventDto> AddEvent(int orderId, OrderEventCreateDto dto)
+        public async Task<OrderEventDto> AddManualEvent(int orderId, OrderEventCreateDto dto)
         {
             SalesOrder? order = await _dbContext.SalesOrders.FirstOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
@@ -82,11 +82,12 @@ namespace ScmssApiServer.DomainServices
         public async Task<SalesOrderDto?> GetSalesOrderAsync(int id)
         {
             SalesOrder? item = await _dbContext.SalesOrders
+                .Include(i => i.Items).ThenInclude(i => i.Product)
+                .Include(i => i.Customer)
+                .Include(i => i.ProductionFacility)
+                .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.FinishUser)
-                .Include(i => i.Events)
-                .Include(i => i.ProductionFacility)
-                .Include(i => i.Items)
                 .FirstOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<SalesOrderDto?>(item);
         }
@@ -94,9 +95,10 @@ namespace ScmssApiServer.DomainServices
         public async Task<IList<SalesOrderDto>> GetSalesOrdersAsync()
         {
             IList<SalesOrder> items = await _dbContext.SalesOrders
+                .Include(i => i.Customer)
+                .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.FinishUser)
-                .Include(i => i.ProductionFacility)
                 .ToListAsync();
             return _mapper.Map<IList<SalesOrderDto>>(items);
         }
@@ -106,9 +108,12 @@ namespace ScmssApiServer.DomainServices
                                                                string userId)
         {
             SalesOrder? item = await _dbContext.SalesOrders
-                .Include(i => i.Items)
-                .Include(i => i.Events)
+                .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.Customer)
+                .Include(i => i.ProductionFacility)
+                .Include(i => i.Events)
+                .Include(i => i.CreateUser)
+                .Include(i => i.FinishUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
             if (item == null)
             {

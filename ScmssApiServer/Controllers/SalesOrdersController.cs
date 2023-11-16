@@ -56,7 +56,7 @@ namespace ScmssApiServer.Controllers
         [HttpPost("{orderId}/events")]
         public async Task<ActionResult<OrderEventDto>> AddManualEvent(int orderId, [FromBody] OrderEventCreateDto body)
         {
-            OrderEventDto item = await _salesOrdersService.AddEvent(orderId, body);
+            OrderEventDto item = await _salesOrdersService.AddManualEvent(orderId, body);
             return Ok(item);
         }
 
