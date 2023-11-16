@@ -33,11 +33,21 @@ namespace ScmssApiServer.Data
         private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
         {
             EntityEntry entry = e.Entry;
-            if (!e.FromQuery && entry.State == EntityState.Added
-                && entry.Entity is IUpdateTrackable entity)
+            if (e.FromQuery || entry.State != EntityState.Added)
             {
+                return;
+            }
+
+            if (entry.Entity is IUpdateTrackable)
+            {
+                var entity = (IUpdateTrackable)entry.Entity;
                 entity.CreateTime = DateTime.UtcNow;
                 entity.IsActive = true;
+            }
+            else if (entry.Entity is ILifecycle)
+            {
+                var entity = (ILifecycle)entry.Entity;
+                entity.CreateTime = DateTime.UtcNow;
             }
         }
 
@@ -48,13 +58,19 @@ namespace ScmssApiServer.Data
         {
             EntityEntry entry = e.Entry;
 
-            if (!(entry.Entity is IUpdateTrackable entity))
+            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
             {
                 return;
             }
 
-            if (e.NewState == EntityState.Modified || e.NewState == EntityState.Deleted)
+            if (entry.Entity is IUpdateTrackable)
             {
+                var entity = (IUpdateTrackable)entry.Entity;
+                entity.UpdateTime = DateTime.UtcNow;
+            }
+            else if (entry.Entity is ILifecycle)
+            {
+                var entity = (ILifecycle)entry.Entity;
                 entity.UpdateTime = DateTime.UtcNow;
             }
         }
