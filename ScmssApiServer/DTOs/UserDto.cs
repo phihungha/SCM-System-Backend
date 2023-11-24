@@ -26,8 +26,8 @@ namespace ScmssApiServer.DTOs
 
         public bool IsActive { get; set; }
 
-        public required DateTime CreatedTime { get; set; }
+        public required DateTime CreateTime { get; set; }
 
-        public DateTime? UpdatedTime { get; set; }
+        public DateTime? UpdateTime { get; set; }
     }
 }

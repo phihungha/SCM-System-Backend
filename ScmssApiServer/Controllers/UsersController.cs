@@ -14,11 +14,9 @@ namespace ScmssApiServer.Controllers
     [Authorize]
     public class UsersController : CustomControllerBase
     {
-        private readonly IUsersService _usersService;
-
         public UsersController(IUsersService usersService)
+            : base(usersService)
         {
-            _usersService = usersService;
         }
 
         [HttpGet]
@@ -54,7 +52,7 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<User>> Update(string id, [FromBody] UserInputDto body)
         {
             try
@@ -73,7 +71,7 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpPut("{id}/change-password")]
+        [HttpPut("{id}/changePassword")]
         public async Task<ActionResult<User>> Update(string id, [FromBody] UserPasswordChangeDto body)
         {
             try
@@ -106,7 +104,7 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpGet("{id}/profile-image-upload-url")]
+        [HttpGet("{id}/profileImageUploadUrl")]
         public string GetProfileImageUploadUrl(string id)
         {
             return _usersService.GetProfileImageUploadUrl(id);

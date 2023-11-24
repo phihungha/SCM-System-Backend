@@ -1,9 +1,12 @@
 ﻿using ScmssApiServer.DTOs;
+using System.Security.Claims;
 
 namespace ScmssApiServer.IDomainServices
 {
     public interface IUsersService
     {
+        string? GetUserIdFromPrincipal(ClaimsPrincipal principal);
+
         Task<IList<UserDto>> GetUsersAsync();
 
         Task<UserDto?> GetUserAsync(string id);

@@ -10,6 +10,16 @@ namespace ScmssApiServer.Data
     /// </summary>
     public class AppDbContext : IdentityDbContext<User>
     {
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductionOrder> ProductionOrders { get; set; }
+        public DbSet<ProductionFacility> ProductionFacilities { get; set; }
+        public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<Vendor> Vendors { get; set; }
+        public DbSet<SalesOrder> SalesOrders { get; set; }
+        public DbSet<Supply> Supplies { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
@@ -23,11 +33,21 @@ namespace ScmssApiServer.Data
         private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
         {
             EntityEntry entry = e.Entry;
-            if (!e.FromQuery && entry.State == EntityState.Added
-                && entry.Entity is IUpdateTrackable entity)
+            if (e.FromQuery || entry.State != EntityState.Added)
             {
-                entity.CreatedTime = DateTime.UtcNow;
+                return;
+            }
+
+            if (entry.Entity is IUpdateTrackable)
+            {
+                var entity = (IUpdateTrackable)entry.Entity;
+                entity.CreateTime = DateTime.UtcNow;
                 entity.IsActive = true;
+            }
+            else if (entry.Entity is ILifecycle)
+            {
+                var entity = (ILifecycle)entry.Entity;
+                entity.CreateTime = DateTime.UtcNow;
             }
         }
 
@@ -38,14 +58,20 @@ namespace ScmssApiServer.Data
         {
             EntityEntry entry = e.Entry;
 
-            if (!(entry.Entity is IUpdateTrackable entity))
+            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
             {
                 return;
             }
 
-            if (e.NewState == EntityState.Modified || e.NewState == EntityState.Deleted)
+            if (entry.Entity is IUpdateTrackable)
             {
-                entity.UpdatedTime = DateTime.UtcNow;
+                var entity = (IUpdateTrackable)entry.Entity;
+                entity.UpdateTime = DateTime.UtcNow;
+            }
+            else if (entry.Entity is ILifecycle)
+            {
+                var entity = (ILifecycle)entry.Entity;
+                entity.UpdateTime = DateTime.UtcNow;
             }
         }
 
@@ -54,11 +80,175 @@ namespace ScmssApiServer.Data
             builder
                 .Properties<Gender>()
                 .HaveConversion<string>();
+
+            builder
+                .Properties<OrderStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<OrderPaymentStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<PurchaseRequisitionStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<ProductionOrderStatus>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<OrderEventType>()
+                .HaveConversion<string>();
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            #region PurchaseRequisition
+
+            // Many-to-many with Supply via PurchaseRequisitionItem
+            builder.Entity<PurchaseRequisition>()
+                .HasMany(e => e.Supplies)
+                .WithMany(e => e.PurchaseRequisitions)
+                .UsingEntity<PurchaseRequisitionItem>(
+                    l => l.HasOne(e => e.Supply)
+                    .WithMany(e => e.PurchaseRequisitionItems)
+                    .HasForeignKey(e => e.ItemId),
+
+                    r => r.HasOne(e => e.PurchaseRequisition)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedPurchaseRequisitions)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.ApproveProductionManager)
+                .WithMany(e => e.ApprovedPurchaseRequisitionsAsManager)
+                .HasForeignKey(e => e.ApproveProductionManagerId);
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.ApproveFinance)
+                .WithMany(e => e.ApprovedPurchaseRequisitionsAsFinance)
+                .HasForeignKey(e => e.ApproveFinanceId);
+
+            builder.Entity<PurchaseRequisition>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedPurchaseRequisitions)
+                .HasForeignKey(e => e.FinishUserId);
+
+            #endregion PurchaseRequisition
+
+            #region PurchaseOrder
+
+            // Many-to-many with Supply via PurchaseOrderItem
+            builder.Entity<PurchaseOrder>()
+                .HasMany(e => e.Supplies)
+                .WithMany(e => e.PurchaseOrders)
+                .UsingEntity<PurchaseOrderItem>(
+                    l => l.HasOne(e => e.Supply)
+                    .WithMany(e => e.PurchaseOrderItems)
+                    .HasForeignKey(e => e.ItemId),
+
+                    r => r.HasOne(e => e.PurchaseOrder)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
+
+            builder.Entity<PurchaseOrder>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedPurchaseOrders)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<PurchaseOrder>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedPurchaseOrders)
+                .HasForeignKey(e => e.FinishUserId);
+
+            #endregion PurchaseOrder
+
+            #region SalesOrder
+
+            // Many-to-many with Supply via PurchaseOrderItem
+            builder.Entity<SalesOrder>()
+                .HasMany(e => e.Products)
+                .WithMany(e => e.SalesOrders)
+                .UsingEntity<SalesOrderItem>(
+                    l => l.HasOne(e => e.Product)
+                    .WithMany(e => e.SalesOrderItems)
+                    .HasForeignKey(e => e.ItemId),
+
+                    r => r.HasOne(e => e.SalesOrder)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
+
+            builder.Entity<SalesOrder>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedSalesOrders)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<SalesOrder>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedSalesOrders)
+                .HasForeignKey(e => e.FinishUserId);
+
+            #endregion SalesOrder
+
+            #region Product
+
+            builder.Entity<Product>()
+                .HasMany(e => e.Supplies)
+                .WithMany(e => e.Products)
+                .UsingEntity<ProductionCostItem>();
+
+            #endregion Product
+
+            #region ProductionOrder
+
+            // Many-to-many with Supply via PurchaseOrderItem
+            builder.Entity<ProductionOrder>()
+                .HasMany(e => e.Products)
+                .WithMany(e => e.ProductionOrders)
+                .UsingEntity<ProductionOrderItem>();
+
+            builder.Entity<ProductionOrder>()
+                .HasOne(e => e.CreateUser)
+                .WithMany(e => e.CreatedProductionOrders)
+                .HasForeignKey(e => e.CreateUserId);
+
+            builder.Entity<ProductionOrder>()
+                .HasOne(e => e.ApproveProductionManager)
+                .WithMany(e => e.ApprovedProductionOrdersAsManager)
+                .HasForeignKey(e => e.ApproveProductionManagerId);
+
+            builder.Entity<ProductionOrder>()
+                .HasOne(e => e.FinishUser)
+                .WithMany(e => e.FinishedProductionOrders)
+                .HasForeignKey(e => e.FinishUserId);
+
+            #endregion ProductionOrder
+
+            #region ProductionFacility
+
+            // Many-to-many with Supply via WarehouseSupplyItem
+            builder.Entity<ProductionFacility>()
+                .HasMany(e => e.WarehouseSupplies)
+                .WithMany(e => e.ProductionFacilities)
+                .UsingEntity<WarehouseSupplyItem>();
+
+            // Many-to-many with Product via WarehouseProductItem
+            builder.Entity<ProductionFacility>()
+                .HasMany(e => e.WarehouseProducts)
+                .WithMany(e => e.ProductionFacilities)
+                .UsingEntity<WarehouseProductItem>();
+
+            #endregion ProductionFacility
         }
     }
 }

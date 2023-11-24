@@ -28,9 +28,45 @@ namespace ScmssApiServer.Models
 
         public string? Description { get; set; }
 
+        public int? ProductionFacilityId { get; set; }
+        public ProductionFacility? Facility { get; set; }
+
+        public ICollection<PurchaseRequisition> CreatedPurchaseRequisitions { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseRequisition> ApprovedPurchaseRequisitionsAsManager { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseRequisition> ApprovedPurchaseRequisitionsAsFinance { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseRequisition> FinishedPurchaseRequisitions { get; set; }
+            = new List<PurchaseRequisition>();
+
+        public ICollection<PurchaseOrder> CreatedPurchaseOrders { get; set; }
+            = new List<PurchaseOrder>();
+
+        public ICollection<PurchaseOrder> FinishedPurchaseOrders { get; set; }
+            = new List<PurchaseOrder>();
+
+        public ICollection<SalesOrder> CreatedSalesOrders { get; set; }
+            = new List<SalesOrder>();
+
+        public ICollection<SalesOrder> FinishedSalesOrders { get; set; }
+            = new List<SalesOrder>();
+
+        public ICollection<ProductionOrder> CreatedProductionOrders { get; set; }
+            = new List<ProductionOrder>();
+
+        public ICollection<ProductionOrder> ApprovedProductionOrdersAsManager { get; set; }
+            = new List<ProductionOrder>();
+
+        public ICollection<ProductionOrder> FinishedProductionOrders { get; set; }
+            = new List<ProductionOrder>();
+
         public bool IsActive { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime? UpdatedTime { get; set; }
+        public DateTime CreateTime { get; set; }
+        public DateTime? UpdateTime { get; set; }
     }
 
     public class UserMappingProfile : Profile
