@@ -28,7 +28,6 @@ namespace ScmssApiServer.Models
         public string? FromLocation { get; set; }
 
         public int Id { get; set; }
-
         public string? InvoiceUrl { get; set; }
 
         /// <summary>
@@ -37,6 +36,11 @@ namespace ScmssApiServer.Models
         public ICollection<TItem> Items { get; } = new List<TItem>();
 
         public TransOrderPaymentStatus PaymentStatus { get; private set; }
+
+        /// <summary>
+        /// Reason the order was canceled or returned.
+        /// </summary>
+        public string? Problem { get; private set; }
 
         public string? ReceiptUrl { get; set; }
 
@@ -126,7 +130,7 @@ namespace ScmssApiServer.Models
             return AddEvent(type, location, message);
         }
 
-        public void Cancel(string userId)
+        public void Cancel(string userId, string problem)
         {
             if (Status == TransOrderStatus.Delivered || Status == TransOrderStatus.Completed)
             {
@@ -136,6 +140,7 @@ namespace ScmssApiServer.Models
             }
             Status = TransOrderStatus.Canceled;
             PaymentStatus = TransOrderPaymentStatus.Canceled;
+            Problem = Problem;
             Finish(userId);
 
             TEvent lastEvent = Events.Last();
@@ -196,7 +201,7 @@ namespace ScmssApiServer.Models
             AddEvent(OrderEventType.Delivered, ToLocation);
         }
 
-        public void Return(string userId)
+        public void Return(string userId, string problem)
         {
             if (Status != TransOrderStatus.Delivered)
             {
@@ -206,6 +211,7 @@ namespace ScmssApiServer.Models
             }
             Status = TransOrderStatus.Returned;
             PaymentStatus = TransOrderPaymentStatus.Canceled;
+            Problem = problem;
             Finish(userId);
             AddEvent(OrderEventType.Returned, ToLocation);
         }

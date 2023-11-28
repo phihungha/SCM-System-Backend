@@ -361,7 +361,6 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
@@ -418,7 +417,6 @@ namespace ScmssApiServer.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateTime")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreateUserId")
@@ -447,6 +445,9 @@ namespace ScmssApiServer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Problem")
+                        .HasColumnType("text");
+
                     b.Property<int>("ProductionFacilityId")
                         .HasColumnType("integer");
 
@@ -455,6 +456,9 @@ namespace ScmssApiServer.Migrations
 
                     b.Property<string>("ReceiptUrl")
                         .HasColumnType("text");
+
+                    b.Property<decimal>("RemainingAmount")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -471,7 +475,6 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<DateTime?>("UpdateTime")
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("VatAmount")
@@ -517,7 +520,6 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
@@ -671,7 +673,6 @@ namespace ScmssApiServer.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateTime")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreateUserId")
@@ -700,11 +701,17 @@ namespace ScmssApiServer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Problem")
+                        .HasColumnType("text");
+
                     b.Property<int?>("ProductionFacilityId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ReceiptUrl")
                         .HasColumnType("text");
+
+                    b.Property<decimal>("RemainingAmount")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -721,7 +728,6 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<DateTime?>("UpdateTime")
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("VatAmount")
@@ -761,7 +767,6 @@ namespace ScmssApiServer.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Time")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")

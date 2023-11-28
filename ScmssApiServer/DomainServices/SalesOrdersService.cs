@@ -103,9 +103,10 @@ namespace ScmssApiServer.DomainServices
             return GetOrderEventDto(item);
         }
 
-        public async Task<SalesOrderDto> UpdateSalesOrderAsync(int id,
-                                                               SalesOrderUpdateDto dto,
-                                                               string userId)
+        public async Task<SalesOrderDto> UpdateSalesOrderAsync(
+            int id,
+            SalesOrderUpdateDto dto,
+            string userId)
         {
             SalesOrder? item = await _dbContext.SalesOrders
                 .Include(i => i.Items).ThenInclude(i => i.Product)
@@ -176,11 +177,23 @@ namespace ScmssApiServer.DomainServices
                     break;
 
                 case TransOrderStatusSelection.Canceled:
-                    item.Cancel(userId);
+                    if (dto.Problem == null)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot cancel an order without a problem."
+                            );
+                    }
+                    item.Cancel(userId, dto.Problem);
                     break;
 
                 case TransOrderStatusSelection.Returned:
-                    item.Return(userId);
+                    if (dto.Problem == null)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot return an order without a problem."
+                            );
+                    }
+                    item.Return(userId, dto.Problem);
                     break;
             }
 
