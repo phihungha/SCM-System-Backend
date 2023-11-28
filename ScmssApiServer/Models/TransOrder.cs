@@ -12,36 +12,67 @@ namespace ScmssApiServer.Models
         where TItem : TransOrderItem
         where TEvent : OrderEvent, new()
     {
+        public DateTime CreateTime { get; set; }
+        public User CreateUser { get; set; } = null!;
+        public required string CreateUserId { get; set; }
+        public DateTime? DeliverTime { get; protected set; }
+        public ICollection<TEvent> Events { get; } = new List<TEvent>();
+        public bool Finished { get => FinishTime != null; }
+        public DateTime? FinishTime { get; private set; }
+        public User? FinishUser { get; private set; }
+        public string? FinishUserId { get; private set; }
+
+        /// <summary>
+        /// Delivery start location.
+        /// </summary>
+        public string? FromLocation { get; set; }
+
         public int Id { get; set; }
 
+        public string? InvoiceUrl { get; set; }
+
+        /// <summary>
+        /// Order item.
+        /// </summary>
         public ICollection<TItem> Items { get; } = new List<TItem>();
 
-        public decimal SubTotal { get; private set; }
-        public double VatRate { get; private set; }
-        public decimal VatAmount { get; private set; }
-        public decimal TotalAmount { get; private set; }
-
-        public string? FromLocation { get; set; }
-        public required string ToLocation { get; set; }
-
-        public TransOrderStatus Status { get; private set; }
         public TransOrderPaymentStatus PaymentStatus { get; private set; }
 
-        public string? InvoiceUrl { get; set; }
         public string? ReceiptUrl { get; set; }
 
-        public ICollection<TEvent> Events { get; } = new List<TEvent>();
+        /// <summary>
+        /// Remaining amount to pay.
+        /// </summary>
+        public decimal RemainingAmount { get; private set; }
 
-        public required string CreateUserId { get; set; }
-        public User CreateUser { get; set; } = null!;
-        public string? FinishUserId { get; private set; }
-        public User? FinishUser { get; private set; }
+        public TransOrderStatus Status { get; private set; }
 
-        public DateTime CreateTime { get; set; }
+        /// <summary>
+        /// Sum of TransOrderItem.TotalPrice.
+        /// </summary>
+        public decimal SubTotal { get; private set; }
+
+        /// <summary>
+        /// Delivery destination location.
+        /// </summary>
+        public required string ToLocation { get; set; }
+
+        /// <summary>
+        /// Total amount to pay = SubTotal + VatAmount
+        /// </summary>
+        public decimal TotalAmount { get; private set; }
+
         public DateTime? UpdateTime { get; set; }
-        public DateTime? DeliverTime { get; protected set; }
-        public DateTime? FinishTime { get; private set; }
-        public bool Finished { get => FinishTime != null; }
+
+        /// <summary>
+        /// VAT-taxed amount = SubTotal * VatRate
+        /// </summary>
+        public decimal VatAmount { get; private set; }
+
+        /// <summary>
+        /// VAT tax rate from 0 (0%) to 1 (100%).
+        /// </summary>
+        public double VatRate { get; private set; }
 
         public void AddItem(TItem item)
         {
@@ -95,34 +126,88 @@ namespace ScmssApiServer.Models
             return AddEvent(type, location, message);
         }
 
-        public TEvent UpdateEvent(int id, string? message = null, string? location = null)
+        public void Cancel(string userId)
+        {
+            if (Status == TransOrderStatus.Delivered || Status == TransOrderStatus.Completed)
+            {
+                throw new InvalidOperationException(
+                        "Cannot cancel order after it has been delivered."
+                    );
+            }
+            Status = TransOrderStatus.Canceled;
+            PaymentStatus = TransOrderPaymentStatus.Canceled;
+            Finish(userId);
+
+            TEvent lastEvent = Events.Last();
+            AddEvent(OrderEventType.Canceled, lastEvent.Location);
+        }
+
+        public void Complete(string userId)
+        {
+            if (Status != TransOrderStatus.Delivered)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot complete order if it hasn't finished delivery."
+                    );
+            }
+            Status = TransOrderStatus.Completed;
+            AddEvent(OrderEventType.Completed, ToLocation);
+            CreateDuePayment();
+            Finish(userId);
+        }
+
+        public void CompletePayment(decimal amount)
+        {
+            if (PaymentStatus != TransOrderPaymentStatus.Due)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot complete payment of order if there is no due payment."
+                    );
+            }
+            RemainingAmount = TotalAmount - amount;
+            if (RemainingAmount == 0)
+            {
+                PaymentStatus = TransOrderPaymentStatus.Completed;
+                AddEvent(OrderEventType.PaymentCompleted);
+            }
+        }
+
+        public void Finish(string userId)
         {
             if (FinishTime != null)
             {
+                throw new InvalidDomainOperationException("Order is finished");
+            }
+
+            FinishTime = DateTime.UtcNow;
+            FinishUserId = userId;
+        }
+
+        public void FinishDelivery()
+        {
+            if (Status != TransOrderStatus.Delivering)
+            {
                 throw new InvalidDomainOperationException(
-                        "Cannot update event because the order is finished."
+                        "Cannot finish delivery of order if it is not being delivered."
                     );
             }
+            Status = TransOrderStatus.Delivered;
+            DeliverTime = DateTime.UtcNow;
+            AddEvent(OrderEventType.Delivered, ToLocation);
+        }
 
-            TEvent? item = Events.FirstOrDefault(i => i.Id == id);
-            if (item == null)
+        public void Return(string userId)
+        {
+            if (Status != TransOrderStatus.Delivered)
             {
-                throw new EntityNotFoundException();
+                throw new InvalidOperationException(
+                        "Cannot return order if it has been completed or hasn't finished delivery."
+                    );
             }
-
-            if (location != null)
-            {
-                if (item.Type != OrderEventType.Left
-                    && item.Type != OrderEventType.Arrived
-                    && item.Type != OrderEventType.Interrupted)
-                {
-                    throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
-                }
-                item.Location = location;
-            }
-            item.Message = message;
-
-            return item;
+            Status = TransOrderStatus.Returned;
+            PaymentStatus = TransOrderPaymentStatus.Canceled;
+            Finish(userId);
+            AddEvent(OrderEventType.Returned, ToLocation);
         }
 
         public void Start(string userId)
@@ -156,86 +241,34 @@ namespace ScmssApiServer.Models
             AddEvent(OrderEventType.DeliveryStarted, FromLocation);
         }
 
-        public void FinishDelivery()
+        public TEvent UpdateEvent(int id, string? message = null, string? location = null)
         {
-            if (Status != TransOrderStatus.Delivering)
+            if (FinishTime != null)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot finish delivery of order if it is not being delivered."
+                        "Cannot update event because the order is finished."
                     );
             }
-            Status = TransOrderStatus.Delivered;
-            DeliverTime = DateTime.UtcNow;
-            AddEvent(OrderEventType.Delivered, ToLocation);
-        }
 
-        public void Complete(string userId)
-        {
-            if (Status != TransOrderStatus.Delivered)
+            TEvent? item = Events.FirstOrDefault(i => i.Id == id);
+            if (item == null)
             {
-                throw new InvalidDomainOperationException(
-                        "Cannot complete order if it hasn't finished delivery."
-                    );
+                throw new EntityNotFoundException();
             }
-            Status = TransOrderStatus.Completed;
-            AddEvent(OrderEventType.Completed, ToLocation);
-            CreateDuePayment();
-            Finish(userId);
-        }
 
-        public void Cancel(string userId)
-        {
-            if (Status == TransOrderStatus.Delivered || Status == TransOrderStatus.Completed)
+            if (location != null)
             {
-                throw new InvalidOperationException(
-                        "Cannot cancel order after it has been delivered."
-                    );
+                if (item.Type != OrderEventType.Left
+                    && item.Type != OrderEventType.Arrived
+                    && item.Type != OrderEventType.Interrupted)
+                {
+                    throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
+                }
+                item.Location = location;
             }
-            Status = TransOrderStatus.Canceled;
-            PaymentStatus = TransOrderPaymentStatus.Canceled;
-            Finish(userId);
+            item.Message = message;
 
-            TEvent lastEvent = Events.Last();
-            AddEvent(OrderEventType.Canceled, lastEvent.Location);
-        }
-
-        public void Return(string userId)
-        {
-            if (Status != TransOrderStatus.Delivered)
-            {
-                throw new InvalidOperationException(
-                        "Cannot return order if it has been completed or hasn't finished delivery."
-                    );
-            }
-            Status = TransOrderStatus.Returned;
-            PaymentStatus = TransOrderPaymentStatus.Canceled;
-            Finish(userId);
-            AddEvent(OrderEventType.Returned, ToLocation);
-        }
-
-        public void CompletePayment()
-        {
-            if (PaymentStatus != TransOrderPaymentStatus.Due)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot complete payment of order if there is no due payment."
-                    );
-            }
-            PaymentStatus = TransOrderPaymentStatus.Completed;
-            AddEvent(OrderEventType.PaymentCompleted);
-        }
-
-        private void CreateDuePayment()
-        {
-            PaymentStatus = TransOrderPaymentStatus.Due;
-            AddEvent(OrderEventType.PaymentDue);
-        }
-
-        protected void CalculateTotals()
-        {
-            SubTotal = Items.Sum(i => i.TotalPrice);
-            VatAmount = SubTotal * (decimal)VatRate;
-            TotalAmount = SubTotal + VatAmount;
+            return item;
         }
 
         protected TEvent AddEvent(OrderEventType type, string? location = null, string? message = null)
@@ -251,15 +284,17 @@ namespace ScmssApiServer.Models
             return item;
         }
 
-        public void Finish(string userId)
+        protected void CalculateTotals()
         {
-            if (FinishTime != null)
-            {
-                throw new InvalidDomainOperationException("Order is finished");
-            }
+            SubTotal = Items.Sum(i => i.TotalPrice);
+            VatAmount = SubTotal * (decimal)VatRate;
+            TotalAmount = SubTotal + VatAmount;
+        }
 
-            FinishTime = DateTime.UtcNow;
-            FinishUserId = userId;
+        private void CreateDuePayment()
+        {
+            PaymentStatus = TransOrderPaymentStatus.Due;
+            AddEvent(OrderEventType.PaymentDue);
         }
     }
 }

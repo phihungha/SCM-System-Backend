@@ -10,8 +10,8 @@ namespace ScmssApiServer.DomainServices
 {
     public class SalesOrdersService : ISalesOrdersService
     {
-        private readonly IMapper _mapper;
         private readonly AppDbContext _dbContext;
+        private readonly IMapper _mapper;
 
         public SalesOrdersService(IMapper mapper, AppDbContext dbContext)
         {
@@ -63,22 +63,6 @@ namespace ScmssApiServer.DomainServices
             return GetSalesOrderDto(item);
         }
 
-        public async Task<OrderEventDto> UpdateEvent(int id, int orderId, OrderEventUpdateDto dto)
-        {
-            SalesOrder? order = await _dbContext.SalesOrders
-                .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
-            if (order == null)
-            {
-                throw new EntityNotFoundException();
-            }
-
-            SalesOrderEvent item = order.UpdateEvent(id, dto.Location, dto.Message);
-
-            await _dbContext.SaveChangesAsync();
-            return GetOrderEventDto(item);
-        }
-
         public async Task<SalesOrderDto?> GetSalesOrderAsync(int id)
         {
             SalesOrder? item = await _dbContext.SalesOrders
@@ -103,6 +87,22 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<SalesOrderDto>>(items);
         }
 
+        public async Task<OrderEventDto> UpdateEvent(int id, int orderId, OrderEventUpdateDto dto)
+        {
+            SalesOrder? order = await _dbContext.SalesOrders
+                .Include(i => i.Events)
+                .FirstOrDefaultAsync(i => i.Id == orderId);
+            if (order == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            SalesOrderEvent item = order.UpdateEvent(id, dto.Location, dto.Message);
+
+            await _dbContext.SaveChangesAsync();
+            return GetOrderEventDto(item);
+        }
+
         public async Task<SalesOrderDto> UpdateSalesOrderAsync(int id,
                                                                SalesOrderUpdateDto dto,
                                                                string userId)
@@ -122,7 +122,13 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.PaymentCompleted ?? false)
             {
-                item.CompletePayment();
+                if (dto.PaymentAmount == null)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot complete payment without payment amount"
+                        );
+                }
+                item.CompletePayment((decimal)dto.PaymentAmount);
                 await _dbContext.SaveChangesAsync();
                 return GetSalesOrderDto(item);
             }
@@ -182,28 +188,6 @@ namespace ScmssApiServer.DomainServices
             return GetSalesOrderDto(item);
         }
 
-        private SalesOrderDto GetSalesOrderDto(SalesOrder item)
-        {
-            return _mapper.Map<SalesOrderDto>(item);
-        }
-
-        private OrderEventDto GetOrderEventDto(SalesOrderEvent item)
-        {
-            return _mapper.Map<OrderEventDto>(item);
-        }
-
-        private async Task<string> GetLocationOfProductionFacilityAsync(int facilityId)
-        {
-            ProductionFacility? facility = await _dbContext
-                .ProductionFacilities
-                .FindAsync(facilityId);
-            if (facility == null)
-            {
-                throw new EntityNotFoundException("Production facility not found");
-            }
-            return facility.Location;
-        }
-
         private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<TransOrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
@@ -224,6 +208,28 @@ namespace ScmssApiServer.DomainServices
                 };
                 order.AddItem(item);
             }
+        }
+
+        private async Task<string> GetLocationOfProductionFacilityAsync(int facilityId)
+        {
+            ProductionFacility? facility = await _dbContext
+                .ProductionFacilities
+                .FindAsync(facilityId);
+            if (facility == null)
+            {
+                throw new EntityNotFoundException("Production facility not found");
+            }
+            return facility.Location;
+        }
+
+        private OrderEventDto GetOrderEventDto(SalesOrderEvent item)
+        {
+            return _mapper.Map<OrderEventDto>(item);
+        }
+
+        private SalesOrderDto GetSalesOrderDto(SalesOrder item)
+        {
+            return _mapper.Map<SalesOrderDto>(item);
         }
     }
 }
