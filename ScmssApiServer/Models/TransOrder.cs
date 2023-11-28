@@ -9,7 +9,7 @@ namespace ScmssApiServer.Models
     /// <typeparam name="TItem">Order line item type</typeparam>
     /// <typeparam name="TEvent">Order event type</typeparam>
     public abstract class TransOrder<TItem, TEvent> : ILifecycle
-        where TItem : OrderItem
+        where TItem : TransOrderItem
         where TEvent : OrderEvent, new()
     {
         public int Id { get; set; }
@@ -24,8 +24,8 @@ namespace ScmssApiServer.Models
         public string? FromLocation { get; set; }
         public required string ToLocation { get; set; }
 
-        public OrderStatus Status { get; private set; }
-        public OrderPaymentStatus PaymentStatus { get; private set; }
+        public TransOrderStatus Status { get; private set; }
+        public TransOrderPaymentStatus PaymentStatus { get; private set; }
 
         public string? InvoiceUrl { get; set; }
         public string? ReceiptUrl { get; set; }
@@ -45,7 +45,7 @@ namespace ScmssApiServer.Models
 
         public void AddItem(TItem item)
         {
-            if (Status != OrderStatus.Processing)
+            if (Status != TransOrderStatus.Processing)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot add order item after order has started delivery."
@@ -66,7 +66,7 @@ namespace ScmssApiServer.Models
 
         public TEvent AddManualEvent(OrderEventTypeSelection typeSel, string location, string? message)
         {
-            if (Status != OrderStatus.Delivering)
+            if (Status != TransOrderStatus.Delivering)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot add manual event when order is not being delivered."
@@ -132,15 +132,15 @@ namespace ScmssApiServer.Models
                 throw new InvalidDomainOperationException("Cannot start an already created order");
             }
 
-            Status = OrderStatus.Processing;
-            PaymentStatus = OrderPaymentStatus.Pending;
+            Status = TransOrderStatus.Processing;
+            PaymentStatus = TransOrderPaymentStatus.Pending;
             CreateUserId = userId;
             AddEvent(OrderEventType.Processing);
         }
 
         public virtual void StartDelivery()
         {
-            if (Status != OrderStatus.Processing)
+            if (Status != TransOrderStatus.Processing)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot start delivery of order again."
@@ -152,32 +152,32 @@ namespace ScmssApiServer.Models
                         "Cannot start delivery of order without destination location."
                     );
             }
-            Status = OrderStatus.Delivering;
+            Status = TransOrderStatus.Delivering;
             AddEvent(OrderEventType.DeliveryStarted, FromLocation);
         }
 
         public void FinishDelivery()
         {
-            if (Status != OrderStatus.Delivering)
+            if (Status != TransOrderStatus.Delivering)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot finish delivery of order if it is not being delivered."
                     );
             }
-            Status = OrderStatus.Delivered;
+            Status = TransOrderStatus.Delivered;
             DeliverTime = DateTime.UtcNow;
             AddEvent(OrderEventType.Delivered, ToLocation);
         }
 
         public void Complete(string userId)
         {
-            if (Status != OrderStatus.Delivered)
+            if (Status != TransOrderStatus.Delivered)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot complete order if it hasn't finished delivery."
                     );
             }
-            Status = OrderStatus.Completed;
+            Status = TransOrderStatus.Completed;
             AddEvent(OrderEventType.Completed, ToLocation);
             CreateDuePayment();
             Finish(userId);
@@ -185,14 +185,14 @@ namespace ScmssApiServer.Models
 
         public void Cancel(string userId)
         {
-            if (Status == OrderStatus.Delivered || Status == OrderStatus.Completed)
+            if (Status == TransOrderStatus.Delivered || Status == TransOrderStatus.Completed)
             {
                 throw new InvalidOperationException(
                         "Cannot cancel order after it has been delivered."
                     );
             }
-            Status = OrderStatus.Canceled;
-            PaymentStatus = OrderPaymentStatus.Canceled;
+            Status = TransOrderStatus.Canceled;
+            PaymentStatus = TransOrderPaymentStatus.Canceled;
             Finish(userId);
 
             TEvent lastEvent = Events.Last();
@@ -201,33 +201,33 @@ namespace ScmssApiServer.Models
 
         public void Return(string userId)
         {
-            if (Status != OrderStatus.Delivered)
+            if (Status != TransOrderStatus.Delivered)
             {
                 throw new InvalidOperationException(
                         "Cannot return order if it has been completed or hasn't finished delivery."
                     );
             }
-            Status = OrderStatus.Returned;
-            PaymentStatus = OrderPaymentStatus.Canceled;
+            Status = TransOrderStatus.Returned;
+            PaymentStatus = TransOrderPaymentStatus.Canceled;
             Finish(userId);
             AddEvent(OrderEventType.Returned, ToLocation);
         }
 
         public void CompletePayment()
         {
-            if (PaymentStatus != OrderPaymentStatus.Due)
+            if (PaymentStatus != TransOrderPaymentStatus.Due)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot complete payment of order if there is no due payment."
                     );
             }
-            PaymentStatus = OrderPaymentStatus.Completed;
+            PaymentStatus = TransOrderPaymentStatus.Completed;
             AddEvent(OrderEventType.PaymentCompleted);
         }
 
         private void CreateDuePayment()
         {
-            PaymentStatus = OrderPaymentStatus.Due;
+            PaymentStatus = TransOrderPaymentStatus.Due;
             AddEvent(OrderEventType.PaymentDue);
         }
 

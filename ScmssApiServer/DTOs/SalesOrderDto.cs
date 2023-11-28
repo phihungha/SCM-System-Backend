@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public class SalesOrderDto : OrderDto
+    public class SalesOrderDto : TransOrderDto
     {
         public ICollection<SalesOrderItemDto> Items { get; set; }
             = new List<SalesOrderItemDto>();

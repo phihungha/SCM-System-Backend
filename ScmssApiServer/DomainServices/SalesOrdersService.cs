@@ -134,7 +134,7 @@ namespace ScmssApiServer.DomainServices
                     );
             }
 
-            if (item.Status == OrderStatus.Processing)
+            if (item.Status == TransOrderStatus.Processing)
             {
                 if (dto.ProductionFacilityId != null)
                 {
@@ -150,30 +150,30 @@ namespace ScmssApiServer.DomainServices
                 }
             }
 
-            if (item.Status != OrderStatus.Delivered)
+            if (item.Status != TransOrderStatus.Delivered)
             {
                 item.ToLocation = dto.ToLocation ?? item.Customer.DefaultLocation;
             }
 
             switch (dto.Status)
             {
-                case OrderStatusSelection.Delivering:
+                case TransOrderStatusSelection.Delivering:
                     item.StartDelivery();
                     break;
 
-                case OrderStatusSelection.Delivered:
+                case TransOrderStatusSelection.Delivered:
                     item.FinishDelivery();
                     break;
 
-                case OrderStatusSelection.Completed:
+                case TransOrderStatusSelection.Completed:
                     item.Complete(userId);
                     break;
 
-                case OrderStatusSelection.Canceled:
+                case TransOrderStatusSelection.Canceled:
                     item.Cancel(userId);
                     break;
 
-                case OrderStatusSelection.Returned:
+                case TransOrderStatusSelection.Returned:
                     item.Return(userId);
                     break;
             }
@@ -204,7 +204,7 @@ namespace ScmssApiServer.DomainServices
             return facility.Location;
         }
 
-        private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<OrderItemInputDto> dtos)
+        private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<TransOrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext

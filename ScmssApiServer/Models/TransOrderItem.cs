@@ -1,6 +1,9 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public abstract class OrderItem
+    /// <summary>
+    /// Represents an order line in a transaction order.
+    /// </summary>
+    public abstract class TransOrderItem
     {
         public int ItemId { get; set; }
         public int OrderId { get; set; }

@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public abstract class OrderDto
+    public abstract class TransOrderDto
     {
         public int Id { get; set; }
 
@@ -11,8 +11,8 @@ namespace ScmssApiServer.DTOs
         public decimal VatAmount { get; set; }
         public decimal TotalAmount { get; set; }
 
-        public OrderStatus Status { get; set; }
-        public OrderPaymentStatus PaymentStatus { get; set; }
+        public TransOrderStatus Status { get; set; }
+        public TransOrderPaymentStatus PaymentStatus { get; set; }
 
         public string? InvoiceUrl { get; set; }
         public string? ReceiptUrl { get; set; }

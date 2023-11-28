@@ -82,11 +82,11 @@ namespace ScmssApiServer.Data
                 .HaveConversion<string>();
 
             builder
-                .Properties<OrderStatus>()
+                .Properties<TransOrderStatus>()
                 .HaveConversion<string>();
 
             builder
-                .Properties<OrderPaymentStatus>()
+                .Properties<TransOrderPaymentStatus>()
                 .HaveConversion<string>();
 
             builder

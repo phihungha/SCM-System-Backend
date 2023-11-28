@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public class PurchaseOrderItem : OrderItem
+    public class PurchaseOrderItem : TransOrderItem
     {
         public Supply Supply { get; set; } = null!;
         public PurchaseOrder PurchaseOrder { get; set; } = null!;

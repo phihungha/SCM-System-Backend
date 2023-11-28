@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public enum OrderPaymentStatus
+    public enum TransOrderPaymentStatus
     {
         Pending,
         Due,

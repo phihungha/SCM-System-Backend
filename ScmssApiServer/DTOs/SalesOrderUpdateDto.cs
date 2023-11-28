@@ -2,9 +2,9 @@
 {
     public class SalesOrderUpdateDto : SalesOrderInputDto
     {
-        public IList<OrderItemInputDto>? Items { get; set; }
+        public IList<TransOrderItemInputDto>? Items { get; set; }
 
-        public OrderStatusSelection? Status { get; set; }
+        public TransOrderStatusSelection? Status { get; set; }
         public bool? PaymentCompleted { get; set; }
     }
 }
