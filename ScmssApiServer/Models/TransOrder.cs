@@ -3,7 +3,12 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public abstract class Order<TItem, TEvent> : ILifecycle
+    /// <summary>
+    /// Represents a transacton order such as a sales or purchase order.
+    /// </summary>
+    /// <typeparam name="TItem">Order line item type</typeparam>
+    /// <typeparam name="TEvent">Order event type</typeparam>
+    public abstract class TransOrder<TItem, TEvent> : ILifecycle
         where TItem : OrderItem
         where TEvent : OrderEvent, new()
     {

@@ -4,7 +4,10 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class SalesOrder : Order<SalesOrderItem, SalesOrderEvent>
+    /// <summary>
+    /// Represents a sales order.
+    /// </summary>
+    public class SalesOrder : TransOrder<SalesOrderItem, SalesOrderEvent>
     {
         public ICollection<Product> Products { get; set; }
             = new List<Product>();
