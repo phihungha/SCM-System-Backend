@@ -140,7 +140,7 @@ namespace ScmssApiServer.Models
             }
             Status = TransOrderStatus.Canceled;
             PaymentStatus = TransOrderPaymentStatus.Canceled;
-            Problem = Problem;
+            Problem = problem;
             Finish(userId);
 
             TEvent lastEvent = Events.Last();
