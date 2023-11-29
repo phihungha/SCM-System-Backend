@@ -5,8 +5,8 @@
         public int VendorId { get; set; }
         public Vendor Vendor { get; set; } = null!;
 
-        public ICollection<ProductionCostItem> ProductionCostItems { get; set; }
-            = new List<ProductionCostItem>();
+        public ICollection<ProductionSupplyCostItem> ProductionCostItems { get; set; }
+            = new List<ProductionSupplyCostItem>();
 
         public ICollection<Product> Products { get; set; }
             = new List<Product>();

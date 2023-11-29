@@ -10,16 +10,6 @@ namespace ScmssApiServer.Data
     /// </summary>
     public class AppDbContext : IdentityDbContext<User>
     {
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<ProductionOrder> ProductionOrders { get; set; }
-        public DbSet<ProductionFacility> ProductionFacilities { get; set; }
-        public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
-        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
-        public DbSet<Vendor> Vendors { get; set; }
-        public DbSet<SalesOrder> SalesOrders { get; set; }
-        public DbSet<Supply> Supplies { get; set; }
-
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
@@ -27,53 +17,15 @@ namespace ScmssApiServer.Data
             ChangeTracker.StateChanged += ChangeTracker_StateChanged;
         }
 
-        /// <summary>
-        /// Set creation info on new update-trackable entity.
-        /// </summary>
-        private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
-        {
-            EntityEntry entry = e.Entry;
-            if (e.FromQuery || entry.State != EntityState.Added)
-            {
-                return;
-            }
-
-            if (entry.Entity is IUpdateTrackable)
-            {
-                var entity = (IUpdateTrackable)entry.Entity;
-                entity.CreateTime = DateTime.UtcNow;
-                entity.IsActive = true;
-            }
-            else if (entry.Entity is ILifecycle)
-            {
-                var entity = (ILifecycle)entry.Entity;
-                entity.CreateTime = DateTime.UtcNow;
-            }
-        }
-
-        /// <summary>
-        /// Set update info on updated update-trackable entity.
-        /// </summary>
-        private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
-        {
-            EntityEntry entry = e.Entry;
-
-            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
-            {
-                return;
-            }
-
-            if (entry.Entity is IUpdateTrackable)
-            {
-                var entity = (IUpdateTrackable)entry.Entity;
-                entity.UpdateTime = DateTime.UtcNow;
-            }
-            else if (entry.Entity is ILifecycle)
-            {
-                var entity = (ILifecycle)entry.Entity;
-                entity.UpdateTime = DateTime.UtcNow;
-            }
-        }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<ProductionFacility> ProductionFacilities { get; set; }
+        public DbSet<ProductionOrder> ProductionOrders { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
+        public DbSet<SalesOrder> SalesOrders { get; set; }
+        public DbSet<Supply> Supplies { get; set; }
+        public DbSet<Vendor> Vendors { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
         {
@@ -205,7 +157,7 @@ namespace ScmssApiServer.Data
             builder.Entity<Product>()
                 .HasMany(e => e.Supplies)
                 .WithMany(e => e.Products)
-                .UsingEntity<ProductionCostItem>();
+                .UsingEntity<ProductionSupplyCostItem>();
 
             #endregion Product
 
@@ -249,6 +201,270 @@ namespace ScmssApiServer.Data
                 .UsingEntity<WarehouseProductItem>();
 
             #endregion ProductionFacility
+
+            #region Seeding
+
+            builder.Entity<Customer>().HasData(
+            new Customer
+            {
+                Id = 1,
+                Name = "Cool Garden 324",
+                Email = "watarichanno@gmail.com",
+                PhoneNumber = "0344250401",
+                DefaultLocation = "156 Nguyen Van Luong, Bien Hoa, Dong nai",
+                Description = "Flower garden.",
+                ContactPerson = "Hoa Thi Mai",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Customer
+            {
+                Id = 2,
+                Name = "Phi Hung Shop",
+                Email = "haphihung55@gmail.com",
+                PhoneNumber = "0344250401",
+                DefaultLocation = "436 Vo Van Kiet, District 1, HCM City",
+                Description = "Plant shop.",
+                ContactPerson = "Ha Phi Hung",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            });
+
+            builder.Entity<ProductionFacility>().HasData(
+            new ProductionFacility
+            {
+                Id = 1,
+                Name = "Go Dau",
+                Description = "Primary production facility",
+                Location = "Go Dau Industrial Park, Phuoc Thai, Long Thanh, Dong Nai",
+                PhoneNumber = "02837560110",
+                Email = "godau@cool-fertilizer.com.vn",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new ProductionFacility
+            {
+                Id = 2,
+                Name = "Binh Dien - Long An",
+                Description = "Secondary production facility",
+                Location = "Long Dinh Industrial Park, Long Dinh, Can Duoc, Long An",
+                PhoneNumber = "02723726627",
+                Email = "longan@cool-fertilizer.com.vn",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            });
+
+            builder.Entity<Vendor>().HasData(
+            new Vendor
+            {
+                Id = 1,
+                Name = "PVFCCo",
+                Email = "customer@pvfcco.com.vn",
+                PhoneNumber = "02838256258",
+                DefaultLocation = "Phu My Industrial Park, Phu My, Phu My, Ba Ria - Vung Tau",
+                Description = "Main vendor for major ingredients.",
+                ContactPerson = "Ha Long Anh",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Vendor
+            {
+                Id = 2,
+                Name = "Vinachem",
+                Email = "order@vinachem.com.vn",
+                PhoneNumber = "02438240551",
+                DefaultLocation = "Binh Duong Industrial Park, An Binh, Di An, Binh Duong",
+                Description = "Main vendor for trace ingredients.",
+                ContactPerson = "Nguyen Thanh Long",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            });
+
+            builder.Entity<Supply>().HasData(
+            new Supply
+            {
+                Id = 1,
+                VendorId = 1,
+                Name = "PVFCCo Urea",
+                ExpirationMonth = 12,
+                Unit = "Kg",
+                Price = 5000,
+                Description = "CO(NH2)2 for nitrogen.",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Supply
+            {
+                Id = 2,
+                VendorId = 1,
+                Name = "PVFCCo Phosphorous",
+                ExpirationMonth = 12,
+                Unit = "Kg",
+                Price = 6000,
+                Description = "P2O5 for phosphorous.",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Supply
+            {
+                Id = 3,
+                VendorId = 1,
+                Name = "PVFCCo Potassium Chloride",
+                ExpirationMonth = 12,
+                Unit = "Kg",
+                Price = 5000,
+                Description = "KCl for potassium.",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Supply
+            {
+                Id = 4,
+                VendorId = 2,
+                Name = "Vinachem Ammonium Sulphate",
+                ExpirationMonth = 12,
+                Unit = "Kg",
+                Price = 13000,
+                Description = "(NH4)2SO4 for trace sulfur.",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Supply
+            {
+                Id = 5,
+                VendorId = 2,
+                Name = "Vinachem Boric Acid",
+                ExpirationMonth = 12,
+                Unit = "Kg",
+                Price = 38000,
+                Description = "H3BO3 for trace boron.",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Supply
+            {
+                Id = 6,
+                VendorId = 2,
+                Name = "Vinachem Zinc Sulphate",
+                ExpirationMonth = 12,
+                Unit = "Kg",
+                Price = 40000,
+                Description = "ZnSO4 for trace zinc.",
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            });
+
+            builder.Entity<Product>().HasData(
+            new Product
+            {
+                Id = 1,
+                Name = "NPK 16-8-8+13S",
+                NetWeight = 50,
+                ExpirationMonth = 48,
+                Unit = "Item(s)",
+                Price = 500000,
+                Description = "MSPB: 04513\n" +
+                                "Protein total (Nts): 16%\n" +
+                                "Effective Phosphate (P2O5hh): 8%\n" +
+                                "Effective Potassium (K2Ohh): 8%\n" +
+                                "Sulfur (S): 13%\n" +
+                                "Humidity: 2%\n" +
+                                "Suitable for all crops.",
+                SupplyCostItems =
+                {
+                },
+                MiscCost = 15000,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new Product
+            {
+                Id = 2,
+                Name = "NPK 16-7-18+12S+TE",
+                NetWeight = 50,
+                ExpirationMonth = 48,
+                Unit = "Item(s)",
+                Price = 600000,
+                Description = "MSPB: 04519\n" +
+                                "Protein total (Nts): 16%\n" +
+                                "Effective Phosphate (P2O5hh): 7%\n" +
+                                "Effective Potassium (K2Ohh): 18%\n" +
+                                "Sulfur (S): 12%\n" +
+                                "Bo (B): 217ppm\n" +
+                                "Zinc (Zn): 400ppm\n" +
+                                "Humidity: 2%\n" +
+                                "Suitable for coffee, fruit, rubber, " +
+                                "vegetable, rice crops.",
+                SupplyCostItems =
+                {
+                },
+                MiscCost = 18000,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            });
+
+            builder.Entity<ProductionSupplyCostItem>().HasData(
+                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 1, Quantity = 20.6 },
+                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 2, Quantity = 8 },
+                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 3, Quantity = 8 },
+                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 4, Quantity = 13 },
+                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 1, Quantity = 16 },
+                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 2, Quantity = 8 },
+                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 3, Quantity = 13 },
+                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 4, Quantity = 10 },
+                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 5, Quantity = 1.5 },
+                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 6, Quantity = 1.5 }
+            );
+
+            #endregion Seeding
+        }
+
+        /// <summary>
+        /// Set update info on updated update-trackable or lifecycle entity.
+        /// </summary>
+        private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
+        {
+            EntityEntry entry = e.Entry;
+
+            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
+            {
+                return;
+            }
+
+            if (entry.Entity is IUpdateTrackable)
+            {
+                var entity = (IUpdateTrackable)entry.Entity;
+                entity.UpdateTime = DateTime.UtcNow;
+            }
+            else if (entry.Entity is ILifecycle)
+            {
+                var entity = (ILifecycle)entry.Entity;
+                entity.UpdateTime = DateTime.UtcNow;
+            }
+        }
+
+        /// <summary>
+        /// Set creation info on new update-trackable or lifecycle entity.
+        /// </summary>
+        private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
+        {
+            EntityEntry entry = e.Entry;
+            if (e.FromQuery || entry.State != EntityState.Added)
+            {
+                return;
+            }
+
+            if (entry.Entity is IUpdateTrackable)
+            {
+                var entity = (IUpdateTrackable)entry.Entity;
+                entity.CreateTime = DateTime.UtcNow;
+                entity.IsActive = true;
+            }
+            else if (entry.Entity is ILifecycle)
+            {
+                var entity = (ILifecycle)entry.Entity;
+                entity.CreateTime = DateTime.UtcNow;
+            }
         }
     }
 }

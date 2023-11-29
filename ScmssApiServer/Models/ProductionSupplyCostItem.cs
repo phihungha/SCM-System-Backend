@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.Models
 {
-    public class ProductionCostItem
+    public class ProductionSupplyCostItem
     {
         public int ProductId { get; set; }
         public Product Product { get; set; } = null!;

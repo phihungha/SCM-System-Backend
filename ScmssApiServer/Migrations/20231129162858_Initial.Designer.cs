@@ -12,7 +12,7 @@ using ScmssApiServer.Data;
 namespace ScmssApiServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231128114023_Initial")]
+    [Migration("20231129162858_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -197,6 +197,32 @@ namespace ScmssApiServer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ContactPerson = "Hoa Thi Mai",
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(7188),
+                            DefaultLocation = "156 Nguyen Van Luong, Bien Hoa, Dong nai",
+                            Description = "Flower garden.",
+                            Email = "watarichanno@gmail.com",
+                            IsActive = true,
+                            Name = "Cool Garden 324",
+                            PhoneNumber = "0344250401"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ContactPerson = "Ha Phi Hung",
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(7264),
+                            DefaultLocation = "436 Vo Van Kiet, District 1, HCM City",
+                            Description = "Plant shop.",
+                            Email = "haphihung55@gmail.com",
+                            IsActive = true,
+                            Name = "Phi Hung Shop",
+                            PhoneNumber = "0344250401"
+                        });
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.Product", b =>
@@ -213,12 +239,21 @@ namespace ScmssApiServer.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int>("ExpirationMonth")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<decimal>("MiscCost")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<double>("NetWeight")
+                        .HasColumnType("double precision");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -233,24 +268,34 @@ namespace ScmssApiServer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Products");
-                });
 
-            modelBuilder.Entity("ScmssApiServer.Models.ProductionCostItem", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SupplyId")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("ProductId", "SupplyId");
-
-                    b.HasIndex("SupplyId");
-
-                    b.ToTable("ProductionCostItem");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8204),
+                            Description = "MSPB: 04513\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 8%\nEffective Potassium (K2Ohh): 8%\nSulfur (S): 13%\nHumidity: 2%\nSuitable for all crops.",
+                            ExpirationMonth = 48,
+                            IsActive = true,
+                            MiscCost = 15000m,
+                            Name = "NPK 16-8-8+13S",
+                            NetWeight = 50.0,
+                            Price = 500000m,
+                            Unit = "Item(s)"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8209),
+                            Description = "MSPB: 04519\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 7%\nEffective Potassium (K2Ohh): 18%\nSulfur (S): 12%\nBo (B): 217ppm\nZinc (Zn): 400ppm\nHumidity: 2%\nSuitable for coffee, fruit, rubber, vegetable, rice crops.",
+                            ExpirationMonth = 48,
+                            IsActive = true,
+                            MiscCost = 18000m,
+                            Name = "NPK 16-7-18+12S+TE",
+                            NetWeight = 50.0,
+                            Price = 600000m,
+                            Unit = "Item(s)"
+                        });
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.ProductionFacility", b =>
@@ -268,6 +313,10 @@ namespace ScmssApiServer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -279,12 +328,40 @@ namespace ScmssApiServer.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdateTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.ToTable("ProductionFacilities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(7946),
+                            Description = "Primary production facility",
+                            Email = "godau@cool-fertilizer.com.vn",
+                            IsActive = true,
+                            Location = "Go Dau Industrial Park, Phuoc Thai, Long Thanh, Dong Nai",
+                            Name = "Go Dau",
+                            PhoneNumber = "02837560110"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(7952),
+                            Description = "Secondary production facility",
+                            Email = "longan@cool-fertilizer.com.vn",
+                            IsActive = true,
+                            Location = "Long Dinh Industrial Park, Long Dinh, Can Duoc, Long An",
+                            Name = "Binh Dien - Long An",
+                            PhoneNumber = "02723726627"
+                        });
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.ProductionOrder", b =>
@@ -366,10 +443,6 @@ namespace ScmssApiServer.Migrations
                     b.Property<DateTime>("Time")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProductionOrderId");
@@ -409,6 +482,86 @@ namespace ScmssApiServer.Migrations
                     b.HasIndex("ProductionOrderId");
 
                     b.ToTable("ProductionOrderItem");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.ProductionSupplyCostItem", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SupplyId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("ProductId", "SupplyId");
+
+                    b.HasIndex("SupplyId");
+
+                    b.ToTable("ProductionSupplyCostItem");
+
+                    b.HasData(
+                        new
+                        {
+                            ProductId = 1,
+                            SupplyId = 1,
+                            Quantity = 20.600000000000001
+                        },
+                        new
+                        {
+                            ProductId = 1,
+                            SupplyId = 2,
+                            Quantity = 8.0
+                        },
+                        new
+                        {
+                            ProductId = 1,
+                            SupplyId = 3,
+                            Quantity = 8.0
+                        },
+                        new
+                        {
+                            ProductId = 1,
+                            SupplyId = 4,
+                            Quantity = 13.0
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            SupplyId = 1,
+                            Quantity = 16.0
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            SupplyId = 2,
+                            Quantity = 8.0
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            SupplyId = 3,
+                            Quantity = 13.0
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            SupplyId = 4,
+                            Quantity = 10.0
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            SupplyId = 5,
+                            Quantity = 1.5
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            SupplyId = 6,
+                            Quantity = 1.5
+                        });
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrder", b =>
@@ -825,6 +978,9 @@ namespace ScmssApiServer.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<int>("ExpirationMonth")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -850,6 +1006,80 @@ namespace ScmssApiServer.Migrations
                     b.HasIndex("VendorId");
 
                     b.ToTable("Supplies");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8110),
+                            Description = "CO(NH2)2 for nitrogen.",
+                            ExpirationMonth = 12,
+                            IsActive = true,
+                            Name = "PVFCCo Urea",
+                            Price = 5000m,
+                            Unit = "Kg",
+                            VendorId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8116),
+                            Description = "P2O5 for phosphorous.",
+                            ExpirationMonth = 12,
+                            IsActive = true,
+                            Name = "PVFCCo Phosphorous",
+                            Price = 6000m,
+                            Unit = "Kg",
+                            VendorId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8121),
+                            Description = "KCl for potassium.",
+                            ExpirationMonth = 12,
+                            IsActive = true,
+                            Name = "PVFCCo Potassium Chloride",
+                            Price = 5000m,
+                            Unit = "Kg",
+                            VendorId = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8125),
+                            Description = "(NH4)2SO4 for trace sulfur.",
+                            ExpirationMonth = 12,
+                            IsActive = true,
+                            Name = "Vinachem Ammonium Sulphate",
+                            Price = 13000m,
+                            Unit = "Kg",
+                            VendorId = 2
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8130),
+                            Description = "H3BO3 for trace boron.",
+                            ExpirationMonth = 12,
+                            IsActive = true,
+                            Name = "Vinachem Boric Acid",
+                            Price = 38000m,
+                            Unit = "Kg",
+                            VendorId = 2
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8134),
+                            Description = "ZnSO4 for trace zinc.",
+                            ExpirationMonth = 12,
+                            IsActive = true,
+                            Name = "Vinachem Zinc Sulphate",
+                            Price = 40000m,
+                            Unit = "Kg",
+                            VendorId = 2
+                        });
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.User", b =>
@@ -992,6 +1222,32 @@ namespace ScmssApiServer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Vendors");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ContactPerson = "Ha Long Anh",
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8012),
+                            DefaultLocation = "Phu My Industrial Park, Phu My, Phu My, Ba Ria - Vung Tau",
+                            Description = "Main vendor for major ingredients.",
+                            Email = "customer@pvfcco.com.vn",
+                            IsActive = true,
+                            Name = "PVFCCo",
+                            PhoneNumber = "02838256258"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ContactPerson = "Nguyen Thanh Long",
+                            CreateTime = new DateTime(2023, 11, 29, 16, 28, 57, 701, DateTimeKind.Utc).AddTicks(8017),
+                            DefaultLocation = "Binh Duong Industrial Park, An Binh, Di An, Binh Duong",
+                            Description = "Main vendor for trace ingredients.",
+                            Email = "order@vinachem.com.vn",
+                            IsActive = true,
+                            Name = "Vinachem",
+                            PhoneNumber = "02438240551"
+                        });
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.WarehouseProductItem", b =>
@@ -1099,25 +1355,6 @@ namespace ScmssApiServer.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ScmssApiServer.Models.ProductionCostItem", b =>
-                {
-                    b.HasOne("ScmssApiServer.Models.Product", "Product")
-                        .WithMany("ProductionCostItems")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ScmssApiServer.Models.Supply", "Supply")
-                        .WithMany("ProductionCostItems")
-                        .HasForeignKey("SupplyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Supply");
-                });
-
             modelBuilder.Entity("ScmssApiServer.Models.ProductionOrder", b =>
                 {
                     b.HasOne("ScmssApiServer.Models.User", "ApproveProductionManager")
@@ -1177,6 +1414,25 @@ namespace ScmssApiServer.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("ProductionOrder");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.ProductionSupplyCostItem", b =>
+                {
+                    b.HasOne("ScmssApiServer.Models.Product", "Product")
+                        .WithMany("SupplyCostItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ScmssApiServer.Models.Supply", "Supply")
+                        .WithMany("ProductionCostItems")
+                        .HasForeignKey("SupplyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Supply");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrder", b =>
@@ -1438,11 +1694,11 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.Product", b =>
                 {
-                    b.Navigation("ProductionCostItems");
-
                     b.Navigation("ProductionOrderItems");
 
                     b.Navigation("SalesOrderItems");
+
+                    b.Navigation("SupplyCostItems");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.ProductionFacility", b =>
