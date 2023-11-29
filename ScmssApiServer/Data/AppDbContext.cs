@@ -416,6 +416,138 @@ namespace ScmssApiServer.Data
                 new ProductionSupplyCostItem { ProductId = 2, SupplyId = 6, Quantity = 1.5 }
             );
 
+            builder.Entity<WarehouseSupplyItem>().HasData(
+            new WarehouseSupplyItem
+            {
+                SupplyId = 1,
+                ProductionFacilityId = 1,
+                Quantity = 13000,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 2,
+                ProductionFacilityId = 1,
+                Quantity = 12500,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 3,
+                ProductionFacilityId = 1,
+                Quantity = 12500,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 4,
+                ProductionFacilityId = 1,
+                Quantity = 12000,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 5,
+                ProductionFacilityId = 1,
+                Quantity = 1800,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 6,
+                ProductionFacilityId = 1,
+                Quantity = 1800,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 1,
+                ProductionFacilityId = 2,
+                Quantity = 12000,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 2,
+                ProductionFacilityId = 2,
+                Quantity = 12000,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 3,
+                ProductionFacilityId = 2,
+                Quantity = 12500,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 4,
+                ProductionFacilityId = 2,
+                Quantity = 11000,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 5,
+                ProductionFacilityId = 2,
+                Quantity = 1500,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseSupplyItem
+            {
+                SupplyId = 6,
+                ProductionFacilityId = 2,
+                Quantity = 1500,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            });
+
+            builder.Entity<WarehouseProductItem>().HasData(
+            new WarehouseProductItem
+            {
+                ProductId = 1,
+                ProductionFacilityId = 1,
+                Quantity = 400,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseProductItem
+            {
+                ProductId = 2,
+                ProductionFacilityId = 1,
+                Quantity = 300,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseProductItem
+            {
+                ProductId = 1,
+                ProductionFacilityId = 2,
+                Quantity = 700,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            },
+            new WarehouseProductItem
+            {
+                ProductId = 2,
+                ProductionFacilityId = 2,
+                Quantity = 600,
+                IsActive = true,
+                CreateTime = DateTime.UtcNow,
+            });
+
             #endregion Seeding
         }
 
