@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public interface IUpdateTrackable
+    public interface ISoftDeletable
     {
         bool IsActive { get; set; }
         DateTime CreateTime { get; set; }

@@ -4,7 +4,10 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class SalesOrder : Order<SalesOrderItem, SalesOrderEvent>
+    /// <summary>
+    /// Represents a sales order.
+    /// </summary>
+    public class SalesOrder : TransOrder<SalesOrderItem, SalesOrderEvent>
     {
         public ICollection<Product> Products { get; set; }
             = new List<Product>();
@@ -18,7 +21,7 @@ namespace ScmssApiServer.Models
             {
                 if (productionFacilityId != null
                     && value != productionFacilityId
-                    && Status != OrderStatus.Processing)
+                    && Status != TransOrderStatus.Processing)
                 {
                     throw new InvalidDomainOperationException(
                             "Cannot change production facility after sales order has started delivery."
@@ -37,7 +40,7 @@ namespace ScmssApiServer.Models
             {
                 if (productionFacility != null
                     && value?.Id != productionFacility.Id
-                    && Status != OrderStatus.Processing)
+                    && Status != TransOrderStatus.Processing)
                 {
                     throw new InvalidDomainOperationException(
                             "Cannot change production facility after sales order has started delivery."

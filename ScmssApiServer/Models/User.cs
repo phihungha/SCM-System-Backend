@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.Models
 {
-    public class User : IdentityUser, IUpdateTrackable
+    public class User : IdentityUser, ISoftDeletable
     {
         [PersonalData]
         [StringLength(maximumLength: 50, MinimumLength = 5)]

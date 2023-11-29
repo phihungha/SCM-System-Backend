@@ -3,7 +3,7 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class PurchaseOrderEvent : OrderEvent
+    public class PurchaseOrderEvent : TransOrderEvent
     {
         public int PurchaseOrderId { get; set; }
         public PurchaseOrder PurchaseOrder { get; set; } = null!;

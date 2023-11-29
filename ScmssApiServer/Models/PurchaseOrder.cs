@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public class PurchaseOrder : Order<PurchaseOrderItem, PurchaseOrderEvent>
+    public class PurchaseOrder : TransOrder<PurchaseOrderItem, PurchaseOrderEvent>
     {
         public ICollection<Supply> Supplies { get; set; } = new List<Supply>();
 

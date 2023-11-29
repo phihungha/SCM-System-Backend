@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ScmssApiServer.Migrations
 {
     /// <inheritdoc />
@@ -32,14 +34,14 @@ namespace ScmssApiServer.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    ContactPerson = table.Column<string>(type: "text", nullable: true),
+                    CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DefaultLocation = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
-                    ContactPerson = table.Column<string>(type: "text", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
                     UpdateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -53,11 +55,13 @@ namespace ScmssApiServer.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    Location = table.Column<string>(type: "text", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -71,12 +75,15 @@ namespace ScmssApiServer.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Unit = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    MiscCost = table.Column<decimal>(type: "numeric", nullable: false),
+                    NetWeight = table.Column<double>(type: "double precision", nullable: false),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    ExpirationMonth = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Unit = table.Column<string>(type: "text", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -90,14 +97,14 @@ namespace ScmssApiServer.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
+                    ContactPerson = table.Column<string>(type: "text", nullable: true),
+                    CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DefaultLocation = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Email = table.Column<string>(type: "text", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
-                    ContactPerson = table.Column<string>(type: "text", nullable: true),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
-                    CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true),
                     UpdateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -201,12 +208,13 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     VendorId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    Unit = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false),
-                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    ExpirationMonth = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Unit = table.Column<string>(type: "text", nullable: false),
                     UpdateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
@@ -418,22 +426,24 @@ namespace ScmssApiServer.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProductionFacilityId = table.Column<int>(type: "integer", nullable: true),
                     CustomerId = table.Column<int>(type: "integer", nullable: false),
-                    SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
-                    VatRate = table.Column<double>(type: "double precision", nullable: false),
-                    VatAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    FromLocation = table.Column<string>(type: "text", nullable: true),
-                    ToLocation = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    PaymentStatus = table.Column<string>(type: "text", nullable: false),
-                    InvoiceUrl = table.Column<string>(type: "text", nullable: true),
-                    ReceiptUrl = table.Column<string>(type: "text", nullable: true),
-                    CreateUserId = table.Column<string>(type: "text", nullable: false),
-                    FinishUserId = table.Column<string>(type: "text", nullable: true),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreateUserId = table.Column<string>(type: "text", nullable: false),
+                    FinishTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    FinishUserId = table.Column<string>(type: "text", nullable: true),
                     UpdateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeliverTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    FinishTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    FromLocation = table.Column<string>(type: "text", nullable: true),
+                    InvoiceUrl = table.Column<string>(type: "text", nullable: true),
+                    PaymentStatus = table.Column<string>(type: "text", nullable: false),
+                    Problem = table.Column<string>(type: "text", nullable: true),
+                    ReceiptUrl = table.Column<string>(type: "text", nullable: true),
+                    RemainingAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
+                    ToLocation = table.Column<string>(type: "text", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    VatAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    VatRate = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -463,7 +473,7 @@ namespace ScmssApiServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductionCostItem",
+                name: "ProductionSupplyCostItem",
                 columns: table => new
                 {
                     ProductId = table.Column<int>(type: "integer", nullable: false),
@@ -472,15 +482,15 @@ namespace ScmssApiServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductionCostItem", x => new { x.ProductId, x.SupplyId });
+                    table.PrimaryKey("PK_ProductionSupplyCostItem", x => new { x.ProductId, x.SupplyId });
                     table.ForeignKey(
-                        name: "FK_ProductionCostItem_Products_ProductId",
+                        name: "FK_ProductionSupplyCostItem_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductionCostItem_Supplies_SupplyId",
+                        name: "FK_ProductionSupplyCostItem_Supplies_SupplyId",
                         column: x => x.SupplyId,
                         principalTable: "Supplies",
                         principalColumn: "Id",
@@ -522,10 +532,9 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProductionOrderId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Location = table.Column<string>(type: "text", nullable: true),
-                    Message = table.Column<string>(type: "text", nullable: true)
+                    Message = table.Column<string>(type: "text", nullable: true),
+                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -578,22 +587,24 @@ namespace ScmssApiServer.Migrations
                     VendorId = table.Column<int>(type: "integer", nullable: false),
                     ProductionFacilityId = table.Column<int>(type: "integer", nullable: false),
                     PurchaseRequisitionId = table.Column<int>(type: "integer", nullable: true),
-                    SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
-                    VatRate = table.Column<double>(type: "double precision", nullable: false),
-                    VatAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    FromLocation = table.Column<string>(type: "text", nullable: true),
-                    ToLocation = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    PaymentStatus = table.Column<string>(type: "text", nullable: false),
-                    InvoiceUrl = table.Column<string>(type: "text", nullable: true),
-                    ReceiptUrl = table.Column<string>(type: "text", nullable: true),
-                    CreateUserId = table.Column<string>(type: "text", nullable: false),
-                    FinishUserId = table.Column<string>(type: "text", nullable: true),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreateUserId = table.Column<string>(type: "text", nullable: false),
+                    FinishTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    FinishUserId = table.Column<string>(type: "text", nullable: true),
                     UpdateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DeliverTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    FinishTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    FromLocation = table.Column<string>(type: "text", nullable: true),
+                    InvoiceUrl = table.Column<string>(type: "text", nullable: true),
+                    PaymentStatus = table.Column<string>(type: "text", nullable: false),
+                    Problem = table.Column<string>(type: "text", nullable: true),
+                    ReceiptUrl = table.Column<string>(type: "text", nullable: true),
+                    RemainingAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
+                    ToLocation = table.Column<string>(type: "text", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    VatAmount = table.Column<decimal>(type: "numeric", nullable: false),
+                    VatRate = table.Column<double>(type: "double precision", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -636,8 +647,8 @@ namespace ScmssApiServer.Migrations
                     OrderId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "numeric", nullable: false)
+                    TotalPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -663,10 +674,10 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     SalesOrderId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Location = table.Column<string>(type: "text", nullable: true),
-                    Message = table.Column<string>(type: "text", nullable: true)
+                    Message = table.Column<string>(type: "text", nullable: true),
+                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -687,8 +698,8 @@ namespace ScmssApiServer.Migrations
                     OrderId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "numeric", nullable: false)
+                    TotalPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -714,10 +725,10 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PurchaseOrderId = table.Column<int>(type: "integer", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Location = table.Column<string>(type: "text", nullable: true),
-                    Message = table.Column<string>(type: "text", nullable: true)
+                    Message = table.Column<string>(type: "text", nullable: true),
+                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -740,8 +751,8 @@ namespace ScmssApiServer.Migrations
                     NetPrice = table.Column<decimal>(type: "numeric", nullable: false),
                     Quantity = table.Column<double>(type: "double precision", nullable: false),
                     Unit = table.Column<string>(type: "text", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "numeric", nullable: false)
+                    TotalPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -758,6 +769,102 @@ namespace ScmssApiServer.Migrations
                         principalTable: "Supplies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Customers",
+                columns: new[] { "Id", "ContactPerson", "CreateTime", "DefaultLocation", "Description", "Email", "IsActive", "Name", "PhoneNumber", "UpdateTime" },
+                values: new object[,]
+                {
+                    { 1, "Hoa Thi Mai", new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4086), "156 Nguyen Van Luong, Bien Hoa, Dong nai", "Flower garden.", "watarichanno@gmail.com", true, "Cool Garden 324", "0344250401", null },
+                    { 2, "Ha Phi Hung", new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4094), "436 Vo Van Kiet, District 1, HCM City", "Plant shop.", "haphihung55@gmail.com", true, "Phi Hung Shop", "0344250401", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ProductionFacilities",
+                columns: new[] { "Id", "CreateTime", "Description", "Email", "IsActive", "Location", "Name", "PhoneNumber", "UpdateTime" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4694), "Primary production facility", "godau@cool-fertilizer.com.vn", true, "Go Dau Industrial Park, Phuoc Thai, Long Thanh, Dong Nai", "Go Dau", "02837560110", null },
+                    { 2, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4699), "Secondary production facility", "longan@cool-fertilizer.com.vn", true, "Long Dinh Industrial Park, Long Dinh, Can Duoc, Long An", "Binh Dien - Long An", "02723726627", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Products",
+                columns: new[] { "Id", "CreateTime", "Description", "ExpirationMonth", "IsActive", "MiscCost", "Name", "NetWeight", "Price", "Unit", "UpdateTime" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4990), "MSPB: 04513\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 8%\nEffective Potassium (K2Ohh): 8%\nSulfur (S): 13%\nHumidity: 2%\nSuitable for all crops.", 48, true, 15000m, "NPK 16-8-8+13S", 50.0, 500000m, "Item(s)", null },
+                    { 2, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4996), "MSPB: 04519\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 7%\nEffective Potassium (K2Ohh): 18%\nSulfur (S): 12%\nBo (B): 217ppm\nZinc (Zn): 400ppm\nHumidity: 2%\nSuitable for coffee, fruit, rubber, vegetable, rice crops.", 48, true, 18000m, "NPK 16-7-18+12S+TE", 50.0, 600000m, "Item(s)", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Vendors",
+                columns: new[] { "Id", "ContactPerson", "CreateTime", "DefaultLocation", "Description", "Email", "IsActive", "Name", "PhoneNumber", "UpdateTime" },
+                values: new object[,]
+                {
+                    { 1, "Ha Long Anh", new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4747), "Phu My Industrial Park, Phu My, Phu My, Ba Ria - Vung Tau", "Main vendor for major ingredients.", "customer@pvfcco.com.vn", true, "PVFCCo", "02838256258", null },
+                    { 2, "Nguyen Thanh Long", new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4751), "Binh Duong Industrial Park, An Binh, Di An, Binh Duong", "Main vendor for trace ingredients.", "order@vinachem.com.vn", true, "Vinachem", "02438240551", null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Supplies",
+                columns: new[] { "Id", "CreateTime", "Description", "ExpirationMonth", "IsActive", "Name", "Price", "Unit", "UpdateTime", "VendorId" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4838), "CO(NH2)2 for nitrogen.", 12, true, "PVFCCo Urea", 5000m, "Kg", null, 1 },
+                    { 2, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4845), "P2O5 for phosphorous.", 12, true, "PVFCCo Phosphorous", 6000m, "Kg", null, 1 },
+                    { 3, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4850), "KCl for potassium.", 12, true, "PVFCCo Potassium Chloride", 5000m, "Kg", null, 1 },
+                    { 4, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4855), "(NH4)2SO4 for trace sulfur.", 12, true, "Vinachem Ammonium Sulphate", 13000m, "Kg", null, 2 },
+                    { 5, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4926), "H3BO3 for trace boron.", 12, true, "Vinachem Boric Acid", 38000m, "Kg", null, 2 },
+                    { 6, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(4932), "ZnSO4 for trace zinc.", 12, true, "Vinachem Zinc Sulphate", 40000m, "Kg", null, 2 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "WarehouseProductItem",
+                columns: new[] { "ProductId", "ProductionFacilityId", "CreateTime", "IsActive", "Quantity", "UpdateTime" },
+                values: new object[,]
+                {
+                    { 1, 1, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5161), true, 400.0, null },
+                    { 1, 2, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5165), true, 700.0, null },
+                    { 2, 1, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5163), true, 300.0, null },
+                    { 2, 2, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5174), true, 600.0, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ProductionSupplyCostItem",
+                columns: new[] { "ProductId", "SupplyId", "Quantity" },
+                values: new object[,]
+                {
+                    { 1, 1, 20.600000000000001 },
+                    { 1, 2, 8.0 },
+                    { 1, 3, 8.0 },
+                    { 1, 4, 13.0 },
+                    { 2, 1, 16.0 },
+                    { 2, 2, 8.0 },
+                    { 2, 3, 13.0 },
+                    { 2, 4, 10.0 },
+                    { 2, 5, 1.5 },
+                    { 2, 6, 1.5 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "WarehouseSupplyItem",
+                columns: new[] { "ProductionFacilityId", "SupplyId", "CreateTime", "IsActive", "Quantity", "UpdateTime" },
+                values: new object[,]
+                {
+                    { 1, 1, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5097), true, 13000.0, null },
+                    { 1, 2, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5100), true, 12500.0, null },
+                    { 1, 3, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5102), true, 12500.0, null },
+                    { 1, 4, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5104), true, 12000.0, null },
+                    { 1, 5, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5106), true, 1800.0, null },
+                    { 1, 6, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5108), true, 1800.0, null },
+                    { 2, 1, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5110), true, 12000.0, null },
+                    { 2, 2, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5113), true, 12000.0, null },
+                    { 2, 3, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5115), true, 12500.0, null },
+                    { 2, 4, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5117), true, 11000.0, null },
+                    { 2, 5, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5119), true, 1500.0, null },
+                    { 2, 6, new DateTime(2023, 11, 29, 16, 48, 23, 513, DateTimeKind.Utc).AddTicks(5121), true, 1500.0, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -803,11 +910,6 @@ namespace ScmssApiServer.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductionCostItem_SupplyId",
-                table: "ProductionCostItem",
-                column: "SupplyId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ProductionOrderEvent_ProductionOrderId",
                 table: "ProductionOrderEvent",
                 column: "ProductionOrderId");
@@ -836,6 +938,11 @@ namespace ScmssApiServer.Migrations
                 name: "IX_ProductionOrders_ProductionFacilityId",
                 table: "ProductionOrders",
                 column: "ProductionFacilityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductionSupplyCostItem_SupplyId",
+                table: "ProductionSupplyCostItem",
+                column: "SupplyId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrderEvent_PurchaseOrderId",
@@ -973,13 +1080,13 @@ namespace ScmssApiServer.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ProductionCostItem");
-
-            migrationBuilder.DropTable(
                 name: "ProductionOrderEvent");
 
             migrationBuilder.DropTable(
                 name: "ProductionOrderItem");
+
+            migrationBuilder.DropTable(
+                name: "ProductionSupplyCostItem");
 
             migrationBuilder.DropTable(
                 name: "PurchaseOrderEvent");

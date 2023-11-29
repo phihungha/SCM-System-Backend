@@ -2,18 +2,17 @@
 {
     public interface ILifecycle
     {
-        public string CreateUserId { get; set; }
-        public User CreateUser { get; set; }
-        public string? FinishUserId { get; }
-        public User? FinishUser { get; }
-
         public DateTime CreateTime { get; set; }
-        public DateTime? UpdateTime { get; set; }
-        public DateTime? FinishTime { get; }
+        public User CreateUser { get; set; }
+        public string CreateUserId { get; set; }
         public bool Finished { get => FinishTime != null; }
-
-        public void Start(string userId);
+        public DateTime? FinishTime { get; }
+        public User? FinishUser { get; }
+        public string? FinishUserId { get; }
+        public DateTime? UpdateTime { get; set; }
 
         public void Finish(string userId);
+
+        public void Start(string userId);
     }
 }
