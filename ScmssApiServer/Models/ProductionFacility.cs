@@ -3,7 +3,7 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class ProductionFacility : IUpdateTrackable
+    public class ProductionFacility : ISoftDeletable
     {
         public DateTime CreateTime { get; set; }
         public required string Description { get; set; }

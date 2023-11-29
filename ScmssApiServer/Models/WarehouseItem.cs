@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.Models
 {
-    public abstract class WarehouseItem : IUpdateTrackable
+    public abstract class WarehouseItem : ISoftDeletable
     {
         public int ProductionFacilityId { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;

@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public class Company : IUpdateTrackable
+    public class Company : ISoftDeletable
     {
         public string? ContactPerson { get; set; }
         public DateTime CreateTime { get; set; }

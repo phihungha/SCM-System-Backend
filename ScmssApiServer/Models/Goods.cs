@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public abstract class Goods : IUpdateTrackable
+    public abstract class Goods : ISoftDeletable
     {
         public DateTime CreateTime { get; set; }
         public string? Description { get; set; }

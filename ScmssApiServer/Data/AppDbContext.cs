@@ -552,7 +552,7 @@ namespace ScmssApiServer.Data
         }
 
         /// <summary>
-        /// Set update info on updated update-trackable or lifecycle entity.
+        /// Set update info on updated solf-deletable or lifecycle entity.
         /// </summary>
         private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
         {
@@ -563,9 +563,9 @@ namespace ScmssApiServer.Data
                 return;
             }
 
-            if (entry.Entity is IUpdateTrackable)
+            if (entry.Entity is ISoftDeletable)
             {
-                var entity = (IUpdateTrackable)entry.Entity;
+                var entity = (ISoftDeletable)entry.Entity;
                 entity.UpdateTime = DateTime.UtcNow;
             }
             else if (entry.Entity is ILifecycle)
@@ -576,7 +576,7 @@ namespace ScmssApiServer.Data
         }
 
         /// <summary>
-        /// Set creation info on new update-trackable or lifecycle entity.
+        /// Set creation info on new solf-deletable or lifecycle entity.
         /// </summary>
         private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
         {
@@ -586,9 +586,9 @@ namespace ScmssApiServer.Data
                 return;
             }
 
-            if (entry.Entity is IUpdateTrackable)
+            if (entry.Entity is ISoftDeletable)
             {
-                var entity = (IUpdateTrackable)entry.Entity;
+                var entity = (ISoftDeletable)entry.Entity;
                 entity.CreateTime = DateTime.UtcNow;
                 entity.IsActive = true;
             }
