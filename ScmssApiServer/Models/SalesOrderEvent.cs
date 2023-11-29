@@ -3,7 +3,7 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class SalesOrderEvent : OrderEvent
+    public class SalesOrderEvent : TransOrderEvent
     {
         public int SalesOrderId { get; set; }
         public SalesOrder SalesOrder { get; set; } = null!;
@@ -13,8 +13,8 @@ namespace ScmssApiServer.Models
     {
         public SalesOrderEventMappingProfile()
         {
-            CreateMap<SalesOrderEvent, OrderEventDto>();
-            CreateMap<OrderEventCreateDto, SalesOrderEvent>();
+            CreateMap<SalesOrderEvent, TransOrderEventDto>();
+            CreateMap<TransOrderEventCreateDto, SalesOrderEvent>();
         }
     }
 }

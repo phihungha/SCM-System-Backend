@@ -4,7 +4,7 @@ namespace ScmssApiServer.IDomainServices
 {
     public interface ISalesOrdersService
     {
-        Task<OrderEventDto> AddManualEvent(int orderId, OrderEventCreateDto dto);
+        Task<TransOrderEventDto> AddManualEvent(int orderId, TransOrderEventCreateDto dto);
 
         Task<SalesOrderDto> CreateSalesOrderAsync(SalesOrderCreateDto dto, string userId);
 
@@ -12,7 +12,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<IList<SalesOrderDto>> GetSalesOrdersAsync();
 
-        Task<OrderEventDto> UpdateEvent(int id, int orderId, OrderEventUpdateDto dto);
+        Task<TransOrderEventDto> UpdateEvent(int id, int orderId, OrderEventUpdateDto dto);
 
         Task<SalesOrderDto> UpdateSalesOrderAsync(int id, SalesOrderUpdateDto dto, string userId);
     }

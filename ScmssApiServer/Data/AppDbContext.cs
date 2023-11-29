@@ -98,7 +98,7 @@ namespace ScmssApiServer.Data
                 .HaveConversion<string>();
 
             builder
-                .Properties<OrderEventType>()
+                .Properties<TransOrderEventType>()
                 .HaveConversion<string>();
         }
 

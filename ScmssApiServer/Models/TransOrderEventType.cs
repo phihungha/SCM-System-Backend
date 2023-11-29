@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public enum OrderEventType
+    public enum TransOrderEventType
     {
         Processing,
         DeliveryStarted,

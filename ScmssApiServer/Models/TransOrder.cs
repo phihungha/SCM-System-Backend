@@ -8,32 +8,18 @@ namespace ScmssApiServer.Models
     /// </summary>
     /// <typeparam name="TItem">Order line item type</typeparam>
     /// <typeparam name="TEvent">Order event type</typeparam>
-    public abstract class TransOrder<TItem, TEvent> : ILifecycle
+    public abstract class TransOrder<TItem, TEvent> : Order<TItem, TEvent>
         where TItem : TransOrderItem
-        where TEvent : OrderEvent, new()
+        where TEvent : TransOrderEvent, new()
     {
-        public DateTime CreateTime { get; set; }
-        public User CreateUser { get; set; } = null!;
-        public required string CreateUserId { get; set; }
         public DateTime? DeliverTime { get; protected set; }
-        public ICollection<TEvent> Events { get; } = new List<TEvent>();
-        public bool Finished { get => FinishTime != null; }
-        public DateTime? FinishTime { get; private set; }
-        public User? FinishUser { get; private set; }
-        public string? FinishUserId { get; private set; }
 
         /// <summary>
         /// Delivery start location.
         /// </summary>
         public string? FromLocation { get; set; }
 
-        public int Id { get; set; }
         public string? InvoiceUrl { get; set; }
-
-        /// <summary>
-        /// Order item.
-        /// </summary>
-        public ICollection<TItem> Items { get; } = new List<TItem>();
 
         public TransOrderPaymentStatus PaymentStatus { get; private set; }
 
@@ -66,8 +52,6 @@ namespace ScmssApiServer.Models
         /// </summary>
         public decimal TotalAmount { get; private set; }
 
-        public DateTime? UpdateTime { get; set; }
-
         /// <summary>
         /// VAT-taxed amount = SubTotal * VatRate
         /// </summary>
@@ -99,7 +83,7 @@ namespace ScmssApiServer.Models
             CalculateTotals();
         }
 
-        public TEvent AddManualEvent(OrderEventTypeSelection typeSel, string location, string? message)
+        public TEvent AddManualEvent(TransOrderEventTypeSelection typeSel, string location, string? message)
         {
             if (Status != TransOrderStatus.Delivering)
             {
@@ -108,19 +92,19 @@ namespace ScmssApiServer.Models
                     );
             }
 
-            OrderEventType type;
+            TransOrderEventType type;
             switch (typeSel)
             {
-                case OrderEventTypeSelection.Left:
-                    type = OrderEventType.Left;
+                case TransOrderEventTypeSelection.Left:
+                    type = TransOrderEventType.Left;
                     break;
 
-                case OrderEventTypeSelection.Arrived:
-                    type = OrderEventType.Arrived;
+                case TransOrderEventTypeSelection.Arrived:
+                    type = TransOrderEventType.Arrived;
                     break;
 
-                case OrderEventTypeSelection.Interrupted:
-                    type = OrderEventType.Interrupted;
+                case TransOrderEventTypeSelection.Interrupted:
+                    type = TransOrderEventType.Interrupted;
                     break;
 
                 default:
@@ -144,7 +128,7 @@ namespace ScmssApiServer.Models
             Finish(userId);
 
             TEvent lastEvent = Events.Last();
-            AddEvent(OrderEventType.Canceled, lastEvent.Location);
+            AddEvent(TransOrderEventType.Canceled, lastEvent.Location);
         }
 
         public void Complete(string userId)
@@ -156,7 +140,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = TransOrderStatus.Completed;
-            AddEvent(OrderEventType.Completed, ToLocation);
+            AddEvent(TransOrderEventType.Completed, ToLocation);
             CreateDuePayment();
             Finish(userId);
         }
@@ -173,19 +157,8 @@ namespace ScmssApiServer.Models
             if (RemainingAmount == 0)
             {
                 PaymentStatus = TransOrderPaymentStatus.Completed;
-                AddEvent(OrderEventType.PaymentCompleted);
+                AddEvent(TransOrderEventType.PaymentCompleted);
             }
-        }
-
-        public void Finish(string userId)
-        {
-            if (FinishTime != null)
-            {
-                throw new InvalidDomainOperationException("Order is finished");
-            }
-
-            FinishTime = DateTime.UtcNow;
-            FinishUserId = userId;
         }
 
         public void FinishDelivery()
@@ -198,7 +171,7 @@ namespace ScmssApiServer.Models
             }
             Status = TransOrderStatus.Delivered;
             DeliverTime = DateTime.UtcNow;
-            AddEvent(OrderEventType.Delivered, ToLocation);
+            AddEvent(TransOrderEventType.Delivered, ToLocation);
         }
 
         public void Return(string userId, string problem)
@@ -213,20 +186,16 @@ namespace ScmssApiServer.Models
             PaymentStatus = TransOrderPaymentStatus.Canceled;
             Problem = problem;
             Finish(userId);
-            AddEvent(OrderEventType.Returned, ToLocation);
+            AddEvent(TransOrderEventType.Returned, ToLocation);
         }
 
-        public void Start(string userId)
+        public override void Start(string userId)
         {
-            if (Id != 0)
-            {
-                throw new InvalidDomainOperationException("Cannot start an already created order");
-            }
+            base.Start(userId);
 
             Status = TransOrderStatus.Processing;
             PaymentStatus = TransOrderPaymentStatus.Pending;
-            CreateUserId = userId;
-            AddEvent(OrderEventType.Processing);
+            AddEvent(TransOrderEventType.Processing);
         }
 
         public virtual void StartDelivery()
@@ -244,7 +213,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = TransOrderStatus.Delivering;
-            AddEvent(OrderEventType.DeliveryStarted, FromLocation);
+            AddEvent(TransOrderEventType.DeliveryStarted, FromLocation);
         }
 
         public TEvent UpdateEvent(int id, string? message = null, string? location = null)
@@ -264,9 +233,9 @@ namespace ScmssApiServer.Models
 
             if (location != null)
             {
-                if (item.Type != OrderEventType.Left
-                    && item.Type != OrderEventType.Arrived
-                    && item.Type != OrderEventType.Interrupted)
+                if (item.Type != TransOrderEventType.Left
+                    && item.Type != TransOrderEventType.Arrived
+                    && item.Type != TransOrderEventType.Interrupted)
                 {
                     throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
                 }
@@ -277,7 +246,7 @@ namespace ScmssApiServer.Models
             return item;
         }
 
-        protected TEvent AddEvent(OrderEventType type, string? location = null, string? message = null)
+        protected TEvent AddEvent(TransOrderEventType type, string? location = null, string? message = null)
         {
             var item = new TEvent
             {
@@ -300,7 +269,7 @@ namespace ScmssApiServer.Models
         private void CreateDuePayment()
         {
             PaymentStatus = TransOrderPaymentStatus.Due;
-            AddEvent(OrderEventType.PaymentDue);
+            AddEvent(TransOrderEventType.PaymentDue);
         }
     }
 }

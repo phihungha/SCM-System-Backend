@@ -19,7 +19,7 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<OrderEventDto> AddManualEvent(int orderId, OrderEventCreateDto dto)
+        public async Task<TransOrderEventDto> AddManualEvent(int orderId, TransOrderEventCreateDto dto)
         {
             SalesOrder? order = await _dbContext.SalesOrders.FirstOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
@@ -87,7 +87,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<SalesOrderDto>>(items);
         }
 
-        public async Task<OrderEventDto> UpdateEvent(int id, int orderId, OrderEventUpdateDto dto)
+        public async Task<TransOrderEventDto> UpdateEvent(int id, int orderId, OrderEventUpdateDto dto)
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Events)
@@ -235,9 +235,9 @@ namespace ScmssApiServer.DomainServices
             return facility.Location;
         }
 
-        private OrderEventDto GetOrderEventDto(SalesOrderEvent item)
+        private TransOrderEventDto GetOrderEventDto(SalesOrderEvent item)
         {
-            return _mapper.Map<OrderEventDto>(item);
+            return _mapper.Map<TransOrderEventDto>(item);
         }
 
         private SalesOrderDto GetSalesOrderDto(SalesOrder item)

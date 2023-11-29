@@ -54,16 +54,16 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpPost("{orderId}/events")]
-        public async Task<ActionResult<OrderEventDto>> AddManualEvent(int orderId, [FromBody] OrderEventCreateDto body)
+        public async Task<ActionResult<TransOrderEventDto>> AddManualEvent(int orderId, [FromBody] TransOrderEventCreateDto body)
         {
-            OrderEventDto item = await _salesOrdersService.AddManualEvent(orderId, body);
+            TransOrderEventDto item = await _salesOrdersService.AddManualEvent(orderId, body);
             return Ok(item);
         }
 
         [HttpPatch("{orderId}/events/{id}")]
-        public async Task<ActionResult<OrderEventDto>> AddManualEvent(int orderId, int id, [FromBody] OrderEventUpdateDto body)
+        public async Task<ActionResult<TransOrderEventDto>> AddManualEvent(int orderId, int id, [FromBody] OrderEventUpdateDto body)
         {
-            OrderEventDto item = await _salesOrdersService.UpdateEvent(id, orderId, body);
+            TransOrderEventDto item = await _salesOrdersService.UpdateEvent(id, orderId, body);
             return Ok(item);
         }
     }
