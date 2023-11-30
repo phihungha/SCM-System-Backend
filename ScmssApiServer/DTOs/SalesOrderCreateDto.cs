@@ -2,13 +2,16 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class SalesOrderCreateDto : SalesOrderInputDto
+    public class SalesOrderCreateDto
     {
+        [Required]
+        public int CustomerId { get; set; }
+
         [Required]
         public IList<OrderItemInputDto> Items { get; set; }
             = new List<OrderItemInputDto>();
 
-        [Required]
-        public int CustomerId { get; set; }
+        public int? ProductionFacilityId { get; set; }
+        public string? ToLocation { get; set; }
     }
 }

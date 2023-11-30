@@ -21,14 +21,14 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<TransOrderEventDto> AddManualEvent(int orderId, TransOrderEventCreateDto dto)
         {
-            SalesOrder? order = await _dbContext.SalesOrders.FirstOrDefaultAsync(i => i.Id == orderId);
+            SalesOrder? order = await _dbContext.SalesOrders
+                .Include(i => i.Events)
+                .FirstOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();
             }
-
             SalesOrderEvent item = order.AddManualEvent(dto.Type, dto.Location, dto.Message);
-
             await _dbContext.SaveChangesAsync();
             return GetOrderEventDto(item);
         }

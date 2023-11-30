@@ -143,7 +143,6 @@ namespace ScmssApiServer.Models
         {
             base.Complete(userId);
             CreateDuePayment();
-            Finish(userId);
             AddEvent(TransOrderEventType.Completed, ToLocation);
         }
 
@@ -155,7 +154,7 @@ namespace ScmssApiServer.Models
                         "Cannot complete payment of order if there is no due payment."
                     );
             }
-            RemainingAmount = TotalAmount - amount;
+            RemainingAmount = RemainingAmount - amount;
             if (RemainingAmount == 0)
             {
                 PaymentStatus = TransOrderPaymentStatus.Completed;
@@ -224,6 +223,17 @@ namespace ScmssApiServer.Models
 
         protected TEvent AddEvent(TransOrderEventType type, string? location = null, string? message = null)
         {
+            if (type == TransOrderEventType.Left || type == TransOrderEventType.Arrived)
+            {
+                TEvent lastEvent = Events.Last();
+                if (type == lastEvent.Type)
+                {
+                    throw new InvalidDomainOperationException(
+                        "Cannot add arrival/left event with the same type as previous arrival/left event."
+                    );
+                }
+            }
+
             var item = new TEvent
             {
                 Type = type,
@@ -245,6 +255,7 @@ namespace ScmssApiServer.Models
         private void CreateDuePayment()
         {
             PaymentStatus = TransOrderPaymentStatus.Due;
+            RemainingAmount = TotalAmount;
             AddEvent(TransOrderEventType.PaymentDue);
         }
     }
