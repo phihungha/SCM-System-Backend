@@ -4,25 +4,13 @@
             ProductionOrderItem,
             ProductionOrderEvent>
     {
-        public ICollection<Product> Products { get; set; }
-            = new List<Product>();
-
-        public decimal TotalValue { get; set; }
+        public User? ApproveProductionManager { get; set; }
+        public string? ApproveProductionManagerId { get; set; }
+        public ProductionFacility ProductionFacility { get; set; } = null!;
+        public int ProductionFacilityId { get; set; }
+        public ICollection<Product> Products { get; set; } = new List<Product>();
         public decimal TotalCost { get; set; }
         public decimal TotalProfit { get; set; }
-
-        public ProductionOrderStatus Status { get; set; }
-
-        public int ProductionFacilityId { get; set; }
-        public ProductionFacility ProductionFacility { get; set; } = null!;
-
-        public string? ApproveProductionManagerId { get; set; }
-        public User? ApproveProductionManager { get; set; }
-
-        public override void Start(string userId)
-        {
-            base.Start(userId);
-            Status = ProductionOrderStatus.PendingApproval;
-        }
+        public decimal TotalValue { get; set; }
     }
 }

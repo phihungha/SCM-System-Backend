@@ -1,11 +1,11 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public enum TransOrderStatus
+    public enum OrderStatus
     {
         Processing,
-        Delivering,
+        Executing,
         Interrupted,
-        Delivered,
+        WaitingAcceptance,
         Completed,
         Canceled,
         Returned,

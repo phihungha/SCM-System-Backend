@@ -12,7 +12,8 @@ namespace ScmssApiServer.Models
         where TItem : TransOrderItem
         where TEvent : TransOrderEvent, new()
     {
-        public DateTime? DeliverTime { get; protected set; }
+        private ProductionFacility? productionFacility = null;
+        private int? productionFacilityId = null;
 
         /// <summary>
         /// Delivery start location.
@@ -23,10 +24,35 @@ namespace ScmssApiServer.Models
 
         public TransOrderPaymentStatus PaymentStatus { get; private set; }
 
-        /// <summary>
-        /// Reason the order was canceled or returned.
-        /// </summary>
-        public string? Problem { get; private set; }
+        public ProductionFacility? ProductionFacility
+        {
+            get => productionFacility;
+            set
+            {
+                if (value?.Id != productionFacility?.Id && IsStarted)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot change production facility after order has started delivery."
+                        );
+                }
+                productionFacility = value;
+            }
+        }
+
+        public int? ProductionFacilityId
+        {
+            get => productionFacilityId;
+            set
+            {
+                if (value != productionFacilityId && IsStarted)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot change production facility after order has started delivery."
+                        );
+                }
+                productionFacilityId = value;
+            }
+        }
 
         public string? ReceiptUrl { get; set; }
 
@@ -34,8 +60,6 @@ namespace ScmssApiServer.Models
         /// Remaining amount to pay.
         /// </summary>
         public decimal RemainingAmount { get; private set; }
-
-        public TransOrderStatus Status { get; private set; }
 
         /// <summary>
         /// Sum of TransOrderItem.TotalPrice.
@@ -62,30 +86,15 @@ namespace ScmssApiServer.Models
         /// </summary>
         public double VatRate { get; private set; }
 
-        public void AddItem(TItem item)
+        public override void AddItem(TItem item)
         {
-            if (Status != TransOrderStatus.Processing)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot add order item after order has started delivery."
-                    );
-            }
-
-            bool idAlreadyExists = Items.FirstOrDefault(
-                    i => i.ItemId == item.ItemId
-                ) != null;
-            if (idAlreadyExists)
-            {
-                throw new InvalidDomainOperationException("An order item with this ID already exists");
-            }
-
-            Items.Add(item);
+            base.AddItem(item);
             CalculateTotals();
         }
 
         public TEvent AddManualEvent(TransOrderEventTypeSelection typeSel, string location, string? message)
         {
-            if (Status != TransOrderStatus.Delivering)
+            if (Status != OrderStatus.Executing)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot add manual event when order is not being delivered."
@@ -105,6 +114,7 @@ namespace ScmssApiServer.Models
 
                 case TransOrderEventTypeSelection.Interrupted:
                     type = TransOrderEventType.Interrupted;
+                    Status = OrderStatus.Interrupted;
                     break;
 
                 default:
@@ -114,35 +124,27 @@ namespace ScmssApiServer.Models
             return AddEvent(type, location, message);
         }
 
-        public void Cancel(string userId, string problem)
+        public override void Begin(string userId)
         {
-            if (Status == TransOrderStatus.Delivered || Status == TransOrderStatus.Completed)
-            {
-                throw new InvalidOperationException(
-                        "Cannot cancel order after it has been delivered."
-                    );
-            }
-            Status = TransOrderStatus.Canceled;
-            PaymentStatus = TransOrderPaymentStatus.Canceled;
-            Problem = problem;
-            Finish(userId);
+            base.Begin(userId);
+            PaymentStatus = TransOrderPaymentStatus.Pending;
+            AddEvent(TransOrderEventType.Processing);
+        }
 
+        public override void Cancel(string userId, string problem)
+        {
+            base.Cancel(userId, problem);
+            PaymentStatus = TransOrderPaymentStatus.Canceled;
             TEvent lastEvent = Events.Last();
             AddEvent(TransOrderEventType.Canceled, lastEvent.Location);
         }
 
-        public void Complete(string userId)
+        public override void Complete(string userId)
         {
-            if (Status != TransOrderStatus.Delivered)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot complete order if it hasn't finished delivery."
-                    );
-            }
-            Status = TransOrderStatus.Completed;
-            AddEvent(TransOrderEventType.Completed, ToLocation);
+            base.Complete(userId);
             CreateDuePayment();
             Finish(userId);
+            AddEvent(TransOrderEventType.Completed, ToLocation);
         }
 
         public void CompletePayment(decimal amount)
@@ -161,58 +163,34 @@ namespace ScmssApiServer.Models
             }
         }
 
-        public void FinishDelivery()
+        /// <summary>
+        /// Finish order delivery.
+        /// </summary>
+        public override void FinishExecution()
         {
-            if (Status != TransOrderStatus.Delivering)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot finish delivery of order if it is not being delivered."
-                    );
-            }
-            Status = TransOrderStatus.Delivered;
-            DeliverTime = DateTime.UtcNow;
+            base.FinishExecution();
             AddEvent(TransOrderEventType.Delivered, ToLocation);
         }
 
-        public void Return(string userId, string problem)
+        public override void Return(string userId, string problem)
         {
-            if (Status != TransOrderStatus.Delivered)
-            {
-                throw new InvalidOperationException(
-                        "Cannot return order if it has been completed or hasn't finished delivery."
-                    );
-            }
-            Status = TransOrderStatus.Returned;
+            base.Return(userId, problem);
             PaymentStatus = TransOrderPaymentStatus.Canceled;
-            Problem = problem;
-            Finish(userId);
             AddEvent(TransOrderEventType.Returned, ToLocation);
         }
 
-        public override void Start(string userId)
+        /// <summary>
+        /// Start order delivery.
+        /// </summary>
+        public override void StartExecution()
         {
-            base.Start(userId);
-
-            Status = TransOrderStatus.Processing;
-            PaymentStatus = TransOrderPaymentStatus.Pending;
-            AddEvent(TransOrderEventType.Processing);
-        }
-
-        public virtual void StartDelivery()
-        {
-            if (Status != TransOrderStatus.Processing)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot start delivery of order again."
-                    );
-            }
             if (FromLocation == null)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start delivery of order without destination location."
+                        "Cannot start delivery of order without start location."
                     );
             }
-            Status = TransOrderStatus.Delivering;
+            base.StartExecution();
             AddEvent(TransOrderEventType.DeliveryStarted, FromLocation);
         }
 
@@ -233,9 +211,7 @@ namespace ScmssApiServer.Models
 
             if (location != null)
             {
-                if (item.Type != TransOrderEventType.Left
-                    && item.Type != TransOrderEventType.Arrived
-                    && item.Type != TransOrderEventType.Interrupted)
+                if (item.IsAutomatic)
                 {
                     throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
                 }

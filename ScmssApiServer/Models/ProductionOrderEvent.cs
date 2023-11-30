@@ -7,6 +7,7 @@ namespace ScmssApiServer.Models
     {
         public int ProductionOrderId { get; set; }
         public ProductionOrder ProductionOrder { get; set; } = null!;
+        public override bool IsAutomatic => throw new NotImplementedException();
     }
 
     public class ProductionOrderEventMP : Profile

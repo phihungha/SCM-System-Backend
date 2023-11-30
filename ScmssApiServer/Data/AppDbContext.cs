@@ -34,7 +34,7 @@ namespace ScmssApiServer.Data
                 .HaveConversion<string>();
 
             builder
-                .Properties<TransOrderStatus>()
+                .Properties<OrderStatus>()
                 .HaveConversion<string>();
 
             builder

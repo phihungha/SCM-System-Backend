@@ -5,8 +5,8 @@ namespace ScmssApiServer.DTOs
     public class SalesOrderCreateDto : SalesOrderInputDto
     {
         [Required]
-        public IList<TransOrderItemInputDto> Items { get; set; }
-            = new List<TransOrderItemInputDto>();
+        public IList<OrderItemInputDto> Items { get; set; }
+            = new List<OrderItemInputDto>();
 
         [Required]
         public int CustomerId { get; set; }

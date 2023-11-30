@@ -56,7 +56,7 @@ namespace ScmssApiServer.DomainServices
             }
 
             await AddOrderItemsFromDtos(item, dto.Items);
-            item.Start(userId);
+            item.Begin(userId);
 
             _dbContext.SalesOrders.Add(item);
             await _dbContext.SaveChangesAsync();
@@ -134,14 +134,14 @@ namespace ScmssApiServer.DomainServices
                 return GetSalesOrderDto(item);
             }
 
-            if (item.Finished)
+            if (item.IsFinished)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot update order because it is finished"
                     );
             }
 
-            if (item.Status == TransOrderStatus.Processing)
+            if (item.Status == OrderStatus.Processing)
             {
                 if (dto.ProductionFacilityId != null)
                 {
@@ -157,26 +157,26 @@ namespace ScmssApiServer.DomainServices
                 }
             }
 
-            if (item.Status != TransOrderStatus.Delivered)
+            if (item.Status != OrderStatus.WaitingAcceptance)
             {
                 item.ToLocation = dto.ToLocation ?? item.Customer.DefaultLocation;
             }
 
             switch (dto.Status)
             {
-                case TransOrderStatusSelection.Delivering:
-                    item.StartDelivery();
+                case OrderStatusSelection.Executing:
+                    item.StartExecution();
                     break;
 
-                case TransOrderStatusSelection.Delivered:
-                    item.FinishDelivery();
+                case OrderStatusSelection.WaitingAcceptance:
+                    item.FinishExecution();
                     break;
 
-                case TransOrderStatusSelection.Completed:
+                case OrderStatusSelection.Completed:
                     item.Complete(userId);
                     break;
 
-                case TransOrderStatusSelection.Canceled:
+                case OrderStatusSelection.Canceled:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
@@ -186,7 +186,7 @@ namespace ScmssApiServer.DomainServices
                     item.Cancel(userId, dto.Problem);
                     break;
 
-                case TransOrderStatusSelection.Returned:
+                case OrderStatusSelection.Returned:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
@@ -201,7 +201,7 @@ namespace ScmssApiServer.DomainServices
             return GetSalesOrderDto(item);
         }
 
-        private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<TransOrderItemInputDto> dtos)
+        private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext

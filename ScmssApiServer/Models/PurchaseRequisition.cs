@@ -41,7 +41,7 @@
             throw new NotImplementedException();
         }
 
-        public void Start(string userId)
+        public void Begin(string userId)
         {
             throw new NotImplementedException();
         }

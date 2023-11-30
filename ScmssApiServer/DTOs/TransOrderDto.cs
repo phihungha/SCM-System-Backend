@@ -16,7 +16,7 @@ namespace ScmssApiServer.DTOs
         public string? InvoiceUrl { get; set; }
         public TransOrderPaymentStatus PaymentStatus { get; set; }
         public string? ReceiptUrl { get; set; }
-        public TransOrderStatus Status { get; set; }
+        public OrderStatus Status { get; set; }
         public decimal SubTotal { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime? UpdateTime { get; set; }
