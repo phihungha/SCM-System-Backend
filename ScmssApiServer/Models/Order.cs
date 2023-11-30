@@ -64,6 +64,7 @@ namespace ScmssApiServer.Models
                 throw new InvalidDomainOperationException("Cannot begin an already created order");
             }
             CreateUserId = userId;
+            Status = OrderStatus.Processing;
         }
 
         public virtual void Cancel(string userId, string problem)

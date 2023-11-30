@@ -58,7 +58,7 @@ namespace ScmssApiServer.Models
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot approve production order that isn't waiting for approval"
+                        "Cannot approve production order which isn't currently waiting for approval."
                     );
             }
             ApprovalStatus = ApprovalStatus.Approved;
@@ -86,7 +86,7 @@ namespace ScmssApiServer.Models
         }
 
         /// <summary>
-        /// Finish order delivery.
+        /// Finish production.
         /// </summary>
         public override void FinishExecution()
         {
@@ -114,10 +114,14 @@ namespace ScmssApiServer.Models
         }
 
         /// <summary>
-        /// Start order delivery.
+        /// Start production.
         /// </summary>
         public override void StartExecution()
         {
+            if (ApprovalStatus != ApprovalStatus.Approved)
+            {
+                throw new InvalidDomainOperationException("Cannot start an unapproved production order.");
+            }
             base.StartExecution();
             AddEvent(ProductionOrderEventType.Producing);
         }
