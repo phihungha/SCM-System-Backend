@@ -5,7 +5,7 @@
         PendingApproval,
         Approved,
         Rejected,
-        Started,
+        Producing,
         StageDone,
         Produced,
         Completed,
