@@ -6,8 +6,5 @@ namespace ScmssApiServer.DTOs
     {
         [Required]
         public ProductionOrderEventTypeSelection Type { get; set; }
-
-        [Required]
-        public required string Location { get; set; }
     }
 }

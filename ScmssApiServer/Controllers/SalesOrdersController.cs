@@ -6,9 +6,9 @@ using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class SalesOrdersController : CustomControllerBase
     {
         private readonly ISalesOrdersService _salesOrdersService;

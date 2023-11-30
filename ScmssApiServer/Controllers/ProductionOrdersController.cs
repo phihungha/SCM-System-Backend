@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
@@ -6,6 +7,7 @@ using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductionOrdersController : CustomControllerBase
@@ -13,7 +15,7 @@ namespace ScmssApiServer.Controllers
         private readonly IProductionOrdersService _productionOrdersService;
 
         public ProductionOrdersController(IProductionOrdersService ProductionOrdersService,
-                                     IUsersService usersService)
+                                          IUsersService usersService)
             : base(usersService)
         {
             _productionOrdersService = ProductionOrdersService;

@@ -319,6 +319,7 @@ namespace ScmssApiServer.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ApprovalStatus = table.Column<int>(type: "integer", nullable: false),
                     ApproveProductionManagerId = table.Column<string>(type: "text", nullable: true),
                     ProductionFacilityId = table.Column<int>(type: "integer", nullable: false),
                     TotalCost = table.Column<decimal>(type: "numeric", nullable: false),
@@ -426,6 +427,7 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CustomerId = table.Column<int>(type: "integer", nullable: false),
+                    ProductionFacilityId = table.Column<int>(type: "integer", nullable: true),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreateUserId = table.Column<string>(type: "text", nullable: false),
                     ExecutionFinishTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -437,7 +439,6 @@ namespace ScmssApiServer.Migrations
                     FromLocation = table.Column<string>(type: "text", nullable: true),
                     InvoiceUrl = table.Column<string>(type: "text", nullable: true),
                     PaymentStatus = table.Column<string>(type: "text", nullable: false),
-                    ProductionFacilityId = table.Column<int>(type: "integer", nullable: true),
                     ReceiptUrl = table.Column<string>(type: "text", nullable: true),
                     RemainingAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
@@ -533,6 +534,7 @@ namespace ScmssApiServer.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProductionOrderId = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
                     Location = table.Column<string>(type: "text", nullable: true),
                     Message = table.Column<string>(type: "text", nullable: true),
                     Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -598,7 +600,6 @@ namespace ScmssApiServer.Migrations
                     FromLocation = table.Column<string>(type: "text", nullable: true),
                     InvoiceUrl = table.Column<string>(type: "text", nullable: true),
                     PaymentStatus = table.Column<string>(type: "text", nullable: false),
-                    ProductionFacilityId = table.Column<int>(type: "integer", nullable: true),
                     ReceiptUrl = table.Column<string>(type: "text", nullable: true),
                     RemainingAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     SubTotal = table.Column<decimal>(type: "numeric", nullable: false),
@@ -620,11 +621,6 @@ namespace ScmssApiServer.Migrations
                         name: "FK_PurchaseOrders_AspNetUsers_FinishUserId",
                         column: x => x.FinishUserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_PurchaseOrders_ProductionFacilities_ProductionFacilityId",
-                        column: x => x.ProductionFacilityId,
-                        principalTable: "ProductionFacilities",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PurchaseOrders_PurchaseRequisitions_PurchaseRequisitionId",
@@ -776,8 +772,8 @@ namespace ScmssApiServer.Migrations
                 columns: new[] { "Id", "ContactPerson", "CreateTime", "DefaultLocation", "Description", "Email", "IsActive", "Name", "PhoneNumber", "UpdateTime" },
                 values: new object[,]
                 {
-                    { 1, "Hoa Thi Mai", new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(6819), "156 Nguyen Van Luong, Bien Hoa, Dong nai", "Flower garden.", "watarichanno@gmail.com", true, "Cool Garden 324", "0344250401", null },
-                    { 2, "Ha Phi Hung", new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(6826), "436 Vo Van Kiet, District 1, HCM City", "Plant shop.", "haphihung55@gmail.com", true, "Phi Hung Shop", "0344250401", null }
+                    { 1, "Hoa Thi Mai", new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1174), "156 Nguyen Van Luong, Bien Hoa, Dong nai", "Flower garden.", "watarichanno@gmail.com", true, "Cool Garden 324", "0344250401", null },
+                    { 2, "Ha Phi Hung", new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1180), "436 Vo Van Kiet, District 1, HCM City", "Plant shop.", "haphihung55@gmail.com", true, "Phi Hung Shop", "0344250401", null }
                 });
 
             migrationBuilder.InsertData(
@@ -785,8 +781,8 @@ namespace ScmssApiServer.Migrations
                 columns: new[] { "Id", "CreateTime", "Description", "Email", "IsActive", "Location", "Name", "PhoneNumber", "UpdateTime" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7323), "Primary production facility", "godau@cool-fertilizer.com.vn", true, "Go Dau Industrial Park, Phuoc Thai, Long Thanh, Dong Nai", "Go Dau", "02837560110", null },
-                    { 2, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7328), "Secondary production facility", "longan@cool-fertilizer.com.vn", true, "Long Dinh Industrial Park, Long Dinh, Can Duoc, Long An", "Binh Dien - Long An", "02723726627", null }
+                    { 1, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1678), "Primary production facility", "godau@cool-fertilizer.com.vn", true, "Go Dau Industrial Park, Phuoc Thai, Long Thanh, Dong Nai", "Go Dau", "02837560110", null },
+                    { 2, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1682), "Secondary production facility", "longan@cool-fertilizer.com.vn", true, "Long Dinh Industrial Park, Long Dinh, Can Duoc, Long An", "Binh Dien - Long An", "02723726627", null }
                 });
 
             migrationBuilder.InsertData(
@@ -794,8 +790,8 @@ namespace ScmssApiServer.Migrations
                 columns: new[] { "Id", "CreateTime", "Description", "ExpirationMonth", "IsActive", "MiscCost", "Name", "NetWeight", "Price", "Unit", "UpdateTime" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7527), "MSPB: 04513\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 8%\nEffective Potassium (K2Ohh): 8%\nSulfur (S): 13%\nHumidity: 2%\nSuitable for all crops.", 48, true, 15000m, "NPK 16-8-8+13S", 50.0, 500000m, "Item(s)", null },
-                    { 2, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7532), "MSPB: 04519\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 7%\nEffective Potassium (K2Ohh): 18%\nSulfur (S): 12%\nBo (B): 217ppm\nZinc (Zn): 400ppm\nHumidity: 2%\nSuitable for coffee, fruit, rubber, vegetable, rice crops.", 48, true, 18000m, "NPK 16-7-18+12S+TE", 50.0, 600000m, "Item(s)", null }
+                    { 1, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1926), "MSPB: 04513\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 8%\nEffective Potassium (K2Ohh): 8%\nSulfur (S): 13%\nHumidity: 2%\nSuitable for all crops.", 48, true, 15000m, "NPK 16-8-8+13S", 50.0, 500000m, "Item(s)", null },
+                    { 2, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1930), "MSPB: 04519\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 7%\nEffective Potassium (K2Ohh): 18%\nSulfur (S): 12%\nBo (B): 217ppm\nZinc (Zn): 400ppm\nHumidity: 2%\nSuitable for coffee, fruit, rubber, vegetable, rice crops.", 48, true, 18000m, "NPK 16-7-18+12S+TE", 50.0, 600000m, "Item(s)", null }
                 });
 
             migrationBuilder.InsertData(
@@ -803,8 +799,8 @@ namespace ScmssApiServer.Migrations
                 columns: new[] { "Id", "ContactPerson", "CreateTime", "DefaultLocation", "Description", "Email", "IsActive", "Name", "PhoneNumber", "UpdateTime" },
                 values: new object[,]
                 {
-                    { 1, "Ha Long Anh", new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7377), "Phu My Industrial Park, Phu My, Phu My, Ba Ria - Vung Tau", "Main vendor for major ingredients.", "customer@pvfcco.com.vn", true, "PVFCCo", "02838256258", null },
-                    { 2, "Nguyen Thanh Long", new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7380), "Binh Duong Industrial Park, An Binh, Di An, Binh Duong", "Main vendor for trace ingredients.", "order@vinachem.com.vn", true, "Vinachem", "02438240551", null }
+                    { 1, "Ha Long Anh", new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1720), "Phu My Industrial Park, Phu My, Phu My, Ba Ria - Vung Tau", "Main vendor for major ingredients.", "customer@pvfcco.com.vn", true, "PVFCCo", "02838256258", null },
+                    { 2, "Nguyen Thanh Long", new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1723), "Binh Duong Industrial Park, An Binh, Di An, Binh Duong", "Main vendor for trace ingredients.", "order@vinachem.com.vn", true, "Vinachem", "02438240551", null }
                 });
 
             migrationBuilder.InsertData(
@@ -812,12 +808,12 @@ namespace ScmssApiServer.Migrations
                 columns: new[] { "Id", "CreateTime", "Description", "ExpirationMonth", "IsActive", "Name", "Price", "Unit", "UpdateTime", "VendorId" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7459), "CO(NH2)2 for nitrogen.", 12, true, "PVFCCo Urea", 5000m, "Kg", null, 1 },
-                    { 2, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7463), "P2O5 for phosphorous.", 12, true, "PVFCCo Phosphorous", 6000m, "Kg", null, 1 },
-                    { 3, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7467), "KCl for potassium.", 12, true, "PVFCCo Potassium Chloride", 5000m, "Kg", null, 1 },
-                    { 4, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7471), "(NH4)2SO4 for trace sulfur.", 12, true, "Vinachem Ammonium Sulphate", 13000m, "Kg", null, 2 },
-                    { 5, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7476), "H3BO3 for trace boron.", 12, true, "Vinachem Boric Acid", 38000m, "Kg", null, 2 },
-                    { 6, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7483), "ZnSO4 for trace zinc.", 12, true, "Vinachem Zinc Sulphate", 40000m, "Kg", null, 2 }
+                    { 1, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1798), "CO(NH2)2 for nitrogen.", 12, true, "PVFCCo Urea", 5000m, "Kg", null, 1 },
+                    { 2, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1804), "P2O5 for phosphorous.", 12, true, "PVFCCo Phosphorous", 6000m, "Kg", null, 1 },
+                    { 3, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1859), "KCl for potassium.", 12, true, "PVFCCo Potassium Chloride", 5000m, "Kg", null, 1 },
+                    { 4, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1863), "(NH4)2SO4 for trace sulfur.", 12, true, "Vinachem Ammonium Sulphate", 13000m, "Kg", null, 2 },
+                    { 5, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1866), "H3BO3 for trace boron.", 12, true, "Vinachem Boric Acid", 38000m, "Kg", null, 2 },
+                    { 6, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(1870), "ZnSO4 for trace zinc.", 12, true, "Vinachem Zinc Sulphate", 40000m, "Kg", null, 2 }
                 });
 
             migrationBuilder.InsertData(
@@ -825,10 +821,10 @@ namespace ScmssApiServer.Migrations
                 columns: new[] { "ProductId", "ProductionFacilityId", "CreateTime", "IsActive", "Quantity", "UpdateTime" },
                 values: new object[,]
                 {
-                    { 1, 1, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7669), true, 400.0, null },
-                    { 1, 2, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7672), true, 700.0, null },
-                    { 2, 1, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7671), true, 300.0, null },
-                    { 2, 2, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7682), true, 600.0, null }
+                    { 1, 1, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2066), true, 400.0, null },
+                    { 1, 2, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2069), true, 700.0, null },
+                    { 2, 1, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2068), true, 300.0, null },
+                    { 2, 2, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2075), true, 600.0, null }
                 });
 
             migrationBuilder.InsertData(
@@ -853,18 +849,18 @@ namespace ScmssApiServer.Migrations
                 columns: new[] { "ProductionFacilityId", "SupplyId", "CreateTime", "IsActive", "Quantity", "UpdateTime" },
                 values: new object[,]
                 {
-                    { 1, 1, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7616), true, 13000.0, null },
-                    { 1, 2, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7618), true, 12500.0, null },
-                    { 1, 3, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7620), true, 12500.0, null },
-                    { 1, 4, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7622), true, 12000.0, null },
-                    { 1, 5, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7625), true, 1800.0, null },
-                    { 1, 6, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7626), true, 1800.0, null },
-                    { 2, 1, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7627), true, 12000.0, null },
-                    { 2, 2, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7629), true, 12000.0, null },
-                    { 2, 3, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7630), true, 12500.0, null },
-                    { 2, 4, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7632), true, 11000.0, null },
-                    { 2, 5, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7634), true, 1500.0, null },
-                    { 2, 6, new DateTime(2023, 11, 30, 15, 34, 26, 218, DateTimeKind.Utc).AddTicks(7635), true, 1500.0, null }
+                    { 1, 1, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2021), true, 13000.0, null },
+                    { 1, 2, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2023), true, 12500.0, null },
+                    { 1, 3, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2024), true, 12500.0, null },
+                    { 1, 4, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2026), true, 12000.0, null },
+                    { 1, 5, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2027), true, 1800.0, null },
+                    { 1, 6, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2028), true, 1800.0, null },
+                    { 2, 1, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2030), true, 12000.0, null },
+                    { 2, 2, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2031), true, 12000.0, null },
+                    { 2, 3, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2032), true, 12500.0, null },
+                    { 2, 4, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2033), true, 11000.0, null },
+                    { 2, 5, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2035), true, 1500.0, null },
+                    { 2, 6, new DateTime(2023, 11, 30, 18, 9, 35, 547, DateTimeKind.Utc).AddTicks(2036), true, 1500.0, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -963,11 +959,6 @@ namespace ScmssApiServer.Migrations
                 name: "IX_PurchaseOrders_FinishUserId",
                 table: "PurchaseOrders",
                 column: "FinishUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PurchaseOrders_ProductionFacilityId",
-                table: "PurchaseOrders",
-                column: "ProductionFacilityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrders_PurchaseRequisitionId",
