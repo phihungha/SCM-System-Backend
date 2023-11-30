@@ -52,6 +52,10 @@ namespace ScmssApiServer.Data
             builder
                 .Properties<TransOrderEventType>()
                 .HaveConversion<string>();
+
+            builder
+                .Properties<ProductionOrderEventType>()
+                .HaveConversion<string>();
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -163,11 +167,18 @@ namespace ScmssApiServer.Data
 
             #region ProductionOrder
 
-            // Many-to-many with Supply via PurchaseOrderItem
+            // Many-to-many with Product via ProductionOrderItem
             builder.Entity<ProductionOrder>()
                 .HasMany(e => e.Products)
                 .WithMany(e => e.ProductionOrders)
-                .UsingEntity<ProductionOrderItem>();
+                .UsingEntity<ProductionOrderItem>(
+                    l => l.HasOne(e => e.Product)
+                    .WithMany(e => e.ProductionOrderItems)
+                    .HasForeignKey(e => e.ItemId),
+                    r => r.HasOne(e => e.ProductionOrder)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
 
             builder.Entity<ProductionOrder>()
                 .HasOne(e => e.CreateUser)

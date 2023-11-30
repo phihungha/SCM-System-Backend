@@ -32,7 +32,7 @@ namespace ScmssApiServer.Models
         {
             if (FinishTime != null)
             {
-                throw new InvalidDomainOperationException("Order is finished");
+                throw new InvalidDomainOperationException("Order is already finished");
             }
 
             FinishTime = DateTime.UtcNow;

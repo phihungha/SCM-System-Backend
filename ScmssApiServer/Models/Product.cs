@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.Models
 {
+    /// <summary>
+    /// Represents a product for sales.
+    /// </summary>
     public class Product : Goods
     {
         public decimal MiscCost { get; set; }
