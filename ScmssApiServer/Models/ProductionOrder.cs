@@ -1,4 +1,5 @@
-﻿using ScmssApiServer.DomainExceptions;
+﻿using AutoMapper;
+using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
@@ -67,6 +68,7 @@ namespace ScmssApiServer.Models
         public override void Begin(string userId)
         {
             base.Begin(userId);
+            ApprovalStatus = ApprovalStatus.PendingApproval;
             AddEvent(ProductionOrderEventType.PendingApproval);
         }
 
@@ -92,7 +94,7 @@ namespace ScmssApiServer.Models
             AddEvent(ProductionOrderEventType.Produced);
         }
 
-        public void Reject(string userId)
+        public void Reject(string userId, string problem)
         {
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
@@ -101,6 +103,7 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
+            Problem = problem;
             Finish(userId);
         }
 
@@ -165,6 +168,14 @@ namespace ScmssApiServer.Models
             TotalValue = Items.Sum(i => i.TotalValue);
             TotalCost = Items.Sum(i => i.TotalCost);
             TotalProfit = TotalValue - TotalCost;
+        }
+    }
+
+    public class ProductionOrderMp : Profile
+    {
+        public ProductionOrderMp()
+        {
+            CreateMap<ProductionOrder, ProductionOrderDto>();
         }
     }
 }

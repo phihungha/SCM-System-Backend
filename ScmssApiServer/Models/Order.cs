@@ -20,6 +20,7 @@ namespace ScmssApiServer.Models
         public User? FinishUser { get; private set; }
         public string? FinishUserId { get; private set; }
         public int Id { get; set; }
+        public bool IsExecutionFinished => ExecutionFinishTime != null;
         public bool IsFinished { get => FinishTime != null; }
         public bool IsStarted => Status != OrderStatus.Processing;
 
@@ -31,7 +32,7 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Reason the order was canceled or returned.
         /// </summary>
-        public string? Problem { get; private set; }
+        public string? Problem { get; protected set; }
 
         public OrderStatus Status { get; protected set; }
         public DateTime? UpdateTime { get; set; }

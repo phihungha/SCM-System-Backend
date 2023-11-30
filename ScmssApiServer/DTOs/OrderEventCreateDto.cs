@@ -2,12 +2,11 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class ProductionOrderEventCreateDto : OrderEventCreateDto
+    public abstract class OrderEventCreateDto
     {
         [Required]
-        public ProductionOrderEventTypeSelection Type { get; set; }
-
-        [Required]
         public required string Location { get; set; }
+
+        public string? Message { get; set; }
     }
 }
