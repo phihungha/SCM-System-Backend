@@ -12,9 +12,6 @@ namespace ScmssApiServer.Models
         where TItem : TransOrderItem
         where TEvent : TransOrderEvent, new()
     {
-        private ProductionFacility? productionFacility = null;
-        private int? productionFacilityId = null;
-
         /// <summary>
         /// Delivery start location.
         /// </summary>
@@ -23,36 +20,6 @@ namespace ScmssApiServer.Models
         public string? InvoiceUrl { get; set; }
 
         public TransOrderPaymentStatus PaymentStatus { get; private set; }
-
-        public ProductionFacility? ProductionFacility
-        {
-            get => productionFacility;
-            set
-            {
-                if (value?.Id != productionFacility?.Id && IsStarted)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot change production facility after order has started delivery."
-                        );
-                }
-                productionFacility = value;
-            }
-        }
-
-        public int? ProductionFacilityId
-        {
-            get => productionFacilityId;
-            set
-            {
-                if (value != productionFacilityId && IsStarted)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot change production facility after order has started delivery."
-                        );
-                }
-                productionFacilityId = value;
-            }
-        }
 
         public string? ReceiptUrl { get; set; }
 
