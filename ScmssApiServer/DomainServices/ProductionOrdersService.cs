@@ -143,6 +143,7 @@ namespace ScmssApiServer.DomainServices
                 case ApprovalStatus.Approved:
                     item.Approve(userId);
                     break;
+
                 case ApprovalStatus.Rejected:
                     if (dto.Problem == null)
                     {
@@ -179,6 +180,8 @@ namespace ScmssApiServer.DomainServices
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext
                 .Products
+                .Include(i => i.SupplyCostItems)
+                .ThenInclude(i => i.Supply)
                 .Where(i => productIds.Contains(i.Id))
                 .ToDictionaryAsync(i => i.Id);
 
