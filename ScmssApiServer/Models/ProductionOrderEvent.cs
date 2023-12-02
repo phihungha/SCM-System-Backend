@@ -17,6 +17,7 @@ namespace ScmssApiServer.Models
     {
         public ProductionOrderEventMP()
         {
+            CreateMap<ProductionOrderEvent, ProductionOrderEventDto>();
             CreateMap<OrderEventCreateDto, ProductionOrderEvent>();
         }
     }

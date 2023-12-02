@@ -1,7 +1,6 @@
-﻿using ScmssApiServer.DTOs;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ScmssApiServer.Models
+namespace ScmssApiServer.DTOs
 {
     public class ProductionOrderCreateDto : OrderCreateDto
     {

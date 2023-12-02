@@ -9,9 +9,9 @@ namespace ScmssApiServer.Models
         public SalesOrder SalesOrder { get; set; } = null!;
     }
 
-    public class SalesOrderEventMappingProfile : Profile
+    public class SalesOrderEventMP : Profile
     {
-        public SalesOrderEventMappingProfile()
+        public SalesOrderEventMP()
         {
             CreateMap<SalesOrderEvent, TransOrderEventDto>();
             CreateMap<TransOrderEventCreateDto, SalesOrderEvent>();

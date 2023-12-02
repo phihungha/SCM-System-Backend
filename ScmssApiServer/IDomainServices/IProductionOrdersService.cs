@@ -1,5 +1,4 @@
 ﻿using ScmssApiServer.DTOs;
-using ScmssApiServer.Models;
 
 namespace ScmssApiServer.IDomainServices
 {

@@ -42,7 +42,7 @@ namespace ScmssApiServer.Models
             if (IsStarted)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add order item after order has started delivery."
+                        "Cannot add order item after order has started execution."
                     );
             }
 

@@ -1,12 +1,15 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     /// <summary>
     /// Represents a production order line.
     /// </summary>
     public class ProductionOrderItem : OrderItem
     {
-        public ProductionOrder ProductionOrder { get; set; } = null!;
         public Product Product { get; set; } = null!;
+        public ProductionOrder ProductionOrder { get; set; } = null!;
 
         /// <summary>
         /// Total production cost of this item = UnitCost * Quantity
@@ -35,5 +38,13 @@
         /// Unit value of this item = Product.Price
         /// </summary>
         public decimal UnitValue { get; set; }
+    }
+
+    public class ProductionOrderItemMp : Profile
+    {
+        public ProductionOrderItemMp()
+        {
+            CreateMap<ProductionOrderItem, ProductionOrderItemDto>();
+        }
     }
 }

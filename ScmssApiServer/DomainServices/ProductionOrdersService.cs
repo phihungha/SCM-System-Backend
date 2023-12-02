@@ -95,7 +95,7 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            if (!item.IsStarted && dto.Items != null)
+            if (dto.Items != null)
             {
                 _dbContext.RemoveRange(item.Items);
                 await AddOrderItemsFromDtos(item, dto.Items);
@@ -133,6 +133,22 @@ namespace ScmssApiServer.DomainServices
                             );
                     }
                     item.Return(userId, dto.Problem);
+                    break;
+            }
+
+            switch (dto.ApprovalStatus)
+            {
+                case ApprovalStatus.Approved:
+                    item.Approve(userId);
+                    break;
+                case ApprovalStatus.Rejected:
+                    if (dto.Problem == null)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot reject an order without a problem."
+                            );
+                    }
+                    item.Reject(userId, dto.Problem);
                     break;
             }
 

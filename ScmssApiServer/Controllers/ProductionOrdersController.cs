@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Models;
 using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers

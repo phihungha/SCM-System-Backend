@@ -2,11 +2,9 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public abstract class TransOrderDto : OrderDto
+    public abstract class TransOrderDto
+        : OrderDto<TransOrderItemDto, TransOrderEventDto>
     {
-        public ICollection<TransOrderEventDto> Events { get; set; }
-            = new List<TransOrderEventDto>();
-
         public string? InvoiceUrl { get; set; }
         public TransOrderPaymentStatus PaymentStatus { get; set; }
         public string? ReceiptUrl { get; set; }

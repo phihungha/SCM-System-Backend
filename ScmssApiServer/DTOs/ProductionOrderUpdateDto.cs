@@ -1,10 +1,9 @@
-﻿using ScmssApiServer.DTOs;
+﻿using ScmssApiServer.Models;
 
-namespace ScmssApiServer.Models
+namespace ScmssApiServer.DTOs
 {
     public class ProductionOrderUpdateDto : OrderUpdateDto
     {
         public ApprovalStatus ApprovalStatus { get; set; }
-        public string? ApproveProductionManagerId { get; set; }
     }
 }

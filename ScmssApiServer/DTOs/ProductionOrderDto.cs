@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class ProductionOrderDto : OrderDto
+    public class ProductionOrderDto : OrderDto<ProductionOrderItemDto, ProductionOrderEventDto>
     {
         public ApprovalStatus ApprovalStatus { get; set; }
         public UserDto? ApproveProductionManager { get; set; }
