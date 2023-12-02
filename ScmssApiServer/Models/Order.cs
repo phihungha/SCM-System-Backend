@@ -32,11 +32,6 @@ namespace ScmssApiServer.Models
         /// </summary>
         public ICollection<TItem> Items { get; } = new List<TItem>();
 
-        /// <summary>
-        /// Reason the order was canceled or returned.
-        /// </summary>
-        public string? Problem { get; protected set; }
-
         public OrderStatus Status { get; protected set; }
 
         public virtual void AddItem(TItem item)
@@ -74,8 +69,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = OrderStatus.Canceled;
-            Problem = problem;
-            End(userId);
+            EndWithProblem(userId, problem);
         }
 
         public virtual void Complete(string userId)
@@ -111,8 +105,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = OrderStatus.Returned;
-            Problem = problem;
-            End(userId);
+            EndWithProblem(userId, problem);
         }
 
         public virtual void StartExecution()

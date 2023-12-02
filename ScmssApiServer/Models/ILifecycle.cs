@@ -12,10 +12,13 @@
         User? EndUser { get; }
         string? EndUserId { get; }
         bool IsEnded { get => EndTime != null; }
+        string? Problem { get; }
         DateTime? UpdateTime { get; set; }
 
         void Begin(string userId);
 
         void End(string userId);
+
+        void EndWithProblem(string userId, string problem);
     }
 }

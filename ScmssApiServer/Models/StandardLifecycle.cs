@@ -15,6 +15,7 @@ namespace ScmssApiServer.Models
         public string? EndUserId { get; private set; }
         public abstract bool IsCreated { get; }
         public bool IsEnded { get => EndTime != null; }
+        public string? Problem { get; private set; }
         public DateTime? UpdateTime { get; set; }
 
         public virtual void Begin(string userId)
@@ -35,6 +36,12 @@ namespace ScmssApiServer.Models
             EndTime = DateTime.UtcNow;
             EndUserId = userId;
             CreateUserId = userId;
+        }
+
+        public void EndWithProblem(string userId, string problem)
+        {
+            Problem = problem;
+            End(userId);
         }
     }
 }

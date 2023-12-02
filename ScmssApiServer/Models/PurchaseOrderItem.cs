@@ -2,10 +2,9 @@
 {
     public class PurchaseOrderItem : TransOrderItem
     {
-        public Supply Supply { get; set; } = null!;
-        public PurchaseOrder PurchaseOrder { get; set; } = null!;
-
         public decimal Discount { get; set; }
         public decimal NetPrice { get; set; }
+        public PurchaseOrder PurchaseOrder { get; set; } = null!;
+        public Supply Supply { get; set; } = null!;
     }
 }
