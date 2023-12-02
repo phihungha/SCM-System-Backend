@@ -1,9 +1,9 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public enum TransOrderStatusSelection
+    public enum OrderStatusSelection
     {
-        Delivering,
-        Delivered,
+        Executing,
+        WaitingAcceptance,
         Completed,
         Canceled,
         Returned,

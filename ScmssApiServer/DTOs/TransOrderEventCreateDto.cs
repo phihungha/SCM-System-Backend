@@ -2,12 +2,9 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class TransOrderEventCreateDto : OrderEventInputDto
+    public class TransOrderEventCreateDto : OrderEventCreateDto
     {
         [Required]
         public TransOrderEventTypeSelection Type { get; set; }
-
-        [Required]
-        public required string Location { get; set; }
     }
 }

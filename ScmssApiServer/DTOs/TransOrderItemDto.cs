@@ -1,11 +1,10 @@
-﻿namespace ScmssApiServer.DTOs
+﻿using ScmssApiServer.Models;
+
+namespace ScmssApiServer.DTOs
 {
-    public abstract class TransOrderItemDto
+    public abstract class TransOrderItemDto : OrderItemDto
     {
-        public int ItemId { get; set; }
-        public double Quantity { get; set; }
-        public required string Unit { get; set; }
-        public decimal UnitPrice { get; set; }
         public decimal TotalPrice { get; set; }
+        public decimal UnitPrice { get; set; }
     }
 }

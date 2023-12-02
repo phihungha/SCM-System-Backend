@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class TransOrderItemInputDto
+    public class OrderItemInputDto
     {
         [Required]
         public int ItemId { get; set; }

@@ -8,96 +8,88 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.DomainServices
 {
-    public class SalesOrdersService : ISalesOrdersService
+    public class ProductionOrdersService : IProductionOrdersService
     {
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public SalesOrdersService(IMapper mapper, AppDbContext dbContext)
+        public ProductionOrdersService(IMapper mapper, AppDbContext dbContext)
         {
             _dbContext = dbContext;
             _mapper = mapper;
         }
 
-        public async Task<TransOrderEventDto> AddManualEventAsync(int orderId, TransOrderEventCreateDto dto)
+        public async Task<ProductionOrderEventDto> AddManualEventAsync(
+            int orderId,
+            ProductionOrderEventCreateDto dto)
         {
-            SalesOrder? order = await _dbContext.SalesOrders
+            ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Events)
                 .FirstOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();
             }
-            SalesOrderEvent item = order.AddManualEvent(dto.Type, dto.Location, dto.Message);
+            ProductionOrderEvent item = order.AddManualEvent(dto.Type, dto.Location, dto.Message);
             await _dbContext.SaveChangesAsync();
             return GetEventDto(item);
         }
 
-        public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, string userId)
+        public async Task<ProductionOrderDto> CreateAsync(ProductionOrderCreateDto dto, string userId)
         {
-            Customer? customer = await _dbContext.Customers.FindAsync(dto.CustomerId);
-            if (customer == null)
+            ProductionFacility? facility = await _dbContext.ProductionFacilities.FindAsync(dto.ProductionFacilityId);
+            if (facility == null)
             {
-                throw new EntityNotFoundException("Customer not found");
+                throw new EntityNotFoundException("Production facility not found");
             }
 
-            var item = new SalesOrder
+            var item = new ProductionOrder
             {
-                ToLocation = dto.ToLocation ?? customer.DefaultLocation,
-                CustomerId = dto.CustomerId,
+                ProductionFacilityId = dto.ProductionFacilityId,
                 CreateUserId = userId,
             };
-
-            if (dto.ProductionFacilityId != null)
-            {
-                int facilityId = (int)dto.ProductionFacilityId;
-                item.ProductionFacilityId = facilityId;
-                item.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
-            }
 
             await AddOrderItemsFromDtos(item, dto.Items);
             item.Begin(userId);
 
-            _dbContext.SalesOrders.Add(item);
+            _dbContext.ProductionOrders.Add(item);
             await _dbContext.SaveChangesAsync();
+            await _dbContext.Entry(item).Reference(i => i.CreateUser).LoadAsync();
             return GetOrderDto(item);
         }
 
-        public async Task<SalesOrderDto?> GetAsync(int id)
+        public async Task<ProductionOrderDto?> GetAsync(int id)
         {
-            SalesOrder? item = await _dbContext.SalesOrders
+            ProductionOrder? item = await _dbContext.ProductionOrders
                 .Include(i => i.Items).ThenInclude(i => i.Product)
-                .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
+                .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            return _mapper.Map<SalesOrderDto?>(item);
+            return _mapper.Map<ProductionOrderDto?>(item);
         }
 
-        public async Task<IList<SalesOrderDto>> GetManyAsync()
+        public async Task<IList<ProductionOrderDto>> GetManyAsync()
         {
-            IList<SalesOrder> items = await _dbContext.SalesOrders
-                .Include(i => i.Customer)
+            IList<ProductionOrder> items = await _dbContext.ProductionOrders
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
+                .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
                 .ToListAsync();
-            return _mapper.Map<IList<SalesOrderDto>>(items);
+            return _mapper.Map<IList<ProductionOrderDto>>(items);
         }
 
-        public async Task<SalesOrderDto> UpdateAsync(
-            int id,
-            SalesOrderUpdateDto dto,
-            string userId)
+        public async Task<ProductionOrderDto> UpdateAsync(int id, ProductionOrderUpdateDto dto, string userId)
         {
-            SalesOrder? item = await _dbContext.SalesOrders
+            ProductionOrder? item = await _dbContext.ProductionOrders
                 .Include(i => i.Items).ThenInclude(i => i.Product)
-                .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
+                .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
             if (item == null)
@@ -105,38 +97,10 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            if (dto.PaymentCompleted ?? false)
+            if (dto.Items != null)
             {
-                if (dto.PaymentAmount == null)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot complete payment without payment amount"
-                        );
-                }
-                item.CompletePayment((decimal)dto.PaymentAmount);
-                await _dbContext.SaveChangesAsync();
-                return GetOrderDto(item);
-            }
-
-            if (!item.IsExecutionStarted)
-            {
-                if (dto.ProductionFacilityId != null)
-                {
-                    int facilityId = (int)dto.ProductionFacilityId;
-                    item.ProductionFacilityId = facilityId;
-                    item.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
-                }
-
-                if (dto.Items != null)
-                {
-                    _dbContext.RemoveRange(item.Items);
-                    await AddOrderItemsFromDtos(item, dto.Items);
-                }
-            }
-
-            if (!item.IsExecutionFinished)
-            {
-                item.ToLocation = dto.ToLocation ?? item.Customer.DefaultLocation;
+                _dbContext.RemoveRange(item.Items);
+                await AddOrderItemsFromDtos(item, dto.Items);
             }
 
             switch (dto.Status)
@@ -174,13 +138,30 @@ namespace ScmssApiServer.DomainServices
                     break;
             }
 
+            switch (dto.ApprovalStatus)
+            {
+                case ApprovalStatus.Approved:
+                    item.Approve(userId);
+                    break;
+
+                case ApprovalStatus.Rejected:
+                    if (dto.Problem == null)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot reject an order without a problem."
+                            );
+                    }
+                    item.Reject(userId, dto.Problem);
+                    break;
+            }
+
             await _dbContext.SaveChangesAsync();
             return GetOrderDto(item);
         }
 
-        public async Task<TransOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto)
+        public async Task<ProductionOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto)
         {
-            SalesOrder? order = await _dbContext.SalesOrders
+            ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Events)
                 .FirstOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
@@ -188,54 +169,45 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            SalesOrderEvent item = order.UpdateEvent(id, dto.Location, dto.Message);
+            ProductionOrderEvent item = order.UpdateEvent(id, dto.Message, dto.Location);
 
             await _dbContext.SaveChangesAsync();
             return GetEventDto(item);
         }
 
-        private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<OrderItemInputDto> dtos)
+        private async Task AddOrderItemsFromDtos(ProductionOrder order, IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext
                 .Products
+                .Include(i => i.SupplyCostItems)
+                .ThenInclude(i => i.Supply)
                 .Where(i => productIds.Contains(i.Id))
                 .ToDictionaryAsync(i => i.Id);
 
             order.Items.Clear();
             foreach (var dto in dtos)
             {
-                var item = new SalesOrderItem
+                var item = new ProductionOrderItem
                 {
                     ItemId = dto.ItemId,
                     Unit = products[dto.ItemId].Unit,
-                    UnitPrice = products[dto.ItemId].Price,
+                    UnitValue = products[dto.ItemId].Price,
+                    UnitCost = products[dto.ItemId].Cost,
                     Quantity = dto.Quantity
                 };
                 order.AddItem(item);
             }
         }
 
-        private TransOrderEventDto GetEventDto(SalesOrderEvent item)
+        private ProductionOrderEventDto GetEventDto(ProductionOrderEvent item)
         {
-            return _mapper.Map<TransOrderEventDto>(item);
+            return _mapper.Map<ProductionOrderEventDto>(item);
         }
 
-        private async Task<string> GetLocationOfProductionFacilityAsync(int facilityId)
+        private ProductionOrderDto GetOrderDto(ProductionOrder item)
         {
-            ProductionFacility? facility = await _dbContext
-                .ProductionFacilities
-                .FindAsync(facilityId);
-            if (facility == null)
-            {
-                throw new EntityNotFoundException("Production facility not found");
-            }
-            return facility.Location;
-        }
-
-        private SalesOrderDto GetOrderDto(SalesOrder item)
-        {
-            return _mapper.Map<SalesOrderDto>(item);
+            return _mapper.Map<ProductionOrderDto>(item);
         }
     }
 }

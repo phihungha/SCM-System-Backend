@@ -1,11 +1,8 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public class SalesOrderUpdateDto : SalesOrderInputDto
+    public class SalesOrderUpdateDto : TransOrderUpdateDto
     {
-        public IList<TransOrderItemInputDto>? Items { get; set; }
-        public decimal? PaymentAmount { get; set; }
-        public bool? PaymentCompleted { get; set; }
-        public string? Problem { get; set; }
-        public TransOrderStatusSelection? Status { get; set; }
+        public int? ProductionFacilityId { get; set; }
+        public string? ToLocation { get; set; }
     }
 }

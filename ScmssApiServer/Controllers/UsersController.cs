@@ -9,9 +9,9 @@ using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UsersController : CustomControllerBase
     {
         public UsersController(IUsersService usersService)

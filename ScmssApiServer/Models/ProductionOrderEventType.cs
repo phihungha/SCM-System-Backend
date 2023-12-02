@@ -1,14 +1,16 @@
 ﻿namespace ScmssApiServer.Models
 {
-    public enum ProductionOrderStatus
+    public enum ProductionOrderEventType
     {
         PendingApproval,
         Approved,
         Rejected,
-        Started,
+        Producing,
+        StageDone,
         Produced,
         Completed,
         Canceled,
         Unaccepted,
+        Interrupted,
     }
 }

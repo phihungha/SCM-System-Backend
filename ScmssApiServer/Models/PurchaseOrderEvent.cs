@@ -13,7 +13,7 @@ namespace ScmssApiServer.Models
     {
         public PurchaseOrderProgressUpdateMappingProfile()
         {
-            CreateMap<OrderEventInputDto, PurchaseOrderEvent>();
+            CreateMap<OrderEventCreateDto, PurchaseOrderEvent>();
         }
     }
 }

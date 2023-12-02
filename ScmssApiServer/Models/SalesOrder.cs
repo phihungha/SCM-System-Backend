@@ -9,51 +9,44 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class SalesOrder : TransOrder<SalesOrderItem, SalesOrderEvent>
     {
-        public ICollection<Product> Products { get; set; }
-            = new List<Product>();
-
-        private int? productionFacilityId = null;
-
-        public int? ProductionFacilityId
-        {
-            get => productionFacilityId;
-            set
-            {
-                if (productionFacilityId != null
-                    && value != productionFacilityId
-                    && Status != TransOrderStatus.Processing)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot change production facility after sales order has started delivery."
-                        );
-                }
-                productionFacilityId = value;
-            }
-        }
-
         private ProductionFacility? productionFacility = null;
+        private int? productionFacilityId = null;
+        public Customer Customer { get; set; } = null!;
+        public int CustomerId { get; set; }
 
         public ProductionFacility? ProductionFacility
         {
             get => productionFacility;
             set
             {
-                if (productionFacility != null
-                    && value?.Id != productionFacility.Id
-                    && Status != TransOrderStatus.Processing)
+                if (value?.Id != productionFacility?.Id && IsExecutionStarted)
                 {
                     throw new InvalidDomainOperationException(
-                            "Cannot change production facility after sales order has started delivery."
+                            "Cannot change production facility after order has started delivery."
                         );
                 }
                 productionFacility = value;
             }
         }
 
-        public int CustomerId { get; set; }
-        public Customer Customer { get; set; } = null!;
+        public int? ProductionFacilityId
+        {
+            get => productionFacilityId;
+            set
+            {
+                if (value != productionFacilityId && IsExecutionStarted)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot change production facility after order has started delivery."
+                        );
+                }
+                productionFacilityId = value;
+            }
+        }
 
-        public override void StartDelivery()
+        public ICollection<Product> Products { get; set; } = new List<Product>();
+
+        public override void StartExecution()
         {
             if (ProductionFacilityId == null)
             {
@@ -61,7 +54,7 @@ namespace ScmssApiServer.Models
                         "Cannot start delivery of order without starting production facility."
                     );
             }
-            base.StartDelivery();
+            base.StartExecution();
         }
     }
 

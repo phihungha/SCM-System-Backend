@@ -34,7 +34,7 @@ namespace ScmssApiServer.Data
                 .HaveConversion<string>();
 
             builder
-                .Properties<TransOrderStatus>()
+                .Properties<OrderStatus>()
                 .HaveConversion<string>();
 
             builder
@@ -51,6 +51,10 @@ namespace ScmssApiServer.Data
 
             builder
                 .Properties<TransOrderEventType>()
+                .HaveConversion<string>();
+
+            builder
+                .Properties<ProductionOrderEventType>()
                 .HaveConversion<string>();
         }
 
@@ -90,9 +94,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.ApproveFinanceId);
 
             builder.Entity<PurchaseRequisition>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedPurchaseRequisitions)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion PurchaseRequisition
 
@@ -118,9 +122,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.CreateUserId);
 
             builder.Entity<PurchaseOrder>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedPurchaseOrders)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion PurchaseOrder
 
@@ -146,9 +150,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.CreateUserId);
 
             builder.Entity<SalesOrder>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedSalesOrders)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion SalesOrder
 
@@ -163,11 +167,18 @@ namespace ScmssApiServer.Data
 
             #region ProductionOrder
 
-            // Many-to-many with Supply via PurchaseOrderItem
+            // Many-to-many with Product via ProductionOrderItem
             builder.Entity<ProductionOrder>()
                 .HasMany(e => e.Products)
                 .WithMany(e => e.ProductionOrders)
-                .UsingEntity<ProductionOrderItem>();
+                .UsingEntity<ProductionOrderItem>(
+                    l => l.HasOne(e => e.Product)
+                    .WithMany(e => e.ProductionOrderItems)
+                    .HasForeignKey(e => e.ItemId),
+                    r => r.HasOne(e => e.ProductionOrder)
+                    .WithMany(e => e.Items)
+                    .HasForeignKey(e => e.OrderId)
+                );
 
             builder.Entity<ProductionOrder>()
                 .HasOne(e => e.CreateUser)
@@ -180,9 +191,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.ApproveProductionManagerId);
 
             builder.Entity<ProductionOrder>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedProductionOrders)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion ProductionOrder
 
