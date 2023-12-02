@@ -2,17 +2,15 @@
 
 namespace ScmssApiServer.Models
 {
-    public abstract class Order<TItem, TEvent> : ILifecycle
+    /// <summary>
+    /// Represents a generic order.
+    /// </summary>
+    /// <typeparam name="TItem">Order line item type</typeparam>
+    /// <typeparam name="TEvent">Order event type</typeparam>
+    public abstract class Order<TItem, TEvent> : StandardLifecycle
         where TItem : OrderItem
         where TEvent : OrderEvent, new()
     {
-        public DateTime CreateTime { get; set; }
-        public User CreateUser { get; set; } = null!;
-        public required string CreateUserId { get; set; }
-        public DateTime? EndTime { get; private set; }
-        public User? EndUser { get; private set; }
-        public string? EndUserId { get; private set; }
-
         /// <summary>
         /// Events happening on the order.
         /// </summary>
@@ -20,7 +18,8 @@ namespace ScmssApiServer.Models
 
         public DateTime? ExecutionFinishTime { get; private set; }
         public int Id { get; set; }
-        public bool IsEnded { get => EndTime != null; }
+
+        public override bool IsCreated => Id != 0;
 
         public bool IsExecuting => Status == OrderStatus.Executing
                                                    || Status == OrderStatus.Interrupted;
@@ -39,7 +38,6 @@ namespace ScmssApiServer.Models
         public string? Problem { get; protected set; }
 
         public OrderStatus Status { get; protected set; }
-        public DateTime? UpdateTime { get; set; }
 
         public virtual void AddItem(TItem item)
         {
@@ -61,13 +59,9 @@ namespace ScmssApiServer.Models
             Items.Add(item);
         }
 
-        public virtual void Begin(string userId)
+        public override void Begin(string userId)
         {
-            if (Id != 0)
-            {
-                throw new InvalidDomainOperationException("Cannot begin an already created order");
-            }
-            CreateUserId = userId;
+            base.Begin(userId);
             Status = OrderStatus.Processing;
         }
 
@@ -94,17 +88,6 @@ namespace ScmssApiServer.Models
             }
             Status = OrderStatus.Completed;
             End(userId);
-        }
-
-        public virtual void End(string userId)
-        {
-            if (IsEnded)
-            {
-                throw new InvalidDomainOperationException("Order is already ended");
-            }
-
-            EndTime = DateTime.UtcNow;
-            EndUserId = userId;
         }
 
         public virtual void FinishExecution()

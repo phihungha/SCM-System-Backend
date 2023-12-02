@@ -1,18 +1,21 @@
 ﻿namespace ScmssApiServer.Models
 {
+    /// <summary>
+    /// Interface for models that have a lifecycle (begin and end).
+    /// </summary>
     public interface ILifecycle
     {
-        public DateTime CreateTime { get; set; }
-        public User CreateUser { get; set; }
-        public string CreateUserId { get; set; }
-        public DateTime? EndTime { get; }
-        public User? EndUser { get; }
-        public string? EndUserId { get; }
-        public bool IsEnded { get => EndTime != null; }
-        public DateTime? UpdateTime { get; set; }
+        DateTime CreateTime { get; set; }
+        User CreateUser { get; set; }
+        string CreateUserId { get; set; }
+        DateTime? EndTime { get; }
+        User? EndUser { get; }
+        string? EndUserId { get; }
+        bool IsEnded { get => EndTime != null; }
+        DateTime? UpdateTime { get; set; }
 
-        public void Begin(string userId);
+        void Begin(string userId);
 
-        public void End(string userId);
+        void End(string userId);
     }
 }
