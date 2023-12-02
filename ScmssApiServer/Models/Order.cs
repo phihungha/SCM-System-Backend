@@ -9,6 +9,9 @@ namespace ScmssApiServer.Models
         public DateTime CreateTime { get; set; }
         public User CreateUser { get; set; } = null!;
         public required string CreateUserId { get; set; }
+        public DateTime? EndTime { get; private set; }
+        public User? EndUser { get; private set; }
+        public string? EndUserId { get; private set; }
 
         /// <summary>
         /// Events happening on the order.
@@ -16,13 +19,14 @@ namespace ScmssApiServer.Models
         public ICollection<TEvent> Events { get; } = new List<TEvent>();
 
         public DateTime? ExecutionFinishTime { get; private set; }
-        public DateTime? FinishTime { get; private set; }
-        public User? FinishUser { get; private set; }
-        public string? FinishUserId { get; private set; }
         public int Id { get; set; }
+        public bool IsEnded { get => EndTime != null; }
+
+        public bool IsExecuting => Status == OrderStatus.Executing
+                                                   || Status == OrderStatus.Interrupted;
+
         public bool IsExecutionFinished => ExecutionFinishTime != null;
-        public bool IsFinished { get => FinishTime != null; }
-        public bool IsStarted => Status != OrderStatus.Processing;
+        public bool IsExecutionStarted => Status != OrderStatus.Processing;
 
         /// <summary>
         /// Order lines.
@@ -39,7 +43,7 @@ namespace ScmssApiServer.Models
 
         public virtual void AddItem(TItem item)
         {
-            if (IsStarted)
+            if (IsExecutionStarted)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot add order item after order has started execution."
@@ -69,15 +73,15 @@ namespace ScmssApiServer.Models
 
         public virtual void Cancel(string userId, string problem)
         {
-            if (IsFinished || Status == OrderStatus.WaitingAcceptance)
+            if (IsExecutionFinished)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot cancel an order which is waiting acceptance or is finished."
+                        "Cannot cancel an already executed order."
                     );
             }
             Status = OrderStatus.Canceled;
             Problem = problem;
-            Finish(userId);
+            End(userId);
         }
 
         public virtual void Complete(string userId)
@@ -89,23 +93,23 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = OrderStatus.Completed;
-            Finish(userId);
+            End(userId);
         }
 
-        public virtual void Finish(string userId)
+        public virtual void End(string userId)
         {
-            if (FinishTime != null)
+            if (IsEnded)
             {
-                throw new InvalidDomainOperationException("Order is already finished");
+                throw new InvalidDomainOperationException("Order is already ended");
             }
 
-            FinishTime = DateTime.UtcNow;
-            FinishUserId = userId;
+            EndTime = DateTime.UtcNow;
+            EndUserId = userId;
         }
 
         public virtual void FinishExecution()
         {
-            if (Status != OrderStatus.Executing)
+            if (!IsExecuting)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot finish execution of order if it is not being executed."
@@ -125,15 +129,15 @@ namespace ScmssApiServer.Models
             }
             Status = OrderStatus.Returned;
             Problem = problem;
-            Finish(userId);
+            End(userId);
         }
 
         public virtual void StartExecution()
         {
-            if (IsStarted)
+            if (IsExecutionStarted)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start delivery of order again."
+                        "Cannot start execution of order again."
                     );
             }
             Status = OrderStatus.Executing;

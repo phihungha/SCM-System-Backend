@@ -19,7 +19,7 @@ namespace ScmssApiServer.Models
             get => productionFacility;
             set
             {
-                if (value?.Id != productionFacility?.Id && IsStarted)
+                if (value?.Id != productionFacility?.Id && IsExecutionStarted)
                 {
                     throw new InvalidDomainOperationException(
                             "Cannot change production facility after order has started delivery."
@@ -34,7 +34,7 @@ namespace ScmssApiServer.Models
             get => productionFacilityId;
             set
             {
-                if (value != productionFacilityId && IsStarted)
+                if (value != productionFacilityId && IsExecutionStarted)
                 {
                     throw new InvalidDomainOperationException(
                             "Cannot change production facility after order has started delivery."

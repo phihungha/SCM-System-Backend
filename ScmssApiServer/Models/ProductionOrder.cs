@@ -27,7 +27,7 @@ namespace ScmssApiServer.Models
                                                    string location,
                                                    string? message)
         {
-            if (Status != OrderStatus.Executing)
+            if (!IsExecuting)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot add manual event when order is not in production."
@@ -39,6 +39,7 @@ namespace ScmssApiServer.Models
             {
                 case ProductionOrderEventTypeSelection.StageDone:
                     type = ProductionOrderEventType.StageDone;
+                    Status = OrderStatus.Executing;
                     break;
 
                 case ProductionOrderEventTypeSelection.Interrupted:
@@ -104,7 +105,7 @@ namespace ScmssApiServer.Models
             }
             ApprovalStatus = ApprovalStatus.Rejected;
             Problem = problem;
-            Finish(userId);
+            End(userId);
         }
 
         public override void Return(string userId, string problem)
@@ -128,7 +129,7 @@ namespace ScmssApiServer.Models
 
         public ProductionOrderEvent UpdateEvent(int id, string? message = null, string? location = null)
         {
-            if (IsFinished)
+            if (IsEnded)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot update event because the order is finished."

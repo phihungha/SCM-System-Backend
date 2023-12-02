@@ -19,8 +19,9 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<ProductionOrderEventDto> AddManualEventAsync(int orderId,
-                                                                       ProductionOrderEventCreateDto dto)
+        public async Task<ProductionOrderEventDto> AddManualEventAsync(
+            int orderId,
+            ProductionOrderEventCreateDto dto)
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Events)
@@ -53,6 +54,7 @@ namespace ScmssApiServer.DomainServices
 
             _dbContext.ProductionOrders.Add(item);
             await _dbContext.SaveChangesAsync();
+            await _dbContext.Entry(item).Reference(i => i.CreateUser).LoadAsync();
             return GetOrderDto(item);
         }
 
@@ -64,7 +66,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
-                .Include(i => i.FinishUser)
+                .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<ProductionOrderDto?>(item);
         }
@@ -75,7 +77,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
-                .Include(i => i.FinishUser)
+                .Include(i => i.EndUser)
                 .ToListAsync();
             return _mapper.Map<IList<ProductionOrderDto>>(items);
         }
@@ -88,7 +90,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
-                .Include(i => i.FinishUser)
+                .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
             if (item == null)
             {
@@ -166,7 +168,7 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            ProductionOrderEvent item = order.UpdateEvent(id, dto.Location, dto.Message);
+            ProductionOrderEvent item = order.UpdateEvent(id, dto.Message, dto.Location);
 
             await _dbContext.SaveChangesAsync();
             return GetEventDto(item);

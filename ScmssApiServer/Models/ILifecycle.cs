@@ -5,14 +5,14 @@
         public DateTime CreateTime { get; set; }
         public User CreateUser { get; set; }
         public string CreateUserId { get; set; }
-        public bool IsFinished { get => FinishTime != null; }
-        public DateTime? FinishTime { get; }
-        public User? FinishUser { get; }
-        public string? FinishUserId { get; }
+        public DateTime? EndTime { get; }
+        public User? EndUser { get; }
+        public string? EndUserId { get; }
+        public bool IsEnded { get => EndTime != null; }
         public DateTime? UpdateTime { get; set; }
 
-        public void Finish(string userId);
-
         public void Begin(string userId);
+
+        public void End(string userId);
     }
 }

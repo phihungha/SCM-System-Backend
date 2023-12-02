@@ -29,14 +29,14 @@
         public User? ApproveProductionManager { get; set; }
         public string? ApproveFinanceId { get; set; }
         public User? ApproveFinance { get; set; }
-        public string? FinishUserId { get; set; }
-        public User? FinishUser { get; set; }
+        public string? EndUserId { get; set; }
+        public User? EndUser { get; set; }
 
         public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
-        public DateTime? FinishTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
-        public void Finish(string userId)
+        public void End(string userId)
         {
             throw new NotImplementedException();
         }

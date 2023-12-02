@@ -71,7 +71,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
-                .Include(i => i.FinishUser)
+                .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<SalesOrderDto?>(item);
         }
@@ -82,7 +82,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
-                .Include(i => i.FinishUser)
+                .Include(i => i.EndUser)
                 .ToListAsync();
             return _mapper.Map<IList<SalesOrderDto>>(items);
         }
@@ -98,7 +98,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
-                .Include(i => i.FinishUser)
+                .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
             if (item == null)
             {
@@ -118,7 +118,7 @@ namespace ScmssApiServer.DomainServices
                 return GetOrderDto(item);
             }
 
-            if (!item.IsStarted)
+            if (!item.IsExecutionStarted)
             {
                 if (dto.ProductionFacilityId != null)
                 {

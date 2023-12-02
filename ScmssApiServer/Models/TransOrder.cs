@@ -59,9 +59,11 @@ namespace ScmssApiServer.Models
             CalculateTotals();
         }
 
-        public TEvent AddManualEvent(TransOrderEventTypeSelection typeSel, string location, string? message)
+        public TEvent AddManualEvent(TransOrderEventTypeSelection typeSel,
+                                     string location,
+                                     string? message)
         {
-            if (Status != OrderStatus.Executing)
+            if (!IsExecuting)
             {
                 throw new InvalidDomainOperationException(
                         "Cannot add manual event when order is not being delivered."
@@ -73,10 +75,12 @@ namespace ScmssApiServer.Models
             {
                 case TransOrderEventTypeSelection.Left:
                     type = TransOrderEventType.Left;
+                    Status = OrderStatus.Executing;
                     break;
 
                 case TransOrderEventTypeSelection.Arrived:
                     type = TransOrderEventType.Arrived;
+                    Status = OrderStatus.Executing;
                     break;
 
                 case TransOrderEventTypeSelection.Interrupted:
@@ -162,10 +166,10 @@ namespace ScmssApiServer.Models
 
         public TEvent UpdateEvent(int id, string? message = null, string? location = null)
         {
-            if (FinishTime != null)
+            if (IsEnded)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot update event because the order is finished."
+                        "Cannot update event because the order has been ended."
                     );
             }
 

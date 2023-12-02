@@ -94,9 +94,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.ApproveFinanceId);
 
             builder.Entity<PurchaseRequisition>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedPurchaseRequisitions)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion PurchaseRequisition
 
@@ -122,9 +122,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.CreateUserId);
 
             builder.Entity<PurchaseOrder>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedPurchaseOrders)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion PurchaseOrder
 
@@ -150,9 +150,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.CreateUserId);
 
             builder.Entity<SalesOrder>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedSalesOrders)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion SalesOrder
 
@@ -191,9 +191,9 @@ namespace ScmssApiServer.Data
                 .HasForeignKey(e => e.ApproveProductionManagerId);
 
             builder.Entity<ProductionOrder>()
-                .HasOne(e => e.FinishUser)
+                .HasOne(e => e.EndUser)
                 .WithMany(e => e.FinishedProductionOrders)
-                .HasForeignKey(e => e.FinishUserId);
+                .HasForeignKey(e => e.EndUserId);
 
             #endregion ProductionOrder
 
