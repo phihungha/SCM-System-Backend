@@ -56,7 +56,8 @@ namespace ScmssApiServer.Models
     {
         public ProductMp()
         {
-            CreateMap<Product, GoodsDto>();
+            CreateMap<Product, ProductDto>();
+            CreateMap<ProductInputDto, Product>();
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     public class Supply : Goods
     {
@@ -25,5 +28,13 @@
 
         public ICollection<WarehouseSupplyItem> WarehouseSupplyItems { get; set; }
             = new List<WarehouseSupplyItem>();
+    }
+
+    public class SupplyMp : Profile
+    {
+        public SupplyMp()
+        {
+            CreateMap<Supply, SupplyDto>();
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.Models
 {
@@ -19,5 +21,14 @@ namespace ScmssApiServer.Models
 
         [NotMapped]
         public decimal TotalCost => UnitCost * (decimal)Quantity;
+    }
+
+    public class ProductSupplyCostItemMp : Profile
+    {
+        public ProductSupplyCostItemMp()
+        {
+            CreateMap<ProductionSupplyCostItem, ProductionSupplyCostItemDto>();
+            CreateMap<ProductionSupplyCostItemInputDto, ProductionSupplyCostItem>();
+        }
     }
 }
