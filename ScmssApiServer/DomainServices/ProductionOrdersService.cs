@@ -190,7 +190,7 @@ namespace ScmssApiServer.DomainServices
                     ItemId = dto.ItemId,
                     Unit = products[dto.ItemId].Unit,
                     UnitValue = products[dto.ItemId].Price,
-                    UnitCost = products[dto.ItemId].ProductionCost,
+                    UnitCost = products[dto.ItemId].Cost,
                     Quantity = dto.Quantity
                 };
                 order.AddItem(item);

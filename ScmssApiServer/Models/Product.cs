@@ -16,7 +16,7 @@ namespace ScmssApiServer.Models
         /// Production cost of this product = SupplyCost + MiscCost
         /// </summary>
         [NotMapped]
-        public decimal ProductionCost => SupplyCost + MiscCost;
+        public decimal Cost => SupplyCost + MiscCost;
 
         public IList<ProductionOrderItem> ProductionOrderItems { get; set; }
             = new List<ProductionOrderItem>();
@@ -28,7 +28,7 @@ namespace ScmssApiServer.Models
         /// Profit of this product = Price - ProductionCost
         /// </summary>
         [NotMapped]
-        public decimal Profit => Price - ProductionCost;
+        public decimal Profit => Price - Cost;
 
         public IList<SalesOrderItem> SalesOrderItems { get; set; }
             = new List<SalesOrderItem>();
