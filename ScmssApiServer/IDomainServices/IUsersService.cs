@@ -1,17 +1,21 @@
 ﻿using ScmssApiServer.DTOs;
-using ScmssApiServer.Models;
+using System.Security.Claims;
 
 namespace ScmssApiServer.IDomainServices
 {
     public interface IUsersService
     {
-        Task<IList<User>> GetUsersAsync();
+        string? GetUserIdFromPrincipal(ClaimsPrincipal principal);
 
-        Task<User?> GetUserAsync(string id);
+        Task<IList<UserDto>> GetUsersAsync();
 
-        Task<User> CreateUserAsync(UserCreateDto dto);
+        Task<UserDto?> GetUserAsync(string id);
 
-        Task<User> UpdateUserAsync(string id, UserUpdateDto dto);
+        Task<UserDto> CreateUserAsync(UserCreateDto dto);
+
+        Task<UserDto> UpdateUserAsync(string id, UserInputDto dto);
+
+        Task ChangePasswordAsync(string id, UserPasswordChangeDto dto);
 
         Task DeleteUserAsync(string id);
 

@@ -4,6 +4,7 @@ using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainServices;
 using ScmssApiServer.Exceptions;
@@ -11,11 +12,14 @@ using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
+using System.Text.Json.Serialization;
 
 namespace ScmssApiServer
 {
     public class Program
     {
+        private const string CorsPolicyName = "Main";
+
         public static void Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -26,32 +30,44 @@ namespace ScmssApiServer
             ILogger logger = loggerFactory.CreateLogger<Program>();
 
             // Add external services.
+            builder.Services.AddAutoMapper(typeof(Program));
+
             string? dbConnectionString = builder.Configuration.GetConnectionString("AppDb");
-            builder.Services.AddDbContext<ApplicationDbContext>(
-                    options => options.UseNpgsql(dbConnectionString)
+            builder.Services.AddDbContext<AppDbContext>(
+                    o => o.UseNpgsql(dbConnectionString)
                 );
+
             AddAuthentication(builder);
             AddAwsS3(builder, logger);
+
             // Add infrastructure services
             builder.Services.AddSingleton<IImageHostService, ImageHostService>();
 
             // Add domain services
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
+            builder.Services.AddScoped<ISalesOrdersService, SalesOrdersService>();
+            builder.Services.AddScoped<IProductionOrdersService, ProductionOrdersService>();
 
-            builder.Services.AddControllers();
+            builder.Services.AddCors(o => o.AddPolicy(
+                name: CorsPolicyName,
+                builder => builder.WithHeaders(HeaderNames.ContentType)
+                                  .AllowCredentials()
+                                  .WithOrigins("http://localhost:3000"))
+            );
+
+            builder.Services.AddControllers().AddJsonOptions(
+                    o => o.JsonSerializerOptions
+                          .Converters
+                          .Add(new JsonStringEnumConverter())
+                );
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Seed database
-            using (var scope = app.Services.CreateScope())
-            {
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                ApplicationDbSeeder.SeedRootAdminUser(userManager, app);
-            }
+            AppDbSeeder.SeedRootAdminUser(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -61,6 +77,8 @@ namespace ScmssApiServer
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors(CorsPolicyName);
 
             app.UseAuthorization();
 
@@ -80,7 +98,7 @@ namespace ScmssApiServer
                         options.User.RequireUniqueEmail = true;
                     }
                 )
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<AppDbContext>();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                         {
