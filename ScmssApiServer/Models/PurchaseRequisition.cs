@@ -115,7 +115,7 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
-            EndWithProblem(userId, problem);
+            Cancel(userId, problem);
         }
 
         protected void CalculateTotals()
