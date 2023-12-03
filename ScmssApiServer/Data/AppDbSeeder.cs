@@ -54,6 +54,7 @@ namespace ScmssApiServer.Data
                     Email = email,
                     Name = name,
                     Gender = Gender.Male,
+                    ProductionFacilityId = 1,
                     DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
                     Description = description,
                 };

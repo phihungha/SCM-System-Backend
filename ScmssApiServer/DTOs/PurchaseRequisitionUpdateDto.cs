@@ -2,7 +2,7 @@
 {
     public class PurchaseRequisitionUpdateDto
     {
-        public ApprovalStatusSelection? ApprovalStatus { get; set; }
+        public ApprovalStatusOption? ApprovalStatus { get; set; }
         public bool? IsCanceled { get; set; }
         public ICollection<OrderItemInputDto>? Items { get; set; }
         public string? Problem { get; set; }

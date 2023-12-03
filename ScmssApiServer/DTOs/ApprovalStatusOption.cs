@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public enum ApprovalStatusSelection
+    public enum ApprovalStatusOption
     {
         Approved,
         Rejected,

@@ -53,6 +53,7 @@ namespace ScmssApiServer.Models
             }
 
             Items = items;
+            CalculateTotals();
         }
 
         public virtual void Approve(string userId)
@@ -118,6 +119,13 @@ namespace ScmssApiServer.Models
             }
             ApprovalStatus = ApprovalStatus.Rejected;
             EndWithProblem(userId, problem);
+        }
+
+        protected void CalculateTotals()
+        {
+            SubTotal = Items.Sum(i => i.TotalPrice);
+            VatAmount = SubTotal * (decimal)VatRate;
+            TotalAmount = SubTotal + VatAmount;
         }
     }
 

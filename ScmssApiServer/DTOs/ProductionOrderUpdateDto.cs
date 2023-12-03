@@ -2,6 +2,6 @@
 {
     public class ProductionOrderUpdateDto : OrderUpdateDto<OrderItemInputDto>
     {
-        public ApprovalStatusSelection ApprovalStatus { get; set; }
+        public ApprovalStatusOption ApprovalStatus { get; set; }
     }
 }
