@@ -61,7 +61,7 @@ namespace ScmssApiServer.DomainServices
                 CreateUser = user,
             };
 
-            order.AddItems(await GetOrderItemsFromDtos(dto.Items));
+            order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             order.Begin(userId);
 
             _dbContext.ProductionOrders.Add(order);
@@ -111,7 +111,7 @@ namespace ScmssApiServer.DomainServices
             if (dto.Items != null)
             {
                 _dbContext.RemoveRange(order.Items);
-                order.AddItems(await GetOrderItemsFromDtos(dto.Items));
+                order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             }
 
             switch (dto.Status)
@@ -186,7 +186,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderEventDto>(orderEvent);
         }
 
-        private async Task<IList<ProductionOrderItem>> GetOrderItemsFromDtos(IEnumerable<OrderItemInputDto> dtos)
+        private async Task<IList<ProductionOrderItem>> MapOrderItemDtosToModels(IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext

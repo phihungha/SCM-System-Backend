@@ -50,7 +50,7 @@ namespace ScmssApiServer.DomainServices
                 CreateUser = user,
             };
 
-            requisition.AddItems(await GetRequisitionItemsFromDtos(dto.VendorId, dto.Items));
+            requisition.AddItems(await MapRequisitionItemDtosToModels(dto.VendorId, dto.Items));
             requisition.Begin(userId);
 
             _dbContext.PurchaseRequisitions.Add(requisition);
@@ -104,7 +104,9 @@ namespace ScmssApiServer.DomainServices
             if (dto.Items != null)
             {
                 _dbContext.RemoveRange(requisition.Items);
-                requisition.AddItems(await GetRequisitionItemsFromDtos(requisition.VendorId, dto.Items));
+                requisition.AddItems(
+                        await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
+                    );
             }
 
             if (dto.IsCanceled ?? false)
@@ -137,7 +139,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
-        private async Task<IList<PurchaseRequisitionItem>> GetRequisitionItemsFromDtos(
+        private async Task<IList<PurchaseRequisitionItem>> MapRequisitionItemDtosToModels(
             int requisitionVendorId,
             IEnumerable<OrderItemInputDto> dtos)
         {

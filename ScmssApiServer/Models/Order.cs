@@ -49,7 +49,6 @@ namespace ScmssApiServer.Models
                 throw new InvalidDomainOperationException("Duplicate order item IDs found.");
             }
 
-            Items.Clear();
             Items = items;
         }
 

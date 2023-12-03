@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public class PurchaseOrderDto : TransOrderDto
+    public class PurchaseOrderDto : TransOrderDto<PurchaseOrderItemDto>
     {
         public decimal DiscountAmount { get; set; }
         public required ProductionFacilityDto ProductionFacility { get; set; }

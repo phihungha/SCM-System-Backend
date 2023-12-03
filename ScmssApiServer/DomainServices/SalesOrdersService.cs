@@ -53,13 +53,12 @@ namespace ScmssApiServer.DomainServices
             if (dto.ProductionFacilityId != null)
             {
                 int facilityId = (int)dto.ProductionFacilityId;
-                ProductionFacility facility = await GetLocationOfProductionFacilityAsync(facilityId);
+                ProductionFacility facility = await GetProductionFacilityAsync(facilityId);
                 order.ProductionFacility = facility;
                 order.FromLocation = facility.Location;
             }
 
-            IList<SalesOrderItem> items = await MapOrderItemDtosToModels(dto.Items);
-            order.AddItems(items);
+            order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             order.Begin(userId);
 
             _dbContext.SalesOrders.Add(order);
@@ -124,16 +123,15 @@ namespace ScmssApiServer.DomainServices
             if (dto.ProductionFacilityId != null)
             {
                 int facilityId = (int)dto.ProductionFacilityId;
-                ProductionFacility facility = await GetLocationOfProductionFacilityAsync(facilityId);
+                ProductionFacility facility = await GetProductionFacilityAsync(facilityId);
                 order.ProductionFacility = facility;
                 order.FromLocation = facility.Location;
             }
 
             if (dto.Items != null)
             {
-                IList<SalesOrderItem> items = await MapOrderItemDtosToModels(dto.Items);
-                order.AddItems(items);
                 _dbContext.RemoveRange(order.Items);
+                order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             }
 
             switch (dto.Status)
@@ -191,7 +189,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        private async Task<ProductionFacility> GetLocationOfProductionFacilityAsync(int facilityId)
+        private async Task<ProductionFacility> GetProductionFacilityAsync(int facilityId)
         {
             ProductionFacility? facility = await _dbContext
                 .ProductionFacilities

@@ -47,7 +47,6 @@ namespace ScmssApiServer.Models
                 throw new InvalidDomainOperationException("Duplicate requisition item IDs found.");
             }
 
-            Items.Clear();
             Items = items;
             CalculateTotals();
         }
