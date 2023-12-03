@@ -140,11 +140,11 @@ namespace ScmssApiServer.DomainServices
 
             switch (dto.ApprovalStatus)
             {
-                case ApprovalStatus.Approved:
+                case ApprovalStatusSelection.Approved:
                     item.Approve(userId);
                     break;
 
-                case ApprovalStatus.Rejected:
+                case ApprovalStatusSelection.Rejected:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(

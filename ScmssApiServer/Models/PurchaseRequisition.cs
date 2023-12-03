@@ -7,8 +7,9 @@ namespace ScmssApiServer.Models
     /// <summary>
     /// Represents a purchase requisition.
     /// </summary>
-    public class PurchaseRequisition : ApprovableLifecycle
+    public class PurchaseRequisition : StandardLifecycle, IApprovable
     {
+        public ApprovalStatus ApprovalStatus { get; private set; }
         public User? ApproveFinance { get; set; }
         public string? ApproveFinanceId { get; set; }
         public User? ApproveProductionManager { get; set; }
@@ -54,11 +55,24 @@ namespace ScmssApiServer.Models
             Items = items;
         }
 
-        public override void Approve(string userId)
+        public virtual void Approve(string userId)
         {
-            base.Approve(userId);
+            if (ApprovalStatus != ApprovalStatus.PendingApproval)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot approve purchase requisition which " +
+                        "isn't currently waiting for approval."
+                    );
+            }
+            ApprovalStatus = ApprovalStatus.Approved;
             ApproveProductionManagerId = userId;
             ApproveFinanceId = userId;
+        }
+
+        public override void Begin(string userId)
+        {
+            base.Begin(userId);
+            ApprovalStatus = ApprovalStatus.PendingApproval;
         }
 
         public void Cancel(string userId, string problem)
@@ -91,6 +105,19 @@ namespace ScmssApiServer.Models
             Status = PurchaseRequisitionStatus.Purchasing;
 
             return order;
+        }
+
+        public virtual void Reject(string userId, string problem)
+        {
+            if (ApprovalStatus != ApprovalStatus.PendingApproval)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot reject purchase requisition " +
+                        "which isn't waiting for approval."
+                    );
+            }
+            ApprovalStatus = ApprovalStatus.Rejected;
+            EndWithProblem(userId, problem);
         }
     }
 
