@@ -42,7 +42,7 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException("Vendor not found.");
             }
 
-            var item = new PurchaseRequisition
+            var requisition = new PurchaseRequisition
             {
                 Vendor = vendor,
                 ProductionFacility = user.ProductionFacility,
@@ -50,17 +50,19 @@ namespace ScmssApiServer.DomainServices
                 CreateUser = user,
             };
 
-            await AddOrderItemsFromDtos(item, dto.Items);
-            item.Begin(userId);
+            IList<PurchaseRequisitionItem> items
+                    = await GetRequisitionItemsFromDtos(dto.VendorId, dto.Items);
+            requisition.AddItems(items);
+            requisition.Begin(userId);
 
-            _dbContext.PurchaseRequisitions.Add(item);
+            _dbContext.PurchaseRequisitions.Add(requisition);
             await _dbContext.SaveChangesAsync();
-            return _mapper.Map<PurchaseRequisitionDto>(item);
+            return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
         public async Task<PurchaseRequisitionDto?> GetAsync(int id)
         {
-            PurchaseRequisition? item = await _dbContext.PurchaseRequisitions
+            PurchaseRequisition? requisition = await _dbContext.PurchaseRequisitions
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
@@ -69,23 +71,23 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            return _mapper.Map<PurchaseRequisitionDto?>(item);
+            return _mapper.Map<PurchaseRequisitionDto?>(requisition);
         }
 
         public async Task<IList<PurchaseRequisitionDto>> GetManyAsync()
         {
-            IList<PurchaseRequisition> items = await _dbContext.PurchaseRequisitions
+            IList<PurchaseRequisition> requisitions = await _dbContext.PurchaseRequisitions
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Vendor)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .ToListAsync();
-            return _mapper.Map<IList<PurchaseRequisitionDto>>(items);
+            return _mapper.Map<IList<PurchaseRequisitionDto>>(requisitions);
         }
 
         public async Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, string userId)
         {
-            PurchaseRequisition? item = await _dbContext.PurchaseRequisitions
+            PurchaseRequisition? requisition = await _dbContext.PurchaseRequisitions
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
@@ -94,15 +96,17 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            if (item == null)
+            if (requisition == null)
             {
                 throw new EntityNotFoundException();
             }
 
             if (dto.Items != null)
             {
-                _dbContext.RemoveRange(item.Items);
-                await AddOrderItemsFromDtos(item, dto.Items);
+                _dbContext.RemoveRange(requisition.Items);
+                IList<PurchaseRequisitionItem> items
+                    = await GetRequisitionItemsFromDtos(requisition.VendorId, dto.Items);
+                requisition.AddItems(items);
             }
 
             User user = await _userManager.Users.FirstAsync(x => x.Id == userId);
@@ -114,12 +118,12 @@ namespace ScmssApiServer.DomainServices
                             "Cannot cancel a requisition without a problem."
                         );
                 }
-                item.Cancel(userId, dto.Problem);
+                requisition.Cancel(userId, dto.Problem);
             }
 
             if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
             {
-                item.Approve(userId);
+                requisition.Approve(userId);
             }
             else if (dto.ApprovalStatus == ApprovalStatusOption.Rejected)
             {
@@ -129,22 +133,33 @@ namespace ScmssApiServer.DomainServices
                             "Cannot reject a requisition without a problem."
                         );
                 }
-                item.Reject(userId, dto.Problem);
+                requisition.Reject(userId, dto.Problem);
             }
 
             await _dbContext.SaveChangesAsync();
-            return _mapper.Map<PurchaseRequisitionDto>(item);
+            return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
-        private async Task AddOrderItemsFromDtos(PurchaseRequisition requisition, IEnumerable<OrderItemInputDto> dtos)
+        private async Task<IList<PurchaseRequisitionItem>> GetRequisitionItemsFromDtos(
+            int requisitionVendorId,
+            IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> supplyIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Supply> supplies = await _dbContext
                 .Supplies
+                .Where(i => i.VendorId == requisitionVendorId)
                 .Where(i => supplyIds.Contains(i.Id))
                 .ToDictionaryAsync(i => i.Id);
 
-            IList<PurchaseRequisitionItem> requisitionItems = dtos.Select(
+            if (supplies.Count != supplyIds.Count)
+            {
+                throw new InvalidDomainOperationException(
+                            "Cannot add a supply item with different vendor " +
+                            "from the purchase requisition's vendor."
+                        );
+            }
+
+            return dtos.Select(
                 i => new PurchaseRequisitionItem
                 {
                     ItemId = i.ItemId,
@@ -152,8 +167,6 @@ namespace ScmssApiServer.DomainServices
                     UnitPrice = supplies[i.ItemId].Price,
                     Quantity = i.Quantity
                 }).ToList();
-
-            requisition.AddItems(requisitionItems);
         }
     }
 }

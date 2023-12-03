@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using System.Collections.Generic;
 
 namespace ScmssApiServer.Models
 {
@@ -38,20 +39,16 @@ namespace ScmssApiServer.Models
             {
                 throw new InvalidDomainOperationException(
                         "Cannot add order item after requisition has been approved."
-                    );
+                );
             }
 
-            foreach (PurchaseRequisitionItem item in items)
+            int duplicateCount = items.GroupBy(x => x.ItemId).Count(g => g.Count() > 1);
+            if (duplicateCount > 0)
             {
-                bool idAlreadyExists = Items.FirstOrDefault(
-                    i => i.ItemId == item.ItemId
-                ) != null;
-                if (idAlreadyExists)
-                {
-                    throw new InvalidDomainOperationException("An order item with this ID already exists.");
-                }
+                throw new InvalidDomainOperationException("Duplicate order item IDs found.");
             }
 
+            Items.Clear();
             Items = items;
             CalculateTotals();
         }
