@@ -53,9 +53,9 @@ namespace ScmssApiServer.Models
         /// </summary>
         public double VatRate { get; private set; }
 
-        public override void AddItem(TItem item)
+        public override void AddItems(ICollection<TItem> items)
         {
-            base.AddItem(item);
+            base.AddItems(items);
             CalculateTotals();
         }
 

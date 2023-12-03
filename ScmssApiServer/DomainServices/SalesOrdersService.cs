@@ -28,9 +28,11 @@ namespace ScmssApiServer.DomainServices
             {
                 throw new EntityNotFoundException();
             }
-            SalesOrderEvent item = order.AddManualEvent(dto.Type, dto.Location, dto.Message);
+
+            SalesOrderEvent orderEvent = order.AddManualEvent(dto.Type, dto.Location, dto.Message);
+
             await _dbContext.SaveChangesAsync();
-            return GetEventDto(item);
+            return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
         public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, string userId)
@@ -41,7 +43,7 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException("Customer not found");
             }
 
-            var item = new SalesOrder
+            var order = new SalesOrder
             {
                 ToLocation = dto.ToLocation ?? customer.DefaultLocation,
                 CustomerId = dto.CustomerId,
@@ -51,21 +53,22 @@ namespace ScmssApiServer.DomainServices
             if (dto.ProductionFacilityId != null)
             {
                 int facilityId = (int)dto.ProductionFacilityId;
-                item.ProductionFacilityId = facilityId;
-                item.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
+                order.ProductionFacilityId = facilityId;
+                order.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
             }
 
-            await AddOrderItemsFromDtos(item, dto.Items);
-            item.Begin(userId);
+            IList<SalesOrderItem> items = await AddOrderItemsFromDtos(dto.Items);
+            order.AddItems(items);
+            order.Begin(userId);
 
-            _dbContext.SalesOrders.Add(item);
+            _dbContext.SalesOrders.Add(order);
             await _dbContext.SaveChangesAsync();
-            return GetOrderDto(item);
+            return _mapper.Map<SalesOrderDto>(order);
         }
 
         public async Task<SalesOrderDto?> GetAsync(int id)
         {
-            SalesOrder? item = await _dbContext.SalesOrders
+            SalesOrder? orders = await _dbContext.SalesOrders
                 .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
@@ -73,18 +76,18 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            return _mapper.Map<SalesOrderDto?>(item);
+            return _mapper.Map<SalesOrderDto?>(orders);
         }
 
         public async Task<IList<SalesOrderDto>> GetManyAsync()
         {
-            IList<SalesOrder> items = await _dbContext.SalesOrders
+            IList<SalesOrder> orders = await _dbContext.SalesOrders
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .ToListAsync();
-            return _mapper.Map<IList<SalesOrderDto>>(items);
+            return _mapper.Map<IList<SalesOrderDto>>(orders);
         }
 
         public async Task<SalesOrderDto> UpdateAsync(
@@ -92,7 +95,7 @@ namespace ScmssApiServer.DomainServices
             SalesOrderUpdateDto dto,
             string userId)
         {
-            SalesOrder? item = await _dbContext.SalesOrders
+            SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
@@ -100,7 +103,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            if (item == null)
+            if (order == null)
             {
                 throw new EntityNotFoundException();
             }
@@ -113,44 +116,45 @@ namespace ScmssApiServer.DomainServices
                             "Cannot complete payment without payment amount"
                         );
                 }
-                item.CompletePayment((decimal)dto.PaymentAmount);
+                order.CompletePayment((decimal)dto.PaymentAmount);
                 await _dbContext.SaveChangesAsync();
-                return GetOrderDto(item);
+                return _mapper.Map<SalesOrderDto>(order);
             }
 
-            if (!item.IsExecutionStarted)
+            if (!order.IsExecutionStarted)
             {
                 if (dto.ProductionFacilityId != null)
                 {
                     int facilityId = (int)dto.ProductionFacilityId;
-                    item.ProductionFacilityId = facilityId;
-                    item.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
+                    order.ProductionFacilityId = facilityId;
+                    order.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
                 }
 
                 if (dto.Items != null)
                 {
-                    _dbContext.RemoveRange(item.Items);
-                    await AddOrderItemsFromDtos(item, dto.Items);
+                    _dbContext.RemoveRange(order.Items);
+                    IList<SalesOrderItem> items = await AddOrderItemsFromDtos(dto.Items);
+                    order.AddItems(items);
                 }
             }
 
-            if (!item.IsExecutionFinished)
+            if (dto.ToLocation != null && !order.IsExecutionFinished)
             {
-                item.ToLocation = dto.ToLocation ?? item.Customer.DefaultLocation;
+                order.ToLocation = dto.ToLocation ?? order.Customer.DefaultLocation;
             }
 
             switch (dto.Status)
             {
                 case OrderStatusSelection.Executing:
-                    item.StartExecution();
+                    order.StartExecution();
                     break;
 
                 case OrderStatusSelection.WaitingAcceptance:
-                    item.FinishExecution();
+                    order.FinishExecution();
                     break;
 
                 case OrderStatusSelection.Completed:
-                    item.Complete(userId);
+                    order.Complete(userId);
                     break;
 
                 case OrderStatusSelection.Canceled:
@@ -160,7 +164,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot cancel an order without a problem."
                             );
                     }
-                    item.Cancel(userId, dto.Problem);
+                    order.Cancel(userId, dto.Problem);
                     break;
 
                 case OrderStatusSelection.Returned:
@@ -170,12 +174,12 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot return an order without a problem."
                             );
                     }
-                    item.Return(userId, dto.Problem);
+                    order.Return(userId, dto.Problem);
                     break;
             }
 
             await _dbContext.SaveChangesAsync();
-            return GetOrderDto(item);
+            return _mapper.Map<SalesOrderDto>(order);
         }
 
         public async Task<TransOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto)
@@ -188,13 +192,13 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            SalesOrderEvent item = order.UpdateEvent(id, dto.Location, dto.Message);
+            SalesOrderEvent orderEvent = order.UpdateEvent(id, dto.Location, dto.Message);
 
             await _dbContext.SaveChangesAsync();
-            return GetEventDto(item);
+            return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<OrderItemInputDto> dtos)
+        private async Task<IList<SalesOrderItem>> AddOrderItemsFromDtos(IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext
@@ -202,23 +206,14 @@ namespace ScmssApiServer.DomainServices
                 .Where(i => productIds.Contains(i.Id))
                 .ToDictionaryAsync(i => i.Id);
 
-            order.Items.Clear();
-            foreach (var dto in dtos)
-            {
-                var item = new SalesOrderItem
+            return dtos.Select(
+                dto => new SalesOrderItem
                 {
                     ItemId = dto.ItemId,
                     Unit = products[dto.ItemId].Unit,
                     UnitPrice = products[dto.ItemId].Price,
                     Quantity = dto.Quantity
-                };
-                order.AddItem(item);
-            }
-        }
-
-        private TransOrderEventDto GetEventDto(SalesOrderEvent item)
-        {
-            return _mapper.Map<TransOrderEventDto>(item);
+                }).ToList();
         }
 
         private async Task<string> GetLocationOfProductionFacilityAsync(int facilityId)
@@ -231,11 +226,6 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException("Production facility not found");
             }
             return facility.Location;
-        }
-
-        private SalesOrderDto GetOrderDto(SalesOrder item)
-        {
-            return _mapper.Map<SalesOrderDto>(item);
         }
     }
 }

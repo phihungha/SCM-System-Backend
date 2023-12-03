@@ -14,7 +14,7 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Events happening on the order.
         /// </summary>
-        public ICollection<TEvent> Events { get; } = new List<TEvent>();
+        public ICollection<TEvent> Events { get; private set; } = new List<TEvent>();
 
         public DateTime? ExecutionFinishTime { get; private set; }
         public int Id { get; set; }
@@ -22,7 +22,7 @@ namespace ScmssApiServer.Models
         public override bool IsCreated => Id != 0;
 
         public bool IsExecuting => Status == OrderStatus.Executing
-                                                   || Status == OrderStatus.Interrupted;
+                                   || Status == OrderStatus.Interrupted;
 
         public bool IsExecutionFinished => ExecutionFinishTime != null;
         public bool IsExecutionStarted => Status != OrderStatus.Processing;
@@ -30,28 +30,27 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Order lines.
         /// </summary>
-        public ICollection<TItem> Items { get; } = new List<TItem>();
+        public ICollection<TItem> Items { get; private set; } = new List<TItem>();
 
         public OrderStatus Status { get; protected set; }
 
-        public virtual void AddItem(TItem item)
+        public virtual void AddItems(ICollection<TItem> items)
         {
             if (IsExecutionStarted)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add order item after order has started execution."
-                    );
+                        "Cannot add order item after requisition has been approved."
+                );
             }
 
-            bool idAlreadyExists = Items.FirstOrDefault(
-                    i => i.ItemId == item.ItemId
-                ) != null;
-            if (idAlreadyExists)
+            int duplicateCount = items.GroupBy(x => x.ItemId).Count(g => g.Count() > 1);
+            if (duplicateCount > 0)
             {
-                throw new InvalidDomainOperationException("An order item with this ID already exists");
+                throw new InvalidDomainOperationException("Duplicate order item IDs found.");
             }
 
-            Items.Add(item);
+            Items.Clear();
+            Items = items;
         }
 
         public override void Begin(string userId)

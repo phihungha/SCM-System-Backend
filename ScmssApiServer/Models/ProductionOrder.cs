@@ -17,9 +17,9 @@ namespace ScmssApiServer.Models
         public decimal TotalProfit { get; set; }
         public decimal TotalValue { get; set; }
 
-        public override void AddItem(ProductionOrderItem item)
+        public override void AddItems(ICollection<ProductionOrderItem> items)
         {
-            base.AddItem(item);
+            base.AddItems(items);
             CalculateTotals();
         }
 

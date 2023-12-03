@@ -50,9 +50,7 @@ namespace ScmssApiServer.DomainServices
                 CreateUser = user,
             };
 
-            IList<PurchaseRequisitionItem> items
-                    = await GetRequisitionItemsFromDtos(dto.VendorId, dto.Items);
-            requisition.AddItems(items);
+            requisition.AddItems(await GetRequisitionItemsFromDtos(dto.VendorId, dto.Items));
             requisition.Begin(userId);
 
             _dbContext.PurchaseRequisitions.Add(requisition);
@@ -104,9 +102,7 @@ namespace ScmssApiServer.DomainServices
             if (dto.Items != null)
             {
                 _dbContext.RemoveRange(requisition.Items);
-                IList<PurchaseRequisitionItem> items
-                    = await GetRequisitionItemsFromDtos(requisition.VendorId, dto.Items);
-                requisition.AddItems(items);
+                requisition.AddItems(await GetRequisitionItemsFromDtos(requisition.VendorId, dto.Items));
             }
 
             User user = await _userManager.Users.FirstAsync(x => x.Id == userId);

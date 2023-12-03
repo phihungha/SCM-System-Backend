@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
-using System.Collections.Generic;
 
 namespace ScmssApiServer.Models
 {
@@ -11,25 +10,25 @@ namespace ScmssApiServer.Models
     public class PurchaseRequisition : StandardLifecycle, IApprovable
     {
         public ApprovalStatus ApprovalStatus { get; private set; }
-        public User? ApproveFinance { get; set; }
-        public string? ApproveFinanceId { get; set; }
-        public User? ApproveProductionManager { get; set; }
-        public string? ApproveProductionManagerId { get; set; }
+        public User? ApproveFinance { get; private set; }
+        public string? ApproveFinanceId { get; private set; }
+        public User? ApproveProductionManager { get; private set; }
+        public string? ApproveProductionManagerId { get; private set; }
         public int Id { get; set; }
         public override bool IsCreated => Id != 0;
 
-        public ICollection<PurchaseRequisitionItem> Items { get; set; }
+        public ICollection<PurchaseRequisitionItem> Items { get; private set; }
                     = new List<PurchaseRequisitionItem>();
 
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
-        public PurchaseOrder? PurchaseOrder { get; set; }
-        public PurchaseRequisitionStatus Status { get; set; }
-        public decimal SubTotal { get; set; }
-        public ICollection<Supply> Supplies { get; set; } = new List<Supply>();
-        public decimal TotalAmount { get; set; }
-        public decimal VatAmount { get; set; }
-        public double VatRate { get; set; }
+        public PurchaseOrder? PurchaseOrder { get; private set; }
+        public PurchaseRequisitionStatus Status { get; private set; }
+        public decimal SubTotal { get; private set; }
+        public ICollection<Supply> Supplies { get; private set; } = new List<Supply>();
+        public decimal TotalAmount { get; private set; }
+        public decimal VatAmount { get; private set; }
+        public double VatRate { get; private set; }
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
 
@@ -97,9 +96,10 @@ namespace ScmssApiServer.Models
                 Unit = i.Unit,
                 UnitPrice = i.UnitPrice,
             }).ToList();
-            order.AddItem(orderItems[0]);
+            order.AddItems(orderItems);
             order.Begin(userId);
 
+            PurchaseOrder = order;
             Status = PurchaseRequisitionStatus.Purchasing;
 
             return order;
