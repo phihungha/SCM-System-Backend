@@ -5,15 +5,16 @@ namespace ScmssApiServer.Models
 {
     public class PurchaseOrderEvent : TransOrderEvent
     {
-        public int PurchaseOrderId { get; set; }
         public PurchaseOrder PurchaseOrder { get; set; } = null!;
+        public int PurchaseOrderId { get; set; }
     }
 
-    public class PurchaseOrderProgressUpdateMappingProfile : Profile
+    public class PurchaseOrderEventMP : Profile
     {
-        public PurchaseOrderProgressUpdateMappingProfile()
+        public PurchaseOrderEventMP()
         {
-            CreateMap<OrderEventCreateDto, PurchaseOrderEvent>();
+            CreateMap<PurchaseOrderEvent, TransOrderEventDto>();
+            CreateMap<TransOrderEventCreateDto, PurchaseOrderEvent>();
         }
     }
 }

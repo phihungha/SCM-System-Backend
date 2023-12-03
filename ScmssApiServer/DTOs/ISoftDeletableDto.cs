@@ -1,9 +1,9 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public interface IUpdateTrackableDto
+    public interface ISoftDeletableDto
     {
-        bool IsActive { get; set; }
         DateTime CreateTime { get; set; }
+        bool IsActive { get; set; }
         DateTime? UpdateTime { get; set; }
     }
 }

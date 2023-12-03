@@ -1,4 +1,6 @@
-﻿using ScmssApiServer.DomainExceptions;
+﻿using AutoMapper;
+using ScmssApiServer.DomainExceptions;
+using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
@@ -89,6 +91,14 @@ namespace ScmssApiServer.Models
             Status = PurchaseRequisitionStatus.Purchasing;
 
             return order;
+        }
+    }
+
+    public class PurchaseRequisitionMp : Profile
+    {
+        public PurchaseRequisitionMp()
+        {
+            CreateMap<PurchaseRequisition, PurchaseRequisitionDto>();
         }
     }
 }

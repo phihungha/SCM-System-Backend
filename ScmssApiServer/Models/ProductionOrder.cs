@@ -104,8 +104,7 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
-            Problem = problem;
-            End(userId);
+            EndWithProblem(userId, problem);
         }
 
         public override void Return(string userId, string problem)

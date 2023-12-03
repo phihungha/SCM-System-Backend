@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public class ProductionFacilityDto : IUpdateTrackableDto
+    public class ProductionFacilityDto : ISoftDeletableDto
     {
         public int Id { get; set; }
         public required string Name { get; set; }

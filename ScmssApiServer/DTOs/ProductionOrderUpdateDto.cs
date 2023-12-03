@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class ProductionOrderUpdateDto : OrderUpdateDto
+    public class ProductionOrderUpdateDto : OrderUpdateDto<OrderItemInputDto>
     {
         public ApprovalStatus ApprovalStatus { get; set; }
     }

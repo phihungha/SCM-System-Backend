@@ -1,4 +1,7 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     /// <summary>
     /// Represents a purchase order.
@@ -13,5 +16,13 @@
         public ICollection<Supply> Supplies { get; set; } = new List<Supply>();
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
+    }
+
+    public class PurchaseOrderMp : Profile
+    {
+        public PurchaseOrderMp()
+        {
+            CreateMap<PurchaseOrder, PurchaseOrderDto>();
+        }
     }
 }
