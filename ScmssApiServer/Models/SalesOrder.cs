@@ -22,7 +22,7 @@ namespace ScmssApiServer.Models
                 if (value?.Id != productionFacility?.Id && IsExecutionStarted)
                 {
                     throw new InvalidDomainOperationException(
-                            "Cannot change production facility after order has started delivery."
+                            "Cannot change production facility after the order has started delivery."
                         );
                 }
                 productionFacility = value;
@@ -37,7 +37,7 @@ namespace ScmssApiServer.Models
                 if (value != productionFacilityId && IsExecutionStarted)
                 {
                     throw new InvalidDomainOperationException(
-                            "Cannot change production facility after order has started delivery."
+                            "Cannot change production facility after the order has started delivery."
                         );
                 }
                 productionFacilityId = value;
@@ -51,7 +51,7 @@ namespace ScmssApiServer.Models
             if (ProductionFacilityId == null)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start delivery of order without starting production facility."
+                        "Cannot start order delivery without start production facility."
                     );
             }
             base.StartExecution();

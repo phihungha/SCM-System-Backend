@@ -12,10 +12,27 @@ namespace ScmssApiServer.Models
         where TItem : TransOrderItem
         where TEvent : TransOrderEvent, new()
     {
+        private string? fromLocation;
+
+        private string toLocation = "";
+
         /// <summary>
         /// Delivery start location.
         /// </summary>
-        public string? FromLocation { get; set; }
+        public string? FromLocation
+        {
+            get => fromLocation;
+            set
+            {
+                if (fromLocation != value && IsExecutionStarted)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot change start location after the order has started delivery."
+                        );
+                }
+                fromLocation = value;
+            }
+        }
 
         public string? InvoiceUrl { get; set; }
 
@@ -36,7 +53,20 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Delivery destination location.
         /// </summary>
-        public required string ToLocation { get; set; }
+        public required string ToLocation
+        {
+            get => toLocation;
+            set
+            {
+                if (value != toLocation && IsExecutionFinished)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot change destination location after the order has finished delivery."
+                        );
+                }
+                toLocation = value;
+            }
+        }
 
         /// <summary>
         /// Total amount to pay = SubTotal + VatAmount
@@ -66,7 +96,7 @@ namespace ScmssApiServer.Models
             if (!IsExecuting)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add manual event when order is not being delivered."
+                        "Cannot add a manual event when the order isn't being delivered."
                     );
             }
 
@@ -89,7 +119,7 @@ namespace ScmssApiServer.Models
                     break;
 
                 default:
-                    throw new ArgumentException("Invalid event type");
+                    throw new ArgumentException("Invalid event type.");
             }
 
             return AddEvent(type, location, message);
@@ -122,7 +152,7 @@ namespace ScmssApiServer.Models
             if (PaymentStatus != TransOrderPaymentStatus.Due)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot complete payment of order if there is no due payment."
+                        "Cannot complete order payment if there is no due payment."
                     );
             }
             RemainingAmount = RemainingAmount - amount;
@@ -157,39 +187,11 @@ namespace ScmssApiServer.Models
             if (FromLocation == null)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start delivery of order without start location."
+                        "Cannot start order delivery without start location."
                     );
             }
             base.StartExecution();
             AddEvent(TransOrderEventType.DeliveryStarted, FromLocation);
-        }
-
-        public TEvent UpdateEvent(int id, string? message = null, string? location = null)
-        {
-            if (IsEnded)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot update event because the order has been ended."
-                    );
-            }
-
-            TEvent? item = Events.FirstOrDefault(i => i.Id == id);
-            if (item == null)
-            {
-                throw new EntityNotFoundException();
-            }
-
-            if (location != null)
-            {
-                if (item.IsAutomatic)
-                {
-                    throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
-                }
-                item.Location = location;
-            }
-            item.Message = message;
-
-            return item;
         }
 
         protected TEvent AddEvent(TransOrderEventType type, string? location = null, string? message = null)
@@ -200,7 +202,8 @@ namespace ScmssApiServer.Models
                 if (type == lastEvent.Type)
                 {
                     throw new InvalidDomainOperationException(
-                        "Cannot add arrival/left event with the same type as previous arrival/left event."
+                        "Cannot add an arrival/left event with the same type " +
+                        "as the previous arrival/left event."
                     );
                 }
             }

@@ -13,7 +13,7 @@ namespace ScmssApiServer.DomainServices
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public SalesOrdersService(IMapper mapper, AppDbContext dbContext)
+        public SalesOrdersService(AppDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
             _mapper = mapper;
@@ -53,11 +53,12 @@ namespace ScmssApiServer.DomainServices
             if (dto.ProductionFacilityId != null)
             {
                 int facilityId = (int)dto.ProductionFacilityId;
-                order.ProductionFacilityId = facilityId;
-                order.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
+                ProductionFacility facility = await GetLocationOfProductionFacilityAsync(facilityId);
+                order.ProductionFacility = facility;
+                order.FromLocation = facility.Location;
             }
 
-            IList<SalesOrderItem> items = await AddOrderItemsFromDtos(dto.Items);
+            IList<SalesOrderItem> items = await MapOrderItemDtosToModels(dto.Items);
             order.AddItems(items);
             order.Begin(userId);
 
@@ -108,56 +109,48 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            if (dto.PaymentCompleted ?? false)
+            if (dto.PaymentAmount != null)
             {
-                if (dto.PaymentAmount == null)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot complete payment without payment amount"
-                        );
-                }
                 order.CompletePayment((decimal)dto.PaymentAmount);
                 await _dbContext.SaveChangesAsync();
                 return _mapper.Map<SalesOrderDto>(order);
             }
 
-            if (!order.IsExecutionStarted)
+            if (dto.ToLocation != null)
             {
-                if (dto.ProductionFacilityId != null)
-                {
-                    int facilityId = (int)dto.ProductionFacilityId;
-                    order.ProductionFacilityId = facilityId;
-                    order.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
-                }
-
-                if (dto.Items != null)
-                {
-                    _dbContext.RemoveRange(order.Items);
-                    IList<SalesOrderItem> items = await AddOrderItemsFromDtos(dto.Items);
-                    order.AddItems(items);
-                }
+                order.ToLocation = dto.ToLocation;
             }
 
-            if (dto.ToLocation != null && !order.IsExecutionFinished)
+            if (dto.ProductionFacilityId != null)
             {
-                order.ToLocation = dto.ToLocation ?? order.Customer.DefaultLocation;
+                int facilityId = (int)dto.ProductionFacilityId;
+                ProductionFacility facility = await GetLocationOfProductionFacilityAsync(facilityId);
+                order.ProductionFacility = facility;
+                order.FromLocation = facility.Location;
+            }
+
+            if (dto.Items != null)
+            {
+                IList<SalesOrderItem> items = await MapOrderItemDtosToModels(dto.Items);
+                order.AddItems(items);
+                _dbContext.RemoveRange(order.Items);
             }
 
             switch (dto.Status)
             {
-                case OrderStatusSelection.Executing:
+                case OrderStatusOption.Executing:
                     order.StartExecution();
                     break;
 
-                case OrderStatusSelection.WaitingAcceptance:
+                case OrderStatusOption.WaitingAcceptance:
                     order.FinishExecution();
                     break;
 
-                case OrderStatusSelection.Completed:
+                case OrderStatusOption.Completed:
                     order.Complete(userId);
                     break;
 
-                case OrderStatusSelection.Canceled:
+                case OrderStatusOption.Canceled:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
@@ -167,7 +160,7 @@ namespace ScmssApiServer.DomainServices
                     order.Cancel(userId, dto.Problem);
                     break;
 
-                case OrderStatusSelection.Returned:
+                case OrderStatusOption.Returned:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
@@ -198,7 +191,19 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        private async Task<IList<SalesOrderItem>> AddOrderItemsFromDtos(IEnumerable<OrderItemInputDto> dtos)
+        private async Task<ProductionFacility> GetLocationOfProductionFacilityAsync(int facilityId)
+        {
+            ProductionFacility? facility = await _dbContext
+                .ProductionFacilities
+                .FindAsync(facilityId);
+            if (facility == null)
+            {
+                throw new EntityNotFoundException("Production facility not found.");
+            }
+            return facility;
+        }
+
+        private async Task<IList<SalesOrderItem>> MapOrderItemDtosToModels(IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext
@@ -214,18 +219,6 @@ namespace ScmssApiServer.DomainServices
                     UnitPrice = products[dto.ItemId].Price,
                     Quantity = dto.Quantity
                 }).ToList();
-        }
-
-        private async Task<string> GetLocationOfProductionFacilityAsync(int facilityId)
-        {
-            ProductionFacility? facility = await _dbContext
-                .ProductionFacilities
-                .FindAsync(facilityId);
-            if (facility == null)
-            {
-                throw new EntityNotFoundException("Production facility not found");
-            }
-            return facility.Location;
         }
     }
 }

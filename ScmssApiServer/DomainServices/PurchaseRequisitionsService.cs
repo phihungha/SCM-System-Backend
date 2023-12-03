@@ -15,9 +15,9 @@ namespace ScmssApiServer.DomainServices
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
 
-        public PurchaseRequisitionsService(UserManager<User> userManager,
+        public PurchaseRequisitionsService(AppDbContext dbContext,
                                            IMapper mapper,
-                                           AppDbContext dbContext)
+                                           UserManager<User> userManager)
         {
             _dbContext = dbContext;
             _mapper = mapper;
@@ -83,7 +83,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<PurchaseRequisitionDto>>(requisitions);
         }
 
-        public async Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, string userId)
+        public async Task<PurchaseRequisitionDto> UpdateAsync(int id,
+                                                              PurchaseRequisitionUpdateDto dto,
+                                                              string userId)
         {
             PurchaseRequisition? requisition = await _dbContext.PurchaseRequisitions
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
@@ -105,7 +107,6 @@ namespace ScmssApiServer.DomainServices
                 requisition.AddItems(await GetRequisitionItemsFromDtos(requisition.VendorId, dto.Items));
             }
 
-            User user = await _userManager.Users.FirstAsync(x => x.Id == userId);
             if (dto.IsCanceled ?? false)
             {
                 if (dto.Problem == null)

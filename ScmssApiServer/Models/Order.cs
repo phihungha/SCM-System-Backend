@@ -39,7 +39,7 @@ namespace ScmssApiServer.Models
             if (IsExecutionStarted)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add order item after requisition has been approved."
+                        "Cannot add items after the order has started execution."
                 );
             }
 
@@ -76,7 +76,7 @@ namespace ScmssApiServer.Models
             if (Status != OrderStatus.WaitingAcceptance)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot complete order if it isn't waiting acceptance."
+                        "Cannot complete the order if it isn't waiting acceptance."
                     );
             }
             Status = OrderStatus.Completed;
@@ -88,7 +88,7 @@ namespace ScmssApiServer.Models
             if (!IsExecuting)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot finish execution of order if it is not being executed."
+                        "Cannot finish execution of the order if isn't being executed."
                     );
             }
             Status = OrderStatus.WaitingAcceptance;
@@ -100,7 +100,7 @@ namespace ScmssApiServer.Models
             if (Status != OrderStatus.WaitingAcceptance)
             {
                 throw new InvalidOperationException(
-                        "Cannot complete order if it isn't waiting acceptance."
+                        "Cannot return the order if it isn't waiting acceptance."
                     );
             }
             Status = OrderStatus.Returned;
@@ -112,10 +112,38 @@ namespace ScmssApiServer.Models
             if (IsExecutionStarted)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start execution of order again."
+                        "Cannot start execution of the order again."
                     );
             }
             Status = OrderStatus.Executing;
+        }
+
+        public virtual TEvent UpdateEvent(int id, string? message = null, string? location = null)
+        {
+            if (IsEnded)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot update an event of an ended order."
+                    );
+            }
+
+            TEvent? item = Events.FirstOrDefault(i => i.Id == id);
+            if (item == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            if (location != null)
+            {
+                if (item.IsAutomatic)
+                {
+                    throw new InvalidDomainOperationException("Cannot edit location of an automatic order event.");
+                }
+                item.Location = location;
+            }
+            item.Message = message;
+
+            return item;
         }
     }
 }

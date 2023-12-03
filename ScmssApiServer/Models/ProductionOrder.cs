@@ -19,36 +19,42 @@ namespace ScmssApiServer.Models
 
         public override void AddItems(ICollection<ProductionOrderItem> items)
         {
+            if (ApprovalStatus != ApprovalStatus.PendingApproval)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot add items after the order has been approved or rejected."
+                );
+            }
             base.AddItems(items);
             CalculateTotals();
         }
 
-        public ProductionOrderEvent AddManualEvent(ProductionOrderEventTypeSelection typeSel,
+        public ProductionOrderEvent AddManualEvent(ProductionOrderEventTypeOption typeSel,
                                                    string location,
                                                    string? message)
         {
             if (!IsExecuting)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add manual event when order is not in production."
+                        "Cannot add a manual event when the order is not in production."
                     );
             }
 
             ProductionOrderEventType type;
             switch (typeSel)
             {
-                case ProductionOrderEventTypeSelection.StageDone:
+                case ProductionOrderEventTypeOption.StageDone:
                     type = ProductionOrderEventType.StageDone;
                     Status = OrderStatus.Executing;
                     break;
 
-                case ProductionOrderEventTypeSelection.Interrupted:
+                case ProductionOrderEventTypeOption.Interrupted:
                     type = ProductionOrderEventType.Interrupted;
                     Status = OrderStatus.Interrupted;
                     break;
 
                 default:
-                    throw new ArgumentException("Invalid event type");
+                    throw new ArgumentException("Invalid event type.");
             }
 
             return AddEvent(type, location, message);
@@ -59,7 +65,7 @@ namespace ScmssApiServer.Models
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot approve production order which isn't currently waiting for approval."
+                        "Cannot approve a production order which isn't waiting approval."
                     );
             }
             ApprovalStatus = ApprovalStatus.Approved;
@@ -100,7 +106,7 @@ namespace ScmssApiServer.Models
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot reject production order that isn't waiting for approval"
+                        "Cannot reject a production order which isn't waiting approval."
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
@@ -124,34 +130,6 @@ namespace ScmssApiServer.Models
             }
             base.StartExecution();
             AddEvent(ProductionOrderEventType.Producing);
-        }
-
-        public ProductionOrderEvent UpdateEvent(int id, string? message = null, string? location = null)
-        {
-            if (IsEnded)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot update event because the order is finished."
-                    );
-            }
-
-            ProductionOrderEvent? item = Events.FirstOrDefault(i => i.Id == id);
-            if (item == null)
-            {
-                throw new EntityNotFoundException();
-            }
-
-            if (location != null)
-            {
-                if (item.IsAutomatic)
-                {
-                    throw new InvalidDomainOperationException("Cannot edit location of automatic order event.");
-                }
-                item.Location = location;
-            }
-            item.Message = message;
-
-            return item;
         }
 
         protected ProductionOrderEvent AddEvent(ProductionOrderEventType type, string? location = null, string? message = null)

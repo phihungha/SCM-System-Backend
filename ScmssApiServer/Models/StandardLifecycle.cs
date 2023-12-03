@@ -31,7 +31,7 @@ namespace ScmssApiServer.Models
         {
             if (IsEnded)
             {
-                throw new InvalidDomainOperationException("Item is already ended.");
+                throw new InvalidDomainOperationException("The item is already ended.");
             }
             EndTime = DateTime.UtcNow;
             EndUserId = userId;

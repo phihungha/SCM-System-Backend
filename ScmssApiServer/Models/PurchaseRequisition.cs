@@ -37,14 +37,14 @@ namespace ScmssApiServer.Models
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add order item after requisition has been approved."
+                        "Cannot add items after the requisition has been approved or rejected."
                 );
             }
 
             int duplicateCount = items.GroupBy(x => x.ItemId).Count(g => g.Count() > 1);
             if (duplicateCount > 0)
             {
-                throw new InvalidDomainOperationException("Duplicate order item IDs found.");
+                throw new InvalidDomainOperationException("Duplicate requisition item IDs found.");
             }
 
             Items.Clear();
@@ -57,8 +57,7 @@ namespace ScmssApiServer.Models
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot approve purchase requisition which " +
-                        "isn't currently waiting for approval."
+                        "Cannot approve a purchase requisition which isn't waiting approval."
                     );
             }
             ApprovalStatus = ApprovalStatus.Approved;
@@ -110,8 +109,7 @@ namespace ScmssApiServer.Models
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot reject purchase requisition " +
-                        "which isn't waiting for approval."
+                        "Cannot reject a purchase requisition which isn't waiting approval."
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;

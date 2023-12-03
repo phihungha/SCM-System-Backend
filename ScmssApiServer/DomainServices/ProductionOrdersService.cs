@@ -116,19 +116,19 @@ namespace ScmssApiServer.DomainServices
 
             switch (dto.Status)
             {
-                case OrderStatusSelection.Executing:
+                case OrderStatusOption.Executing:
                     order.StartExecution();
                     break;
 
-                case OrderStatusSelection.WaitingAcceptance:
+                case OrderStatusOption.WaitingAcceptance:
                     order.FinishExecution();
                     break;
 
-                case OrderStatusSelection.Completed:
+                case OrderStatusOption.Completed:
                     order.Complete(userId);
                     break;
 
-                case OrderStatusSelection.Canceled:
+                case OrderStatusOption.Canceled:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
@@ -138,7 +138,7 @@ namespace ScmssApiServer.DomainServices
                     order.Cancel(userId, dto.Problem);
                     break;
 
-                case OrderStatusSelection.Returned:
+                case OrderStatusOption.Returned:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
