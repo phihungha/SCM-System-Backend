@@ -34,11 +34,7 @@ namespace ScmssApiServer.Models
             }
         }
 
-        public string? InvoiceUrl { get; set; }
-
         public TransOrderPaymentStatus PaymentStatus { get; private set; }
-
-        public string? ReceiptUrl { get; set; }
 
         /// <summary>
         /// Remaining amount to pay.

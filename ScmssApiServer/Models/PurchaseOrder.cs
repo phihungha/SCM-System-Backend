@@ -9,10 +9,12 @@ namespace ScmssApiServer.Models
     public class PurchaseOrder : TransOrder<PurchaseOrderItem, PurchaseOrderEvent>
     {
         public decimal DiscountAmount { get; set; }
+        public Uri? InvoiceUrl { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
         public PurchaseRequisition? PurchaseRequisition { get; set; }
         public int? PurchaseRequisitionId { get; set; }
+        public Uri? ReceiptUrl { get; set; }
         public ICollection<Supply> Supplies { get; set; } = new List<Supply>();
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
