@@ -6,6 +6,7 @@
         public Uri? InvoiceUrl { get; set; }
         public required ProductionFacilityDto ProductionFacility { get; set; }
         public int ProductionFacilityId { get; set; }
+        public required PurchaseRequisitionDto PurchaseRequisition { get; set; }
         public int? PurchaseRequisitionId { get; set; }
         public Uri? ReceiptUrl { get; set; }
         public CompanyDto Vendor { get; set; } = null!;

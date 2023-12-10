@@ -13,6 +13,7 @@ namespace ScmssApiServer.DTOs
         public required ICollection<PurchaseRequisitionItemDto> Items { get; set; }
         public required ProductionFacilityDto ProductionFacility { get; set; }
         public int ProductionFacilityId { get; set; }
+        public ICollection<PurchaseOrderDto> PurchaseOrders { get; set; } = null!;
         public PurchaseRequisitionStatus Status { get; set; }
         public decimal SubTotal { get; set; }
         public decimal TotalAmount { get; set; }
