@@ -51,10 +51,19 @@ namespace ScmssApiServer.Models
             if (ProductionFacilityId == null)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start order delivery without start production facility."
+                        "Cannot start order delivery without source production facility."
                     );
             }
+
             base.StartExecution();
+
+            foreach (SalesOrderItem item in Items)
+            {
+                WarehouseProductItem warehouseItem = item.Product.WarehouseProductItems.First(
+                        i => i.ProductionFacilityId == ProductionFacilityId
+                    );
+                warehouseItem.Quantity -= item.Quantity;
+            }
         }
     }
 
