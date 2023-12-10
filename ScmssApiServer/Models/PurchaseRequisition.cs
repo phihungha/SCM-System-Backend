@@ -99,6 +99,20 @@ namespace ScmssApiServer.Models
 
         public PurchaseOrder GeneratePurchaseOrder(string userId)
         {
+            if (ApprovalStatus != ApprovalStatus.Approved)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot create purchase order from an unapproved requisition"
+                    );
+            }
+
+            if (Status == PurchaseRequisitionStatus.Purchasing)
+            {
+                throw new InvalidDomainOperationException(
+                        "There is already a purchase order ongoing for this requisition."
+                    );
+            }
+
             var order = new PurchaseOrder
             {
                 PurchaseRequisitionId = Id,
