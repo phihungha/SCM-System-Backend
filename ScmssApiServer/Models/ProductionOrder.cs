@@ -13,6 +13,11 @@ namespace ScmssApiServer.Models
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
         public ICollection<Product> Products { get; protected set; } = new List<Product>();
+        public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
+
+        public ICollection<ProductionOrderSupplyUsageItem> SupplyUsageItems { get; protected set; }
+                    = new List<ProductionOrderSupplyUsageItem>();
+
         public decimal TotalCost { get; protected set; }
 
         public decimal TotalProfit
@@ -40,6 +45,32 @@ namespace ScmssApiServer.Models
             }
 
             base.AddItems(items);
+
+            var supplyUsageItems = new Dictionary<int, ProductionOrderSupplyUsageItem>();
+            foreach (ProductionOrderItem item in items)
+            {
+                foreach (ProductSupplyCostItem costItem in item.Product.SupplyCostItems)
+                {
+                    Supply supply = costItem.Supply;
+                    double supplyUsage = costItem.Quantity * item.Quantity;
+
+                    if (!supplyUsageItems.ContainsKey(supply.Id))
+                    {
+                        supplyUsageItems[supply.Id] = new ProductionOrderSupplyUsageItem
+                        {
+                            SupplyId = supply.Id,
+                            Quantity = supplyUsage,
+                            Unit = supply.Unit,
+                            UnitCost = supply.Price,
+                        };
+                    }
+                    else
+                    {
+                        supplyUsageItems[supply.Id].Quantity += supplyUsage;
+                    }
+                }
+            }
+            SupplyUsageItems = supplyUsageItems.Values.ToList();
 
             TotalValue = Items.Sum(i => i.TotalValue);
             TotalCost = Items.Sum(i => i.TotalCost);
@@ -155,15 +186,12 @@ namespace ScmssApiServer.Models
             base.StartExecution();
             AddEvent(ProductionOrderEventType.Producing);
 
-            foreach (ProductionOrderItem item in Items)
+            foreach (ProductionOrderSupplyUsageItem item in SupplyUsageItems)
             {
-                foreach (ProductionSupplyCostItem costItem in item.Product.SupplyCostItems)
-                {
-                    WarehouseSupplyItem warehouseItem = costItem.Supply.WarehouseSupplyItems.First(
-                       i => i.ProductionFacilityId == ProductionFacilityId
-                   );
-                    warehouseItem.Quantity -= item.Quantity;
-                }
+                WarehouseSupplyItem warehouseItem = item.Supply.WarehouseSupplyItems.First(
+                    i => i.ProductionFacilityId == ProductionFacilityId
+                );
+                warehouseItem.Quantity -= item.Quantity;
             }
         }
 
@@ -187,7 +215,7 @@ namespace ScmssApiServer.Models
 
             foreach (ProductionOrderItem item in items)
             {
-                foreach (ProductionSupplyCostItem costItem in item.Product.SupplyCostItems)
+                foreach (ProductSupplyCostItem costItem in item.Product.SupplyCostItems)
                 {
                     int supplyId = costItem.SupplyId;
                     double supplyUsage = costItem.Quantity * item.Quantity;

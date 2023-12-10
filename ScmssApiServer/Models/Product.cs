@@ -48,8 +48,8 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Cost items of supplies used for production of this product.
         /// </summary>
-        public ICollection<ProductionSupplyCostItem> SupplyCostItems { get; set; }
-                    = new List<ProductionSupplyCostItem>();
+        public ICollection<ProductSupplyCostItem> SupplyCostItems { get; set; }
+                    = new List<ProductSupplyCostItem>();
 
         public ICollection<WarehouseProductItem> WarehouseProductItems { get; set; }
             = new List<WarehouseProductItem>();

@@ -73,7 +73,10 @@ namespace ScmssApiServer.DomainServices
         public async Task<ProductionOrderDto?> GetAsync(int id)
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
+                .AsNoTracking()
                 .Include(i => i.Items).ThenInclude(i => i.Product)
+                .Include(i => i.SupplyUsageItems)
+                .ThenInclude(i => i.Supply)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
@@ -86,6 +89,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<IList<ProductionOrderDto>> GetManyAsync()
         {
             IList<ProductionOrder> orders = await _dbContext.ProductionOrders
+                .AsNoTracking()
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
@@ -94,7 +98,10 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<ProductionOrderDto>>(orders);
         }
 
-        public async Task<ProductionOrderDto> UpdateAsync(int id, ProductionOrderUpdateDto dto, string userId)
+        public async Task<ProductionOrderDto> UpdateAsync(
+            int id,
+            ProductionOrderUpdateDto dto,
+            string userId)
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Items)
@@ -105,6 +112,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Items)
                 .ThenInclude(i => i.Product)
                 .ThenInclude(i => i.WarehouseProductItems)
+                .Include(i => i.SupplyUsageItems)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
@@ -119,6 +127,7 @@ namespace ScmssApiServer.DomainServices
             if (dto.Items != null)
             {
                 _dbContext.RemoveRange(order.Items);
+                _dbContext.RemoveRange(order.SupplyUsageItems);
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             }
 

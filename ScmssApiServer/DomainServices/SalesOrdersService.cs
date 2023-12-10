@@ -71,6 +71,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<SalesOrderDto?> GetAsync(int id)
         {
             SalesOrder? order = await _dbContext.SalesOrders
+                .AsNoTracking()
                 .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
@@ -84,6 +85,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<IList<SalesOrderDto>> GetManyAsync()
         {
             IList<SalesOrder> orders = await _dbContext.SalesOrders
+                .AsNoTracking()
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
