@@ -8,7 +8,7 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class PurchaseOrder : TransOrder<PurchaseOrderItem, PurchaseOrderEvent>
     {
-        public decimal AdditionalDiscount { get; set; }
+        public decimal AdditionalDiscount { get; set; } = 0;
 
         /// <summary>
         /// Total discount amount = DiscountSubtotal + AdditionalDiscount
@@ -70,6 +70,15 @@ namespace ScmssApiServer.Models
         public override void Complete(string userId)
         {
             base.Complete(userId);
+
+            foreach (PurchaseOrderItem item in Items)
+            {
+                WarehouseSupplyItem warehouseItem = item.Supply.WarehouseSupplyItems.First(
+                        i => i.ProductionFacilityId == ProductionFacilityId
+                    );
+                warehouseItem.Quantity += item.Quantity;
+            }
+
             PurchaseRequisition.Complete(userId);
         }
 

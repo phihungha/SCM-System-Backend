@@ -103,6 +103,7 @@ namespace ScmssApiServer.DomainServices
         {
             PurchaseOrder? order = await _dbContext.PurchaseOrders
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
+                                      .ThenInclude(i => i.WarehouseSupplyItems)
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.PurchaseRequisition)
