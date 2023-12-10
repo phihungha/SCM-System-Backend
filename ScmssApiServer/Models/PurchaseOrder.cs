@@ -8,16 +8,70 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class PurchaseOrder : TransOrder<PurchaseOrderItem, PurchaseOrderEvent>
     {
-        public decimal AdditionalDiscount { get; set; } = 0;
+        public decimal AdditionalDiscount { get; set; }
+
+        /// <summary>
+        /// Total discount amount = DiscountSubtotal + AdditionalDiscount
+        /// </summary>
+        public decimal DiscountAmount
+        {
+            get => DiscountSubtotal + AdditionalDiscount;
+            private set => _ = value;
+        }
+
+        /// <summary>
+        /// Sum of PurchaseOrderItem.Discount
+        /// </summary>
+        public decimal DiscountSubtotal { get; set; }
+
         public Uri? InvoiceUrl { get; set; }
+
+        /// <summary>
+        /// Subtotal after discount.
+        /// </summary>
+        public decimal NetSubtotal
+        {
+            get => SubTotal - DiscountAmount;
+            private set => _ = value;
+        }
+
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
         public PurchaseRequisition PurchaseRequisition { get; set; } = null!;
         public int? PurchaseRequisitionId { get; set; }
         public Uri? ReceiptUrl { get; set; }
         public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
+
+        /// <summary>
+        /// Total amount to pay = NetSubtotal + VatAmount
+        /// </summary>
+        public override decimal TotalAmount
+        {
+            get => NetSubtotal + VatAmount;
+        }
+
+        /// <summary>
+        /// VAT-taxed amount = NetSubtotal * VatRate
+        /// </summary>
+        public override decimal VatAmount
+        {
+            get => NetSubtotal * (decimal)VatRate;
+        }
+
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
+
+        public override void Cancel(string userId, string problem)
+        {
+            base.Cancel(userId, problem);
+            PurchaseRequisition.Delay(problem);
+        }
+
+        public override void Complete(string userId)
+        {
+            base.Complete(userId);
+            PurchaseRequisition.Complete(userId);
+        }
 
         /// <summary>
         /// Edit discount amount of order items.
@@ -32,33 +86,13 @@ namespace ScmssApiServer.Models
                     item.Discount = discounts[item.ItemId];
                 }
             }
-            CalculateTotals();
-        }
-
-        public override void Cancel(string userId, string problem)
-        {
-            base.Cancel(userId, problem);
-            PurchaseRequisition.Delay(problem);
+            DiscountSubtotal = Items.Sum(i => i.Discount);
         }
 
         public override void Return(string userId, string problem)
         {
             base.Return(userId, problem);
             PurchaseRequisition.Delay(problem);
-        }
-
-        public override void Complete(string userId)
-        {
-            base.Complete(userId);
-            PurchaseRequisition.Complete(userId);
-        }
-
-        protected override void CalculateTotals()
-        {
-            SubTotal = Items.Sum(i => i.NetPrice);
-            decimal NetAmount = SubTotal - AdditionalDiscount;
-            VatAmount = NetAmount * (decimal)VatRate;
-            TotalAmount = NetAmount + VatAmount;
         }
     }
 

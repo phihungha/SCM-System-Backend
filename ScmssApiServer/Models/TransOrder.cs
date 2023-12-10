@@ -67,12 +67,20 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Total amount to pay = SubTotal + VatAmount
         /// </summary>
-        public decimal TotalAmount { get; protected set; }
+        public virtual decimal TotalAmount
+        {
+            get => SubTotal + VatAmount;
+            private set => _ = value;
+        }
 
         /// <summary>
         /// VAT-taxed amount = SubTotal * VatRate
         /// </summary>
-        public decimal VatAmount { get; protected set; }
+        public virtual decimal VatAmount
+        {
+            get => SubTotal * (decimal)VatRate;
+            private set => _ = value;
+        }
 
         /// <summary>
         /// VAT tax rate from 0 (0%) to 1 (100%).
@@ -82,7 +90,7 @@ namespace ScmssApiServer.Models
         public override void AddItems(ICollection<TItem> items)
         {
             base.AddItems(items);
-            CalculateTotals();
+            SubTotal = Items.Sum(i => i.TotalPrice);
         }
 
         public TEvent AddManualEvent(TransOrderEventTypeSelection typeSel,
@@ -213,13 +221,6 @@ namespace ScmssApiServer.Models
             };
             Events.Add(item);
             return item;
-        }
-
-        protected virtual void CalculateTotals()
-        {
-            SubTotal = Items.Sum(i => i.TotalPrice);
-            VatAmount = SubTotal * (decimal)VatRate;
-            TotalAmount = SubTotal + VatAmount;
         }
 
         private void CreateDuePayment()
