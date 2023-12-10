@@ -1,4 +1,7 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     public class PurchaseOrderItem : TransOrderItem
     {
@@ -12,5 +15,13 @@
 
         public PurchaseOrder PurchaseOrder { get; set; } = null!;
         public Supply Supply { get; set; } = null!;
+    }
+
+    public class PurchaseOrderItemMp : Profile
+    {
+        public PurchaseOrderItemMp()
+        {
+            CreateMap<PurchaseOrderItem, PurchaseOrderItemDto>();
+        }
     }
 }

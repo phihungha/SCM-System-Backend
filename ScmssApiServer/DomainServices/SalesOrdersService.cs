@@ -64,6 +64,7 @@ namespace ScmssApiServer.DomainServices
 
             _dbContext.SalesOrders.Add(order);
             await _dbContext.SaveChangesAsync();
+            await _dbContext.Entry(order).Reference(i => i.CreateUser).LoadAsync();
             return _mapper.Map<SalesOrderDto>(order);
         }
 

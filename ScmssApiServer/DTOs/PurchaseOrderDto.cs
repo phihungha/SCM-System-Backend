@@ -2,7 +2,7 @@
 {
     public class PurchaseOrderDto : TransOrderDto<PurchaseOrderItemDto>
     {
-        public decimal DiscountAmount { get; set; }
+        public decimal AdditionalDiscount { get; set; }
         public Uri? InvoiceUrl { get; set; }
         public required ProductionFacilityDto ProductionFacility { get; set; }
         public int ProductionFacilityId { get; set; }

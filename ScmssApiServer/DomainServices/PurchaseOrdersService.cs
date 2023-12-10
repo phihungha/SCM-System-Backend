@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
@@ -67,6 +68,7 @@ namespace ScmssApiServer.DomainServices
 
             _dbContext.PurchaseOrders.Add(order);
             await _dbContext.SaveChangesAsync();
+            await _dbContext.Entry(order).Reference(i => i.CreateUser).LoadAsync();
             return _mapper.Map<PurchaseOrderDto>(order);
         }
 
