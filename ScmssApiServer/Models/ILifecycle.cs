@@ -11,7 +11,7 @@
         DateTime? EndTime { get; }
         User? EndUser { get; }
         string? EndUserId { get; }
-        bool IsEnded { get => EndTime != null; }
+        bool IsEnded => EndTime != null;
         string? Problem { get; }
         DateTime? UpdateTime { get; set; }
 

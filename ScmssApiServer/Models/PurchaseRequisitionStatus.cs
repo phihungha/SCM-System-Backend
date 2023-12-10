@@ -4,6 +4,7 @@
     {
         Processing,
         Purchasing,
+        Delayed,
         Completed,
         Canceled,
     }

@@ -9,26 +9,29 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class PurchaseRequisition : StandardLifecycle, IApprovable
     {
-        public ApprovalStatus ApprovalStatus { get; private set; }
-        public User? ApproveFinance { get; private set; }
-        public string? ApproveFinanceId { get; private set; }
-        public User? ApproveProductionManager { get; private set; }
-        public string? ApproveProductionManagerId { get; private set; }
+        public ApprovalStatus ApprovalStatus { get; protected set; }
+        public User? ApproveFinance { get; protected set; }
+        public string? ApproveFinanceId { get; protected set; }
+        public User? ApproveProductionManager { get; protected set; }
+        public string? ApproveProductionManagerId { get; protected set; }
         public int Id { get; set; }
         public override bool IsCreated => Id != 0;
 
-        public ICollection<PurchaseRequisitionItem> Items { get; private set; }
+        public ICollection<PurchaseRequisitionItem> Items { get; protected set; }
                     = new List<PurchaseRequisitionItem>();
 
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
-        public PurchaseOrder? PurchaseOrder { get; private set; }
-        public PurchaseRequisitionStatus Status { get; private set; }
+
+        public ICollection<PurchaseOrder> PurchaseOrders { get; protected set; }
+            = new List<PurchaseOrder>();
+
+        public PurchaseRequisitionStatus Status { get; protected set; }
         public decimal SubTotal { get; private set; }
-        public ICollection<Supply> Supplies { get; private set; } = new List<Supply>();
-        public decimal TotalAmount { get; private set; }
-        public decimal VatAmount { get; private set; }
-        public double VatRate { get; private set; }
+        public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
+        public decimal TotalAmount { get; protected set; }
+        public decimal VatAmount { get; protected set; }
+        public double VatRate { get; protected set; }
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
 
@@ -72,8 +75,26 @@ namespace ScmssApiServer.Models
 
         public void Cancel(string userId, string problem)
         {
+            if (IsEnded)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot cancel an ended purchase requisition."
+                    );
+            }
             Status = PurchaseRequisitionStatus.Canceled;
             EndWithProblem(userId, problem);
+        }
+
+        public void Delay(string problem)
+        {
+            if (Status != PurchaseRequisitionStatus.Purchasing)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot delay a purchase requisition which hasn't started execution."
+                    );
+            }
+            Status = PurchaseRequisitionStatus.Delayed;
+            Problem = problem;
         }
 
         public PurchaseOrder GeneratePurchaseOrder(string userId)
@@ -98,7 +119,7 @@ namespace ScmssApiServer.Models
             order.AddItems(orderItems);
             order.Begin(userId);
 
-            PurchaseOrder = order;
+            PurchaseOrders.Add(order);
             Status = PurchaseRequisitionStatus.Purchasing;
 
             return order;

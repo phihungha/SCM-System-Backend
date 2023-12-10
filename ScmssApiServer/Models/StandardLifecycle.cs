@@ -10,12 +10,12 @@ namespace ScmssApiServer.Models
         public DateTime CreateTime { get; set; }
         public User CreateUser { get; set; } = null!;
         public required string CreateUserId { get; set; }
-        public DateTime? EndTime { get; private set; }
-        public User? EndUser { get; private set; }
-        public string? EndUserId { get; private set; }
+        public DateTime? EndTime { get; protected set; }
+        public User? EndUser { get; protected set; }
+        public string? EndUserId { get; protected set; }
         public abstract bool IsCreated { get; }
-        public bool IsEnded { get => EndTime != null; }
-        public string? Problem { get; private set; }
+        public bool IsEnded => EndTime != null;
+        public string? Problem { get; protected set; }
         public DateTime? UpdateTime { get; set; }
 
         public virtual void Begin(string userId)
