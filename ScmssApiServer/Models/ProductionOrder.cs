@@ -7,15 +7,21 @@ namespace ScmssApiServer.Models
     public class ProductionOrder : Order<ProductionOrderItem, ProductionOrderEvent>,
                                    IApprovable
     {
-        public ApprovalStatus ApprovalStatus { get; set; }
-        public User? ApproveProductionManager { get; set; }
-        public string? ApproveProductionManagerId { get; set; }
+        public ApprovalStatus ApprovalStatus { get; protected set; }
+        public User? ApproveProductionManager { get; protected set; }
+        public string? ApproveProductionManagerId { get; protected set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
-        public ICollection<Product> Products { get; set; } = new List<Product>();
-        public decimal TotalCost { get; set; }
-        public decimal TotalProfit { get; set; }
-        public decimal TotalValue { get; set; }
+        public ICollection<Product> Products { get; protected set; } = new List<Product>();
+        public decimal TotalCost { get; protected set; }
+
+        public decimal TotalProfit
+        {
+            get => TotalValue - TotalCost;
+            private set => _ = value;
+        }
+
+        public decimal TotalValue { get; protected set; }
 
         public override void AddItems(ICollection<ProductionOrderItem> items)
         {
@@ -25,8 +31,18 @@ namespace ScmssApiServer.Models
                         "Cannot add items after the order has been approved or rejected."
                 );
             }
+
+            if (!CheckStock(items))
+            {
+                throw new InvalidDomainOperationException(
+                        "Not enough supply stock in the selected warehouse to produce the order items."
+                    );
+            }
+
             base.AddItems(items);
-            CalculateTotals();
+
+            TotalValue = Items.Sum(i => i.TotalValue);
+            TotalCost = Items.Sum(i => i.TotalCost);
         }
 
         public ProductionOrderEvent AddManualEvent(ProductionOrderEventTypeOption typeSel,
@@ -90,6 +106,14 @@ namespace ScmssApiServer.Models
         {
             base.Complete(userId);
             AddEvent(ProductionOrderEventType.Completed);
+
+            foreach (ProductionOrderItem item in Items)
+            {
+                WarehouseProductItem warehouseItem = item.Product.WarehouseProductItems.First(
+                        i => i.ProductionFacilityId == ProductionFacilityId
+                    );
+                warehouseItem.Quantity += item.Quantity;
+            }
         }
 
         /// <summary>
@@ -130,6 +154,17 @@ namespace ScmssApiServer.Models
             }
             base.StartExecution();
             AddEvent(ProductionOrderEventType.Producing);
+
+            foreach (ProductionOrderItem item in Items)
+            {
+                foreach (ProductionSupplyCostItem costItem in item.Product.SupplyCostItems)
+                {
+                    WarehouseSupplyItem warehouseItem = costItem.Supply.WarehouseSupplyItems.First(
+                       i => i.ProductionFacilityId == ProductionFacilityId
+                   );
+                    warehouseItem.Quantity -= item.Quantity;
+                }
+            }
         }
 
         protected ProductionOrderEvent AddEvent(ProductionOrderEventType type, string? location = null, string? message = null)
@@ -145,11 +180,33 @@ namespace ScmssApiServer.Models
             return item;
         }
 
-        private void CalculateTotals()
+        private bool CheckStock(IEnumerable<ProductionOrderItem> items)
         {
-            TotalValue = Items.Sum(i => i.TotalValue);
-            TotalCost = Items.Sum(i => i.TotalCost);
-            TotalProfit = TotalValue - TotalCost;
+            var totalSupplyUsage = new Dictionary<int, double>();
+            var warehouseItems = new Dictionary<int, WarehouseSupplyItem>();
+
+            foreach (ProductionOrderItem item in items)
+            {
+                foreach (ProductionSupplyCostItem costItem in item.Product.SupplyCostItems)
+                {
+                    int supplyId = costItem.SupplyId;
+                    double supplyUsage = costItem.Quantity * item.Quantity;
+
+                    if (!totalSupplyUsage.ContainsKey(supplyId))
+                    {
+                        totalSupplyUsage[supplyId] = supplyUsage;
+                        warehouseItems[supplyId] = costItem.Supply
+                            .WarehouseSupplyItems
+                            .First(i => i.ProductionFacilityId == ProductionFacilityId);
+                    }
+                    else
+                    {
+                        totalSupplyUsage[supplyId] += supplyUsage;
+                    }
+                }
+            }
+
+            return totalSupplyUsage.All(i => i.Value <= warehouseItems[i.Key].Quantity);
         }
     }
 

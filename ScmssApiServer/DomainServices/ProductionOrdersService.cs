@@ -56,6 +56,7 @@ namespace ScmssApiServer.DomainServices
 
             var order = new ProductionOrder
             {
+                ProductionFacilityId = user.ProductionFacility.Id,
                 ProductionFacility = user.ProductionFacility,
                 CreateUserId = userId,
                 CreateUser = user,
@@ -96,7 +97,14 @@ namespace ScmssApiServer.DomainServices
         public async Task<ProductionOrderDto> UpdateAsync(int id, ProductionOrderUpdateDto dto, string userId)
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
-                .Include(i => i.Items).ThenInclude(i => i.Product)
+                .Include(i => i.Items)
+                .ThenInclude(i => i.Product)
+                .ThenInclude(i => i.SupplyCostItems)
+                .ThenInclude(i => i.Supply)
+                .ThenInclude(i => i.WarehouseSupplyItems)
+                .Include(i => i.Items)
+                .ThenInclude(i => i.Product)
+                .ThenInclude(i => i.WarehouseProductItems)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
@@ -193,6 +201,7 @@ namespace ScmssApiServer.DomainServices
                 .Products
                 .Include(i => i.SupplyCostItems)
                 .ThenInclude(i => i.Supply)
+                .ThenInclude(i => i.WarehouseSupplyItems)
                 .Where(i => productIds.Contains(i.Id))
                 .ToDictionaryAsync(i => i.Id);
 
@@ -200,6 +209,8 @@ namespace ScmssApiServer.DomainServices
                 dto => new ProductionOrderItem
                 {
                     ItemId = dto.ItemId,
+                    // This is needed to check stock.
+                    Product = products[dto.ItemId],
                     Unit = products[dto.ItemId].Unit,
                     UnitValue = products[dto.ItemId].Price,
                     UnitCost = products[dto.ItemId].Cost,
