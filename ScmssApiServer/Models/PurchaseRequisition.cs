@@ -70,6 +70,7 @@ namespace ScmssApiServer.Models
         public override void Begin(string userId)
         {
             base.Begin(userId);
+            Status = PurchaseRequisitionStatus.Processing;
             ApprovalStatus = ApprovalStatus.PendingApproval;
         }
 
@@ -85,12 +86,24 @@ namespace ScmssApiServer.Models
             EndWithProblem(userId, problem);
         }
 
+        public void Complete(string userId)
+        {
+            if (Status != PurchaseRequisitionStatus.Purchasing)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot complete a purchase requisition which isn't executing."
+                    );
+            }
+            Status = PurchaseRequisitionStatus.Completed;
+            End(userId);
+        }
+
         public void Delay(string problem)
         {
             if (Status != PurchaseRequisitionStatus.Purchasing)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot delay a purchase requisition which hasn't started execution."
+                        "Cannot delay a purchase requisition which isn't executing."
                     );
             }
             Status = PurchaseRequisitionStatus.Delayed;
@@ -131,7 +144,6 @@ namespace ScmssApiServer.Models
                 UnitPrice = i.UnitPrice,
             }).ToList();
             order.AddItems(orderItems);
-            order.Begin(userId);
 
             PurchaseOrders.Add(order);
             Status = PurchaseRequisitionStatus.Purchasing;

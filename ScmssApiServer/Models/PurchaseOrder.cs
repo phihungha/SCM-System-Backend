@@ -47,6 +47,12 @@ namespace ScmssApiServer.Models
             PurchaseRequisition.Delay(problem);
         }
 
+        public override void Complete(string userId)
+        {
+            base.Complete(userId);
+            PurchaseRequisition.Complete(userId);
+        }
+
         protected override void CalculateTotals()
         {
             SubTotal = Items.Sum(i => i.NetPrice);
