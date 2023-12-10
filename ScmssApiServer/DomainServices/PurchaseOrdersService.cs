@@ -62,7 +62,7 @@ namespace ScmssApiServer.DomainServices
                 order.AdditionalDiscount = (decimal)dto.AdditionalDiscount;
             }
 
-            order.EditItemDiscounts(MapOrderItemDtosToDict(dto.Items));
+            order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
             order.Begin(userId);
 
             _dbContext.PurchaseOrders.Add(order);
@@ -74,6 +74,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<PurchaseOrderDto?> GetAsync(int id)
         {
             PurchaseOrder? orders = await _dbContext.PurchaseOrders
+                .AsNoTracking()
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
@@ -88,6 +89,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<IList<PurchaseOrderDto>> GetManyAsync()
         {
             IList<PurchaseOrder> orders = await _dbContext.PurchaseOrders
+                .AsNoTracking()
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
@@ -116,26 +118,34 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            if (dto.PaymentAmount != null)
-            {
-                order.CompletePayment((decimal)dto.PaymentAmount);
-                await _dbContext.SaveChangesAsync();
-                return _mapper.Map<PurchaseOrderDto>(order);
-            }
-
             if (dto.FromLocation != null)
             {
                 order.FromLocation = dto.FromLocation;
             }
 
-            if (dto.Items != null)
-            {
-                order.EditItemDiscounts(MapOrderItemDtosToDict(dto.Items));
-            }
-
             if (dto.AdditionalDiscount != null)
             {
                 order.AdditionalDiscount = (decimal)dto.AdditionalDiscount;
+            }
+
+            if (dto.Items != null)
+            {
+                order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
+            }
+
+            if (dto.InvoiceUrl != null)
+            {
+                order.InvoiceUrl = dto.InvoiceUrl;
+            }
+
+            if (dto.ReceiptUrl != null)
+            {
+                order.ReceiptUrl = dto.ReceiptUrl;
+            }
+
+            if (dto.PayAmount != null)
+            {
+                order.CompletePayment((decimal)dto.PayAmount);
             }
 
             switch (dto.Status)
@@ -196,8 +206,8 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        private IDictionary<int, decimal> MapOrderItemDtosToDict(
-            IEnumerable<PurchaseOrderItemInputDto> dtos)
+        private IDictionary<int, decimal> MapOrderItemDiscountDtosToDict(
+            IEnumerable<PurchaseOrderItemDiscountInputDto> dtos)
         {
             return dtos.ToDictionary(i => i.ItemId, i => i.Discount);
         }

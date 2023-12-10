@@ -110,13 +110,6 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            if (dto.PaymentAmount != null)
-            {
-                order.CompletePayment((decimal)dto.PaymentAmount);
-                await _dbContext.SaveChangesAsync();
-                return _mapper.Map<SalesOrderDto>(order);
-            }
-
             if (dto.ToLocation != null)
             {
                 order.ToLocation = dto.ToLocation;
@@ -134,6 +127,11 @@ namespace ScmssApiServer.DomainServices
             {
                 _dbContext.RemoveRange(order.Items);
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
+            }
+
+            if (dto.PayAmount != null)
+            {
+                order.CompletePayment((decimal)dto.PayAmount);
             }
 
             switch (dto.Status)
