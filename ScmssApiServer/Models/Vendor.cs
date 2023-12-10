@@ -1,4 +1,7 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     public class Vendor : Company
     {
@@ -10,5 +13,13 @@
 
         public ICollection<PurchaseOrder> PurchaseOrders { get; set; }
             = new List<PurchaseOrder>();
+    }
+
+    public class VendorMp : Profile
+    {
+        public VendorMp()
+        {
+            CreateMap<Vendor, CompanyDto>();
+        }
     }
 }

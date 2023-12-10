@@ -2,28 +2,27 @@
 
 namespace ScmssApiServer.Models
 {
-    public abstract class Order<TItem, TEvent> : ILifecycle
+    /// <summary>
+    /// Represents a generic order.
+    /// </summary>
+    /// <typeparam name="TItem">Order line item type</typeparam>
+    /// <typeparam name="TEvent">Order event type</typeparam>
+    public abstract class Order<TItem, TEvent> : StandardLifecycle
         where TItem : OrderItem
         where TEvent : OrderEvent, new()
     {
-        public DateTime CreateTime { get; set; }
-        public User CreateUser { get; set; } = null!;
-        public required string CreateUserId { get; set; }
-        public DateTime? EndTime { get; private set; }
-        public User? EndUser { get; private set; }
-        public string? EndUserId { get; private set; }
-
         /// <summary>
         /// Events happening on the order.
         /// </summary>
-        public ICollection<TEvent> Events { get; } = new List<TEvent>();
+        public ICollection<TEvent> Events { get; protected set; } = new List<TEvent>();
 
-        public DateTime? ExecutionFinishTime { get; private set; }
+        public DateTime? ExecutionFinishTime { get; protected set; }
         public int Id { get; set; }
-        public bool IsEnded { get => EndTime != null; }
+
+        public override bool IsCreated => Id != 0;
 
         public bool IsExecuting => Status == OrderStatus.Executing
-                                                   || Status == OrderStatus.Interrupted;
+                                   || Status == OrderStatus.Interrupted;
 
         public bool IsExecutionFinished => ExecutionFinishTime != null;
         public bool IsExecutionStarted => Status != OrderStatus.Processing;
@@ -31,43 +30,31 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Order lines.
         /// </summary>
-        public ICollection<TItem> Items { get; } = new List<TItem>();
-
-        /// <summary>
-        /// Reason the order was canceled or returned.
-        /// </summary>
-        public string? Problem { get; protected set; }
+        public ICollection<TItem> Items { get; protected set; } = new List<TItem>();
 
         public OrderStatus Status { get; protected set; }
-        public DateTime? UpdateTime { get; set; }
 
-        public virtual void AddItem(TItem item)
+        public virtual void AddItems(ICollection<TItem> items)
         {
             if (IsExecutionStarted)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add order item after order has started execution."
-                    );
+                        "Cannot add items after the order has started execution."
+                );
             }
 
-            bool idAlreadyExists = Items.FirstOrDefault(
-                    i => i.ItemId == item.ItemId
-                ) != null;
-            if (idAlreadyExists)
+            int duplicateCount = items.GroupBy(x => x.ItemId).Count(g => g.Count() > 1);
+            if (duplicateCount > 0)
             {
-                throw new InvalidDomainOperationException("An order item with this ID already exists");
+                throw new InvalidDomainOperationException("Duplicate order item IDs found.");
             }
 
-            Items.Add(item);
+            Items = items;
         }
 
-        public virtual void Begin(string userId)
+        public override void Begin(string userId)
         {
-            if (Id != 0)
-            {
-                throw new InvalidDomainOperationException("Cannot begin an already created order");
-            }
-            CreateUserId = userId;
+            base.Begin(userId);
             Status = OrderStatus.Processing;
         }
 
@@ -80,8 +67,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = OrderStatus.Canceled;
-            Problem = problem;
-            End(userId);
+            EndWithProblem(userId, problem);
         }
 
         public virtual void Complete(string userId)
@@ -89,22 +75,11 @@ namespace ScmssApiServer.Models
             if (Status != OrderStatus.WaitingAcceptance)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot complete order if it isn't waiting acceptance."
+                        "Cannot complete the order if it isn't waiting acceptance."
                     );
             }
             Status = OrderStatus.Completed;
             End(userId);
-        }
-
-        public virtual void End(string userId)
-        {
-            if (IsEnded)
-            {
-                throw new InvalidDomainOperationException("Order is already ended");
-            }
-
-            EndTime = DateTime.UtcNow;
-            EndUserId = userId;
         }
 
         public virtual void FinishExecution()
@@ -112,7 +87,7 @@ namespace ScmssApiServer.Models
             if (!IsExecuting)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot finish execution of order if it is not being executed."
+                        "Cannot finish execution of the order if isn't being executed."
                     );
             }
             Status = OrderStatus.WaitingAcceptance;
@@ -124,12 +99,11 @@ namespace ScmssApiServer.Models
             if (Status != OrderStatus.WaitingAcceptance)
             {
                 throw new InvalidOperationException(
-                        "Cannot complete order if it isn't waiting acceptance."
+                        "Cannot return the order if it isn't waiting acceptance."
                     );
             }
             Status = OrderStatus.Returned;
-            Problem = problem;
-            End(userId);
+            EndWithProblem(userId, problem);
         }
 
         public virtual void StartExecution()
@@ -137,10 +111,38 @@ namespace ScmssApiServer.Models
             if (IsExecutionStarted)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start execution of order again."
+                        "Cannot start execution of the order again."
                     );
             }
             Status = OrderStatus.Executing;
+        }
+
+        public virtual TEvent UpdateEvent(int id, string? message = null, string? location = null)
+        {
+            if (IsEnded)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot update an event of an ended order."
+                    );
+            }
+
+            TEvent? item = Events.FirstOrDefault(i => i.Id == id);
+            if (item == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            if (location != null)
+            {
+                if (item.IsAutomatic)
+                {
+                    throw new InvalidDomainOperationException("Cannot edit location of an automatic order event.");
+                }
+                item.Location = location;
+            }
+            item.Message = message;
+
+            return item;
         }
     }
 }

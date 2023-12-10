@@ -2,9 +2,9 @@
 {
     public enum PurchaseRequisitionStatus
     {
-        PendingApproval,
-        Approved,
+        Processing,
         Purchasing,
+        Delayed,
         Completed,
         Canceled,
     }

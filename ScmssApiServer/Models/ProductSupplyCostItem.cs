@@ -2,22 +2,21 @@
 
 namespace ScmssApiServer.Models
 {
-    public class ProductionSupplyCostItem
+    public class ProductSupplyCostItem
     {
-        public int ProductId { get; set; }
         public Product Product { get; set; } = null!;
-        public int SupplyId { get; set; }
-        public Supply Supply { get; set; } = null!;
-
+        public int ProductId { get; set; }
         public double Quantity { get; set; }
+        public Supply Supply { get; set; } = null!;
+        public int SupplyId { get; set; }
+
+        [NotMapped]
+        public decimal TotalCost => UnitCost * (decimal)Quantity;
 
         [NotMapped]
         public string Unit => Supply.Unit;
 
         [NotMapped]
         public decimal UnitCost => Supply.Price;
-
-        [NotMapped]
-        public decimal TotalCost => UnitCost * (decimal)Quantity;
     }
 }

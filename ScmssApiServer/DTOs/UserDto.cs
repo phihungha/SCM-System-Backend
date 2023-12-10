@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class UserDto : IUpdateTrackableDto
+    public class UserDto : ISoftDeletableDto
     {
         public required string Id { get; set; }
 

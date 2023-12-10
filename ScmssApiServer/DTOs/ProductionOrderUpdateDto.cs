@@ -1,9 +1,7 @@
-﻿using ScmssApiServer.Models;
-
-namespace ScmssApiServer.DTOs
+﻿namespace ScmssApiServer.DTOs
 {
-    public class ProductionOrderUpdateDto : OrderUpdateDto
+    public class ProductionOrderUpdateDto : OrderUpdateDto<OrderItemInputDto>
     {
-        public ApprovalStatus ApprovalStatus { get; set; }
+        public ApprovalStatusOption? ApprovalStatus { get; set; }
     }
 }

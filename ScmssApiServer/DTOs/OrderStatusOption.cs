@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public enum OrderStatusSelection
+    public enum OrderStatusOption
     {
         Executing,
         WaitingAcceptance,

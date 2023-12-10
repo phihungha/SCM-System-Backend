@@ -2,10 +2,9 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public abstract class OrderCreateDto
+    public abstract class OrderCreateDto<TItemDto>
     {
         [Required]
-        public IList<OrderItemInputDto> Items { get; set; }
-            = new List<OrderItemInputDto>();
+        public required ICollection<TItemDto> Items { get; set; }
     }
 }
