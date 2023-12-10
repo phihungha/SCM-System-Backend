@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class PurchaseOrderItemUpdateDto
+    public class PurchaseOrderItemInputDto
     {
         public decimal Discount { get; set; }
 

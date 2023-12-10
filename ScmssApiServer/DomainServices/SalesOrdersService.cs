@@ -19,7 +19,8 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<TransOrderEventDto> AddManualEventAsync(int orderId, TransOrderEventCreateDto dto)
+        public async Task<TransOrderEventDto> AddManualEventAsync(int orderId,
+                                                                  TransOrderEventCreateDto dto)
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Events)
@@ -68,7 +69,7 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<SalesOrderDto?> GetAsync(int id)
         {
-            SalesOrder? orders = await _dbContext.SalesOrders
+            SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
@@ -76,7 +77,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            return _mapper.Map<SalesOrderDto?>(orders);
+            return _mapper.Map<SalesOrderDto?>(order);
         }
 
         public async Task<IList<SalesOrderDto>> GetManyAsync()
@@ -173,7 +174,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SalesOrderDto>(order);
         }
 
-        public async Task<TransOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto)
+        public async Task<TransOrderEventDto> UpdateEventAsync(int id,
+                                                               int orderId,
+                                                               OrderEventUpdateDto dto)
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Events)

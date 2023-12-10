@@ -14,9 +14,9 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Events happening on the order.
         /// </summary>
-        public ICollection<TEvent> Events { get; private set; } = new List<TEvent>();
+        public ICollection<TEvent> Events { get; protected set; } = new List<TEvent>();
 
-        public DateTime? ExecutionFinishTime { get; private set; }
+        public DateTime? ExecutionFinishTime { get; protected set; }
         public int Id { get; set; }
 
         public override bool IsCreated => Id != 0;
@@ -30,7 +30,7 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Order lines.
         /// </summary>
-        public ICollection<TItem> Items { get; private set; } = new List<TItem>();
+        public ICollection<TItem> Items { get; protected set; } = new List<TItem>();
 
         public OrderStatus Status { get; protected set; }
 

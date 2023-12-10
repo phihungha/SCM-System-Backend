@@ -34,17 +34,17 @@ namespace ScmssApiServer.Models
             }
         }
 
-        public TransOrderPaymentStatus PaymentStatus { get; private set; }
+        public TransOrderPaymentStatus PaymentStatus { get; protected set; }
 
         /// <summary>
         /// Remaining amount to pay.
         /// </summary>
-        public decimal RemainingAmount { get; private set; }
+        public decimal RemainingAmount { get; protected set; }
 
         /// <summary>
         /// Sum of TransOrderItem.TotalPrice.
         /// </summary>
-        public decimal SubTotal { get; private set; }
+        public decimal SubTotal { get; protected set; }
 
         /// <summary>
         /// Delivery destination location.
@@ -67,17 +67,17 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Total amount to pay = SubTotal + VatAmount
         /// </summary>
-        public decimal TotalAmount { get; private set; }
+        public decimal TotalAmount { get; protected set; }
 
         /// <summary>
         /// VAT-taxed amount = SubTotal * VatRate
         /// </summary>
-        public decimal VatAmount { get; private set; }
+        public decimal VatAmount { get; protected set; }
 
         /// <summary>
         /// VAT tax rate from 0 (0%) to 1 (100%).
         /// </summary>
-        public double VatRate { get; private set; }
+        public double VatRate { get; protected set; }
 
         public override void AddItems(ICollection<TItem> items)
         {
@@ -215,7 +215,7 @@ namespace ScmssApiServer.Models
             return item;
         }
 
-        protected void CalculateTotals()
+        protected virtual void CalculateTotals()
         {
             SubTotal = Items.Sum(i => i.TotalPrice);
             VatAmount = SubTotal * (decimal)VatRate;

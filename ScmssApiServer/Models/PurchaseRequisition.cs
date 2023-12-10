@@ -84,6 +84,7 @@ namespace ScmssApiServer.Models
                 VendorId = VendorId,
                 ProductionFacilityId = ProductionFacilityId,
                 CreateUserId = userId,
+                FromLocation = Vendor.DefaultLocation,
                 ToLocation = ProductionFacility.Location,
             };
 
