@@ -209,6 +209,7 @@ namespace ScmssApiServer.DomainServices
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext
                 .Products
+                .Include(i => i.WarehouseProductItems)
                 .Where(i => productIds.Contains(i.Id))
                 .ToDictionaryAsync(i => i.Id);
 
@@ -216,6 +217,8 @@ namespace ScmssApiServer.DomainServices
                 dto => new SalesOrderItem
                 {
                     ItemId = dto.ItemId,
+                    // This is needed to check stock.
+                    Product = products[dto.ItemId],
                     Unit = products[dto.ItemId].Unit,
                     UnitPrice = products[dto.ItemId].Price,
                     Quantity = dto.Quantity
