@@ -8,7 +8,6 @@
         public DateTime? EndTime { get; set; }
         public UserDto? EndUser { get; set; }
         public string? EndUserId { get; set; }
-        public DateTime? ExecutionFinishTime { get; set; }
         public string? Problem { get; set; }
         public DateTime? UpdateTime { get; set; }
     }
