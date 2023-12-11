@@ -6,7 +6,7 @@ namespace ScmssApiServer.Models
     public class ProductionFacility : ISoftDeletable
     {
         public DateTime CreateTime { get; set; }
-        public required string Description { get; set; }
+        public string? Description { get; set; }
         public required string Email { get; set; }
         public int Id { get; set; }
         public bool IsActive { get; set; }
@@ -37,6 +37,7 @@ namespace ScmssApiServer.Models
         public ProductionFacilityMP()
         {
             CreateMap<ProductionFacility, ProductionFacilityDto>();
+            CreateMap<ProductionFacilityInputDto, ProductionFacility>();
         }
     }
 }

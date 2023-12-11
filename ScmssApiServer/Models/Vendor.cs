@@ -20,6 +20,7 @@ namespace ScmssApiServer.Models
         public VendorMp()
         {
             CreateMap<Vendor, CompanyDto>();
+            CreateMap<CompanyInputDto, Vendor>();
         }
     }
 }

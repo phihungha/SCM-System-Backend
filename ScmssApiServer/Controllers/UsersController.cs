@@ -19,6 +19,35 @@ namespace ScmssApiServer.Controllers
         {
         }
 
+        [HttpPost]
+        public async Task<ActionResult<User>> Create([FromBody] UserCreateDto body)
+        {
+            try
+            {
+                UserDto item = await _usersService.CreateUserAsync(body);
+                return Ok(item);
+            }
+            catch (IdentityException ex)
+            {
+                ex.AddToModelState(ModelState);
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<User>> Delete(string id)
+        {
+            try
+            {
+                await _usersService.DeleteUserAsync(id);
+                return Ok();
+            }
+            catch (EntityNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult<IList<UserDto>>> Get()
         {
@@ -37,19 +66,10 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<User>> Create([FromBody] UserCreateDto body)
+        [HttpGet("{id}/profileImageUploadUrl")]
+        public string GetProfileImageUploadUrl(string id)
         {
-            try
-            {
-                UserDto item = await _usersService.CreateUserAsync(body);
-                return Ok(item);
-            }
-            catch (IdentityException ex)
-            {
-                ex.AddToModelState(ModelState);
-                return BadRequest(ModelState);
-            }
+            return _usersService.GetProfileImageUploadUrl(id);
         }
 
         [HttpPatch("{id}")]
@@ -88,26 +108,6 @@ namespace ScmssApiServer.Controllers
                 ex.AddToModelState(ModelState);
                 return BadRequest(ModelState);
             }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<User>> Delete(string id)
-        {
-            try
-            {
-                await _usersService.DeleteUserAsync(id);
-                return Ok();
-            }
-            catch (EntityNotFoundException)
-            {
-                return NotFound();
-            }
-        }
-
-        [HttpGet("{id}/profileImageUploadUrl")]
-        public string GetProfileImageUploadUrl(string id)
-        {
-            return _usersService.GetProfileImageUploadUrl(id);
         }
     }
 }

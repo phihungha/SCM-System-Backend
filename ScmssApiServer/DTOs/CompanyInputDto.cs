@@ -1,16 +1,26 @@
-﻿namespace ScmssApiServer.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ScmssApiServer.DTOs
 {
-    public class Company : ISoftDeletable
+    public class CompanyInputDto : ISoftDeletableInputDto
     {
         public string? ContactPerson { get; set; }
-        public DateTime CreateTime { get; set; }
+
+        [Required]
         public required string DefaultLocation { get; set; }
+
         public string? Description { get; set; }
+
+        [EmailAddress]
         public string? Email { get; set; }
-        public int Id { get; set; }
-        public bool IsActive { get; set; }
+
+        public bool? IsActive { get; set; }
+
+        [Required]
         public required string Name { get; set; }
+
+        [Required]
+        [Phone]
         public required string PhoneNumber { get; set; }
-        public DateTime? UpdateTime { get; set; }
     }
 }
