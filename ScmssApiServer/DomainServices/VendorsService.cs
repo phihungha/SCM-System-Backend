@@ -29,7 +29,9 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<CompanyDto?> GetAsync(int id)
         {
-            Vendor? vendor = await _dbContext.Vendors.FindAsync(id);
+            Vendor? vendor = await _dbContext.Vendors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<CompanyDto?>(vendor);
         }
 
@@ -39,7 +41,7 @@ namespace ScmssApiServer.DomainServices
             SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
             bool? displayAll = queryDto.All;
 
-            var query = _dbContext.Vendors.AsQueryable();
+            var query = _dbContext.Vendors.AsNoTracking();
 
             if (searchTerm != null)
             {
