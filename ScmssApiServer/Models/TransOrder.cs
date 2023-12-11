@@ -85,7 +85,7 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// VAT tax rate from 0 (0%) to 1 (100%).
         /// </summary>
-        public double VatRate { get; protected set; }
+        public double VatRate { get; set; }
 
         public override void AddItems(ICollection<TItem> items)
         {

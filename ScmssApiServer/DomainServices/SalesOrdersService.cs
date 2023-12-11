@@ -10,11 +10,13 @@ namespace ScmssApiServer.DomainServices
 {
     public class SalesOrdersService : ISalesOrdersService
     {
+        private readonly IConfigService _configService;
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public SalesOrdersService(AppDbContext dbContext, IMapper mapper)
+        public SalesOrdersService(AppDbContext dbContext, IConfigService configService, IMapper mapper)
         {
+            _configService = configService;
             _dbContext = dbContext;
             _mapper = mapper;
         }
@@ -44,12 +46,15 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException("Customer not found");
             }
 
+            Config config = await _configService.GetAsync();
+
             var order = new SalesOrder
             {
                 ToLocation = dto.ToLocation ?? customer.DefaultLocation,
                 CustomerId = dto.CustomerId,
                 Customer = customer,
                 CreateUserId = userId,
+                VatRate = config.VatRate,
             };
 
             if (dto.ProductionFacilityId != null)
@@ -74,7 +79,8 @@ namespace ScmssApiServer.DomainServices
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .AsNoTracking()
-                .Include(i => i.Items).ThenInclude(i => i.Product)
+                .Include(i => i.Items)
+                .ThenInclude(i => i.Product)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
@@ -102,8 +108,9 @@ namespace ScmssApiServer.DomainServices
             string userId)
         {
             SalesOrder? order = await _dbContext.SalesOrders
-                .Include(i => i.Items).ThenInclude(i => i.Product)
-                                      .ThenInclude(i => i.WarehouseProductItems)
+                .Include(i => i.Items)
+                .ThenInclude(i => i.Product)
+                .ThenInclude(i => i.WarehouseProductItems)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
@@ -138,6 +145,12 @@ namespace ScmssApiServer.DomainServices
             if (dto.PayAmount != null)
             {
                 order.CompletePayment((decimal)dto.PayAmount);
+            }
+
+            if (order.PaymentStatus == TransOrderPaymentStatus.Pending)
+            {
+                Config config = await _configService.GetAsync();
+                order.VatRate = config.VatRate;
             }
 
             switch (dto.Status)
