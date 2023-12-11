@@ -28,7 +28,8 @@ namespace ScmssApiServer.DomainServices
         {
             User user = await _userManager.Users.Include(i => i.ProductionFacility)
                                                 .FirstAsync(x => x.Id == userId);
-            if (user.ProductionFacility == null)
+            ProductionFacility? facility = user.ProductionFacility;
+            if (facility == null)
             {
                 throw new InvalidDomainOperationException(
                         "User needs to belong to a production facility " +
@@ -44,8 +45,10 @@ namespace ScmssApiServer.DomainServices
 
             var requisition = new PurchaseRequisition
             {
+                VendorId = vendor.Id,
                 Vendor = vendor,
-                ProductionFacility = user.ProductionFacility,
+                ProductionFacilityId = facility.Id,
+                ProductionFacility = facility,
                 CreateUserId = userId,
                 CreateUser = user,
             };
@@ -164,6 +167,7 @@ namespace ScmssApiServer.DomainServices
                 i => new PurchaseRequisitionItem
                 {
                     ItemId = i.ItemId,
+                    Supply = supplies[i.ItemId],
                     Unit = supplies[i.ItemId].Unit,
                     UnitPrice = supplies[i.ItemId].Price,
                     Quantity = i.Quantity

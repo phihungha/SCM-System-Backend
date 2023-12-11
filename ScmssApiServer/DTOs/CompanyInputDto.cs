@@ -1,19 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace ScmssApiServer.Models
+namespace ScmssApiServer.DTOs
 {
-    [Index(nameof(Name), IsUnique = true)]
-    public class Company : ISoftDeletable
+    public class CompanyInputDto : ISoftDeletableInputDto
     {
         public string? ContactPerson { get; set; }
-        public DateTime CreateTime { get; set; }
+
+        [Required]
         public required string DefaultLocation { get; set; }
+
         public string? Description { get; set; }
+
+        [EmailAddress]
         public string? Email { get; set; }
-        public int Id { get; set; }
+
+        [Required]
         public bool IsActive { get; set; }
+
+        [Required]
         public required string Name { get; set; }
+
+        [Required]
+        [Phone]
         public required string PhoneNumber { get; set; }
-        public DateTime? UpdateTime { get; set; }
     }
 }

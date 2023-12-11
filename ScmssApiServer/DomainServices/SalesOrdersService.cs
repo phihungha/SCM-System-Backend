@@ -48,6 +48,7 @@ namespace ScmssApiServer.DomainServices
             {
                 ToLocation = dto.ToLocation ?? customer.DefaultLocation,
                 CustomerId = dto.CustomerId,
+                Customer = customer,
                 CreateUserId = userId,
             };
 
@@ -55,6 +56,7 @@ namespace ScmssApiServer.DomainServices
             {
                 int facilityId = (int)dto.ProductionFacilityId;
                 ProductionFacility facility = await GetProductionFacilityAsync(facilityId);
+                order.ProductionFacilityId = facility.Id;
                 order.ProductionFacility = facility;
                 order.FromLocation = facility.Location;
             }
@@ -122,6 +124,7 @@ namespace ScmssApiServer.DomainServices
             {
                 int facilityId = (int)dto.ProductionFacilityId;
                 ProductionFacility facility = await GetProductionFacilityAsync(facilityId);
+                order.ProductionFacilityId = facility.Id;
                 order.ProductionFacility = facility;
                 order.FromLocation = facility.Location;
             }

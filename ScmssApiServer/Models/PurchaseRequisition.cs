@@ -129,8 +129,11 @@ namespace ScmssApiServer.Models
             var order = new PurchaseOrder
             {
                 PurchaseRequisitionId = Id,
+                PurchaseRequisition = this,
                 VendorId = VendorId,
+                Vendor = Vendor,
                 ProductionFacilityId = ProductionFacilityId,
+                ProductionFacility = ProductionFacility,
                 CreateUserId = userId,
                 FromLocation = Vendor.DefaultLocation,
                 ToLocation = ProductionFacility.Location,

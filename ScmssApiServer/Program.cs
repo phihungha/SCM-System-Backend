@@ -50,6 +50,9 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IProductionOrdersService, ProductionOrdersService>();
             builder.Services.AddScoped<IPurchaseRequisitionsService, PurchaseRequisitionsService>();
             builder.Services.AddScoped<IPurchaseOrdersService, PurchaseOrdersService>();
+            builder.Services.AddScoped<IProductionFacilitiesService, ProductionFacilitiesService>();
+            builder.Services.AddScoped<ICustomersService, CustomersService>();
+            builder.Services.AddScoped<IVendorsService, VendorsService>();
 
             builder.Services.AddCors(o => o.AddPolicy(
                 name: CorsPolicyName,

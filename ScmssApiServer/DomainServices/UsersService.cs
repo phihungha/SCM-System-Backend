@@ -13,8 +13,8 @@ namespace ScmssApiServer.DomainServices
 {
     public class UsersService : IUsersService
     {
-        private readonly IMapper _mapper;
         private readonly IImageHostService _imageService;
+        private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
 
         public UsersService(UserManager<User> userManager,
@@ -24,55 +24,6 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
             _imageService = imageService;
             _userManager = userManager;
-        }
-
-        public string? GetUserIdFromPrincipal(ClaimsPrincipal principal)
-        {
-            return _userManager.GetUserId(principal);
-        }
-
-        public async Task<IList<UserDto>> GetUsersAsync()
-        {
-            IList<User> users = await _userManager.Users.ToListAsync();
-            return _mapper.Map<IList<UserDto>>(users);
-        }
-
-        public async Task<UserDto?> GetUserAsync(string id)
-        {
-            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
-            return _mapper.Map<UserDto?>(user);
-        }
-
-        public async Task<UserDto> CreateUserAsync(UserCreateDto dto)
-        {
-            var user = _mapper.Map<User>(dto);
-
-            IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
-            {
-                throw new IdentityException(result);
-            }
-
-            return GetUserDto(user);
-        }
-
-        public async Task<UserDto> UpdateUserAsync(string id, UserInputDto dto)
-        {
-            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
-            {
-                throw new EntityNotFoundException();
-            }
-
-            _mapper.Map(dto, user);
-
-            IdentityResult result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                throw new IdentityException(result);
-            }
-
-            return GetUserDto(user);
         }
 
         public async Task ChangePasswordAsync(string id, UserPasswordChangeDto dto)
@@ -93,6 +44,19 @@ namespace ScmssApiServer.DomainServices
             }
         }
 
+        public async Task<UserDto> CreateUserAsync(UserCreateDto dto)
+        {
+            var user = _mapper.Map<User>(dto);
+
+            IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                throw new IdentityException(result);
+            }
+
+            return GetUserDto(user);
+        }
+
         public async Task DeleteUserAsync(string id)
         {
             User? user = await _userManager.FindByIdAsync(id);
@@ -108,6 +72,42 @@ namespace ScmssApiServer.DomainServices
         {
             string key = $"user-profile-images/{userId}";
             return _imageService.GenerateUploadUrl(key);
+        }
+
+        public async Task<UserDto?> GetUserAsync(string id)
+        {
+            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return _mapper.Map<UserDto?>(user);
+        }
+
+        public string? GetUserIdFromPrincipal(ClaimsPrincipal principal)
+        {
+            return _userManager.GetUserId(principal);
+        }
+
+        public async Task<IList<UserDto>> GetUsersAsync()
+        {
+            IList<User> users = await _userManager.Users.ToListAsync();
+            return _mapper.Map<IList<UserDto>>(users);
+        }
+
+        public async Task<UserDto> UpdateUserAsync(string id, UserInputDto dto)
+        {
+            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            _mapper.Map(dto, user);
+
+            IdentityResult result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new IdentityException(result);
+            }
+
+            return GetUserDto(user);
         }
 
         private UserDto GetUserDto(User user)

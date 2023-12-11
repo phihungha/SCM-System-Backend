@@ -1,5 +1,8 @@
-﻿namespace ScmssApiServer.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace ScmssApiServer.Models
 {
+    [Index(nameof(Name), IsUnique = true)]
     public abstract class Goods : ISoftDeletable
     {
         public DateTime CreateTime { get; set; }
