@@ -159,6 +159,12 @@ namespace ScmssApiServer.Models
                         "Cannot complete order payment if there is no due payment."
                     );
             }
+
+            if (amount > RemainingAmount)
+            {
+                throw new InvalidDomainOperationException("Cannot pay more than remaining amount.");
+            }
+
             RemainingAmount = RemainingAmount - amount;
             if (RemainingAmount == 0)
             {
