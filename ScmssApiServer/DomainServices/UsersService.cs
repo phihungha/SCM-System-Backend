@@ -76,7 +76,8 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<UserDto?> GetUserAsync(string id)
         {
-            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
+            User? user = await _userManager.Users.AsNoTracking()
+                                                 .FirstOrDefaultAsync(x => x.Id == id);
             return _mapper.Map<UserDto?>(user);
         }
 
@@ -87,7 +88,7 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<IList<UserDto>> GetUsersAsync()
         {
-            IList<User> users = await _userManager.Users.ToListAsync();
+            IList<User> users = await _userManager.Users.AsNoTracking().ToListAsync();
             return _mapper.Map<IList<UserDto>>(users);
         }
 

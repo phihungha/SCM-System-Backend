@@ -10,11 +10,13 @@ namespace ScmssApiServer.DomainServices
 {
     public class PurchaseOrdersService : IPurchaseOrdersService
     {
+        private readonly IConfigService _configService;
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public PurchaseOrdersService(AppDbContext dbContext, IMapper mapper)
+        public PurchaseOrdersService(AppDbContext dbContext, IConfigService configService, IMapper mapper)
         {
+            _configService = configService;
             _dbContext = dbContext;
             _mapper = mapper;
         }
@@ -51,6 +53,9 @@ namespace ScmssApiServer.DomainServices
             }
 
             PurchaseOrder order = requistion.GeneratePurchaseOrder(userId);
+
+            Config config = await _configService.GetAsync();
+            order.VatRate = config.VatRate;
 
             if (dto.FromLocation != null)
             {
@@ -104,8 +109,9 @@ namespace ScmssApiServer.DomainServices
             string userId)
         {
             PurchaseOrder? order = await _dbContext.PurchaseOrders
-                .Include(i => i.Items).ThenInclude(i => i.Supply)
-                                      .ThenInclude(i => i.WarehouseSupplyItems)
+                .Include(i => i.Items)
+                .ThenInclude(i => i.Supply)
+                .ThenInclude(i => i.WarehouseSupplyItems)
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.PurchaseRequisition)
@@ -146,6 +152,12 @@ namespace ScmssApiServer.DomainServices
             if (dto.PayAmount != null)
             {
                 order.CompletePayment((decimal)dto.PayAmount);
+            }
+
+            if (order.PaymentStatus == TransOrderPaymentStatus.Pending)
+            {
+                Config config = await _configService.GetAsync();
+                order.VatRate = config.VatRate;
             }
 
             switch (dto.Status)

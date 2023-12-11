@@ -31,7 +31,7 @@ namespace ScmssApiServer.Models
         public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
         public decimal TotalAmount { get; protected set; }
         public decimal VatAmount { get; protected set; }
-        public double VatRate { get; protected set; }
+        public double VatRate { get; set; }
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
 
