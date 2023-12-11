@@ -34,6 +34,10 @@ namespace ScmssApiServer.Data
                 .HaveConversion<string>();
 
             builder
+                .Properties<Uri>()
+                .HaveConversion<string>();
+
+            builder
                 .Properties<OrderStatus>()
                 .HaveConversion<string>();
 
@@ -161,7 +165,7 @@ namespace ScmssApiServer.Data
             builder.Entity<Product>()
                 .HasMany(e => e.Supplies)
                 .WithMany(e => e.Products)
-                .UsingEntity<ProductionSupplyCostItem>();
+                .UsingEntity<ProductSupplyCostItem>();
 
             #endregion Product
 
@@ -178,7 +182,12 @@ namespace ScmssApiServer.Data
                     r => r.HasOne(e => e.ProductionOrder)
                     .WithMany(e => e.Items)
                     .HasForeignKey(e => e.OrderId)
-                );
+            );
+
+            builder.Entity<ProductionOrder>()
+                .HasMany(e => e.Supplies)
+                .WithMany(e => e.ProductionOrders)
+                .UsingEntity<ProductionOrderSupplyUsageItem>();
 
             builder.Entity<ProductionOrder>()
                 .HasOne(e => e.CreateUser)
@@ -414,17 +423,17 @@ namespace ScmssApiServer.Data
                 CreateTime = DateTime.UtcNow,
             });
 
-            builder.Entity<ProductionSupplyCostItem>().HasData(
-                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 1, Quantity = 20.6 },
-                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 2, Quantity = 8 },
-                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 3, Quantity = 8 },
-                new ProductionSupplyCostItem { ProductId = 1, SupplyId = 4, Quantity = 13 },
-                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 1, Quantity = 16 },
-                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 2, Quantity = 8 },
-                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 3, Quantity = 13 },
-                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 4, Quantity = 10 },
-                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 5, Quantity = 1.5 },
-                new ProductionSupplyCostItem { ProductId = 2, SupplyId = 6, Quantity = 1.5 }
+            builder.Entity<ProductSupplyCostItem>().HasData(
+                new ProductSupplyCostItem { ProductId = 1, SupplyId = 1, Quantity = 20.6 },
+                new ProductSupplyCostItem { ProductId = 1, SupplyId = 2, Quantity = 8 },
+                new ProductSupplyCostItem { ProductId = 1, SupplyId = 3, Quantity = 8 },
+                new ProductSupplyCostItem { ProductId = 1, SupplyId = 4, Quantity = 13 },
+                new ProductSupplyCostItem { ProductId = 2, SupplyId = 1, Quantity = 16 },
+                new ProductSupplyCostItem { ProductId = 2, SupplyId = 2, Quantity = 8 },
+                new ProductSupplyCostItem { ProductId = 2, SupplyId = 3, Quantity = 13 },
+                new ProductSupplyCostItem { ProductId = 2, SupplyId = 4, Quantity = 10 },
+                new ProductSupplyCostItem { ProductId = 2, SupplyId = 5, Quantity = 1.5 },
+                new ProductSupplyCostItem { ProductId = 2, SupplyId = 6, Quantity = 1.5 }
             );
 
             builder.Entity<WarehouseSupplyItem>().HasData(
@@ -601,7 +610,6 @@ namespace ScmssApiServer.Data
             {
                 var entity = (ISoftDeletable)entry.Entity;
                 entity.CreateTime = DateTime.UtcNow;
-                entity.IsActive = true;
             }
             else if (entry.Entity is ILifecycle)
             {

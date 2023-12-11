@@ -9,14 +9,14 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class Product : Goods
     {
-        public decimal MiscCost { get; set; }
-        public double NetWeight { get; set; }
-
         /// <summary>
         /// Production cost of this product = SupplyCost + MiscCost
         /// </summary>
         [NotMapped]
         public decimal Cost => SupplyCost + MiscCost;
+
+        public decimal MiscCost { get; set; }
+        public double NetWeight { get; set; }
 
         public IList<ProductionOrderItem> ProductionOrderItems { get; set; }
             = new List<ProductionOrderItem>();
@@ -48,8 +48,11 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// Cost items of supplies used for production of this product.
         /// </summary>
-        public ICollection<ProductionSupplyCostItem> SupplyCostItems { get; set; }
-                    = new List<ProductionSupplyCostItem>();
+        public ICollection<ProductSupplyCostItem> SupplyCostItems { get; set; }
+                    = new List<ProductSupplyCostItem>();
+
+        public ICollection<WarehouseProductItem> WarehouseProductItems { get; set; }
+            = new List<WarehouseProductItem>();
     }
 
     public class ProductMp : Profile

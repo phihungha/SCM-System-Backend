@@ -1,5 +1,8 @@
 ﻿namespace ScmssApiServer.Models
 {
+    /// <summary>
+    /// Represents a generic order event.
+    /// </summary>
     public abstract class OrderEvent
     {
         public int Id { get; set; }

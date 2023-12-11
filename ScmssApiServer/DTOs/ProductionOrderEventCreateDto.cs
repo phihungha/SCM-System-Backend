@@ -5,6 +5,6 @@ namespace ScmssApiServer.DTOs
     public class ProductionOrderEventCreateDto : OrderEventCreateDto
     {
         [Required]
-        public ProductionOrderEventTypeSelection Type { get; set; }
+        public ProductionOrderEventTypeOption Type { get; set; }
     }
 }

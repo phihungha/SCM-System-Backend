@@ -1,5 +1,8 @@
-﻿namespace ScmssApiServer.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace ScmssApiServer.Models
 {
+    [Index(nameof(Name), IsUnique = true)]
     public class Company : ISoftDeletable
     {
         public string? ContactPerson { get; set; }
@@ -10,7 +13,7 @@
         public int Id { get; set; }
         public bool IsActive { get; set; }
         public required string Name { get; set; }
-        public string? PhoneNumber { get; set; }
+        public required string PhoneNumber { get; set; }
         public DateTime? UpdateTime { get; set; }
     }
 }

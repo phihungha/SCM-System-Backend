@@ -1,11 +1,14 @@
 ﻿namespace ScmssApiServer.Models
 {
+    /// <summary>
+    /// Interface for models that have approval ability.
+    /// </summary>
     public interface IApprovable
     {
-        public void Approve(string userId);
+        ApprovalStatus ApprovalStatus { get; }
 
-        public void Reject(string userId, string problem);
+        void Approve(string userId);
 
-        public ApprovalStatus ApprovalStatus { get; }
+        void Reject(string userId, string problem);
     }
 }

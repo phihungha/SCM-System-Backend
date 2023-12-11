@@ -1,11 +1,27 @@
-﻿namespace ScmssApiServer.Models
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.Models
 {
     public class PurchaseOrderItem : TransOrderItem
     {
-        public Supply Supply { get; set; } = null!;
-        public PurchaseOrder PurchaseOrder { get; set; } = null!;
-
         public decimal Discount { get; set; }
-        public decimal NetPrice { get; set; }
+
+        public decimal NetPrice
+        {
+            get => TotalPrice - Discount;
+            private set => _ = value;
+        }
+
+        public PurchaseOrder PurchaseOrder { get; set; } = null!;
+        public Supply Supply { get; set; } = null!;
+    }
+
+    public class PurchaseOrderItemMp : Profile
+    {
+        public PurchaseOrderItemMp()
+        {
+            CreateMap<PurchaseOrderItem, PurchaseOrderItemDto>();
+        }
     }
 }

@@ -13,13 +13,14 @@ namespace ScmssApiServer.DomainServices
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public SalesOrdersService(IMapper mapper, AppDbContext dbContext)
+        public SalesOrdersService(AppDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
             _mapper = mapper;
         }
 
-        public async Task<TransOrderEventDto> AddManualEventAsync(int orderId, TransOrderEventCreateDto dto)
+        public async Task<TransOrderEventDto> AddManualEventAsync(int orderId,
+                                                                  TransOrderEventCreateDto dto)
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Events)
@@ -28,9 +29,11 @@ namespace ScmssApiServer.DomainServices
             {
                 throw new EntityNotFoundException();
             }
-            SalesOrderEvent item = order.AddManualEvent(dto.Type, dto.Location, dto.Message);
+
+            SalesOrderEvent orderEvent = order.AddManualEvent(dto.Type, dto.Location, dto.Message);
+
             await _dbContext.SaveChangesAsync();
-            return GetEventDto(item);
+            return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
         public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, string userId)
@@ -41,31 +44,36 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException("Customer not found");
             }
 
-            var item = new SalesOrder
+            var order = new SalesOrder
             {
                 ToLocation = dto.ToLocation ?? customer.DefaultLocation,
                 CustomerId = dto.CustomerId,
+                Customer = customer,
                 CreateUserId = userId,
             };
 
             if (dto.ProductionFacilityId != null)
             {
                 int facilityId = (int)dto.ProductionFacilityId;
-                item.ProductionFacilityId = facilityId;
-                item.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
+                ProductionFacility facility = await GetProductionFacilityAsync(facilityId);
+                order.ProductionFacilityId = facility.Id;
+                order.ProductionFacility = facility;
+                order.FromLocation = facility.Location;
             }
 
-            await AddOrderItemsFromDtos(item, dto.Items);
-            item.Begin(userId);
+            order.AddItems(await MapOrderItemDtosToModels(dto.Items));
+            order.Begin(userId);
 
-            _dbContext.SalesOrders.Add(item);
+            _dbContext.SalesOrders.Add(order);
             await _dbContext.SaveChangesAsync();
-            return GetOrderDto(item);
+            await _dbContext.Entry(order).Reference(i => i.CreateUser).LoadAsync();
+            return _mapper.Map<SalesOrderDto>(order);
         }
 
         public async Task<SalesOrderDto?> GetAsync(int id)
         {
-            SalesOrder? item = await _dbContext.SalesOrders
+            SalesOrder? order = await _dbContext.SalesOrders
+                .AsNoTracking()
                 .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
@@ -73,18 +81,19 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            return _mapper.Map<SalesOrderDto?>(item);
+            return _mapper.Map<SalesOrderDto?>(order);
         }
 
         public async Task<IList<SalesOrderDto>> GetManyAsync()
         {
-            IList<SalesOrder> items = await _dbContext.SalesOrders
+            IList<SalesOrder> orders = await _dbContext.SalesOrders
+                .AsNoTracking()
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .ToListAsync();
-            return _mapper.Map<IList<SalesOrderDto>>(items);
+            return _mapper.Map<IList<SalesOrderDto>>(orders);
         }
 
         public async Task<SalesOrderDto> UpdateAsync(
@@ -92,93 +101,87 @@ namespace ScmssApiServer.DomainServices
             SalesOrderUpdateDto dto,
             string userId)
         {
-            SalesOrder? item = await _dbContext.SalesOrders
+            SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Items).ThenInclude(i => i.Product)
+                                      .ThenInclude(i => i.WarehouseProductItems)
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            if (item == null)
+            if (order == null)
             {
                 throw new EntityNotFoundException();
             }
 
-            if (dto.PaymentCompleted ?? false)
+            if (dto.ToLocation != null)
             {
-                if (dto.PaymentAmount == null)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot complete payment without payment amount"
-                        );
-                }
-                item.CompletePayment((decimal)dto.PaymentAmount);
-                await _dbContext.SaveChangesAsync();
-                return GetOrderDto(item);
+                order.ToLocation = dto.ToLocation;
             }
 
-            if (!item.IsExecutionStarted)
+            if (dto.ProductionFacilityId != null)
             {
-                if (dto.ProductionFacilityId != null)
-                {
-                    int facilityId = (int)dto.ProductionFacilityId;
-                    item.ProductionFacilityId = facilityId;
-                    item.FromLocation = await GetLocationOfProductionFacilityAsync(facilityId);
-                }
-
-                if (dto.Items != null)
-                {
-                    _dbContext.RemoveRange(item.Items);
-                    await AddOrderItemsFromDtos(item, dto.Items);
-                }
+                int facilityId = (int)dto.ProductionFacilityId;
+                ProductionFacility facility = await GetProductionFacilityAsync(facilityId);
+                order.ProductionFacilityId = facility.Id;
+                order.ProductionFacility = facility;
+                order.FromLocation = facility.Location;
             }
 
-            if (!item.IsExecutionFinished)
+            if (dto.Items != null)
             {
-                item.ToLocation = dto.ToLocation ?? item.Customer.DefaultLocation;
+                _dbContext.RemoveRange(order.Items);
+                order.AddItems(await MapOrderItemDtosToModels(dto.Items));
+            }
+
+            if (dto.PayAmount != null)
+            {
+                order.CompletePayment((decimal)dto.PayAmount);
             }
 
             switch (dto.Status)
             {
-                case OrderStatusSelection.Executing:
-                    item.StartExecution();
+                case OrderStatusOption.Executing:
+                    order.StartExecution();
                     break;
 
-                case OrderStatusSelection.WaitingAcceptance:
-                    item.FinishExecution();
+                case OrderStatusOption.WaitingAcceptance:
+                    order.FinishExecution();
                     break;
 
-                case OrderStatusSelection.Completed:
-                    item.Complete(userId);
+                case OrderStatusOption.Completed:
+                    order.Complete(userId);
                     break;
 
-                case OrderStatusSelection.Canceled:
+                case OrderStatusOption.Canceled:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
                                 "Cannot cancel an order without a problem."
                             );
                     }
-                    item.Cancel(userId, dto.Problem);
+                    order.Cancel(userId, dto.Problem);
                     break;
 
-                case OrderStatusSelection.Returned:
+                case OrderStatusOption.Returned:
                     if (dto.Problem == null)
                     {
                         throw new InvalidDomainOperationException(
                                 "Cannot return an order without a problem."
                             );
                     }
-                    item.Return(userId, dto.Problem);
+                    order.Return(userId, dto.Problem);
                     break;
             }
 
             await _dbContext.SaveChangesAsync();
-            return GetOrderDto(item);
+            return _mapper.Map<SalesOrderDto>(order);
         }
 
-        public async Task<TransOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto)
+        public async Task<TransOrderEventDto> UpdateEventAsync(int id,
+                                                               int orderId,
+                                                               OrderEventUpdateDto dto)
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Events)
@@ -188,54 +191,43 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            SalesOrderEvent item = order.UpdateEvent(id, dto.Location, dto.Message);
+            SalesOrderEvent orderEvent = order.UpdateEvent(id, dto.Location, dto.Message);
 
             await _dbContext.SaveChangesAsync();
-            return GetEventDto(item);
+            return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        private async Task AddOrderItemsFromDtos(SalesOrder order, IEnumerable<OrderItemInputDto> dtos)
-        {
-            IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
-            IDictionary<int, Product> products = await _dbContext
-                .Products
-                .Where(i => productIds.Contains(i.Id))
-                .ToDictionaryAsync(i => i.Id);
-
-            order.Items.Clear();
-            foreach (var dto in dtos)
-            {
-                var item = new SalesOrderItem
-                {
-                    ItemId = dto.ItemId,
-                    Unit = products[dto.ItemId].Unit,
-                    UnitPrice = products[dto.ItemId].Price,
-                    Quantity = dto.Quantity
-                };
-                order.AddItem(item);
-            }
-        }
-
-        private TransOrderEventDto GetEventDto(SalesOrderEvent item)
-        {
-            return _mapper.Map<TransOrderEventDto>(item);
-        }
-
-        private async Task<string> GetLocationOfProductionFacilityAsync(int facilityId)
+        private async Task<ProductionFacility> GetProductionFacilityAsync(int facilityId)
         {
             ProductionFacility? facility = await _dbContext
                 .ProductionFacilities
                 .FindAsync(facilityId);
             if (facility == null)
             {
-                throw new EntityNotFoundException("Production facility not found");
+                throw new EntityNotFoundException("Production facility not found.");
             }
-            return facility.Location;
+            return facility;
         }
 
-        private SalesOrderDto GetOrderDto(SalesOrder item)
+        private async Task<IList<SalesOrderItem>> MapOrderItemDtosToModels(IEnumerable<OrderItemInputDto> dtos)
         {
-            return _mapper.Map<SalesOrderDto>(item);
+            IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
+            IDictionary<int, Product> products = await _dbContext
+                .Products
+                .Include(i => i.WarehouseProductItems)
+                .Where(i => productIds.Contains(i.Id))
+                .ToDictionaryAsync(i => i.Id);
+
+            return dtos.Select(
+                dto => new SalesOrderItem
+                {
+                    ItemId = dto.ItemId,
+                    // This is needed to check stock.
+                    Product = products[dto.ItemId],
+                    Unit = products[dto.ItemId].Unit,
+                    UnitPrice = products[dto.ItemId].Price,
+                    Quantity = dto.Quantity
+                }).ToList();
         }
     }
 }
