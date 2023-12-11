@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public enum ProductionOrderEventTypeSelection
+    public enum ProductionOrderEventTypeOption
     {
         StageDone,
         Interrupted,

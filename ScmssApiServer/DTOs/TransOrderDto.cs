@@ -2,13 +2,11 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public abstract class TransOrderDto
-        : OrderDto<TransOrderItemDto, TransOrderEventDto>
+    public abstract class TransOrderDto<TItemDto> : OrderDto<TItemDto, TransOrderEventDto>
+        where TItemDto : TransOrderItemDto
     {
         public string? FromLocation { get; set; }
-        public string? InvoiceUrl { get; set; }
         public TransOrderPaymentStatus PaymentStatus { get; set; }
-        public string? ReceiptUrl { get; set; }
         public decimal RemainingAmount { get; set; }
         public decimal SubTotal { get; set; }
         public required string ToLocation { get; set; }

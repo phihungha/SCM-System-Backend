@@ -30,7 +30,7 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpPatch("{orderId}/events/{id}")]
-        public async Task<ActionResult<TransOrderEventDto>> AddManualEvent(
+        public async Task<ActionResult<TransOrderEventDto>> UpdateEvent(
             int orderId,
             int id,
             [FromBody] OrderEventUpdateDto body)

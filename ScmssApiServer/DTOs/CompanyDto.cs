@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public class CompanyDto : IUpdateTrackableDto
+    public class CompanyDto : ISoftDeletableDto
     {
         public string? ContactPerson { get; set; }
         public DateTime CreateTime { get; set; }

@@ -19,11 +19,21 @@ namespace ScmssApiServer.Models
             get => productionFacility;
             set
             {
-                if (value?.Id != productionFacility?.Id && IsExecutionStarted)
+                if (value?.Id != productionFacility?.Id)
                 {
-                    throw new InvalidDomainOperationException(
-                            "Cannot change production facility after order has started delivery."
-                        );
+                    if (IsExecutionStarted)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot change production facility after the order has started delivery."
+                            );
+                    }
+
+                    if (value != null && !CheckStock(Items, value.Id))
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Not enough stock in selected warehouse for the order items."
+                            );
+                    }
                 }
                 productionFacility = value;
             }
@@ -34,27 +44,78 @@ namespace ScmssApiServer.Models
             get => productionFacilityId;
             set
             {
-                if (value != productionFacilityId && IsExecutionStarted)
+                if (value != productionFacilityId)
                 {
-                    throw new InvalidDomainOperationException(
-                            "Cannot change production facility after order has started delivery."
-                        );
+                    if (IsExecutionStarted)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot change production facility after the order has started delivery."
+                            );
+                    }
+
+                    if (value != null && !CheckStock(Items, (int)value))
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Not enough stock in selected warehouse for the order items."
+                            );
+                    }
                 }
+
                 productionFacilityId = value;
             }
         }
 
         public ICollection<Product> Products { get; set; } = new List<Product>();
 
+        public override void AddItems(ICollection<SalesOrderItem> items)
+        {
+            if (ProductionFacility != null && !CheckStock(items, ProductionFacility))
+            {
+                throw new InvalidDomainOperationException(
+                        "Not enough stock in selected warehouse for the order items."
+                    );
+            }
+            base.AddItems(items);
+        }
+
         public override void StartExecution()
         {
             if (ProductionFacilityId == null)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start delivery of order without starting production facility."
+                        "Cannot start order delivery without source production facility."
                     );
             }
+
             base.StartExecution();
+
+            foreach (SalesOrderItem item in Items)
+            {
+                WarehouseProductItem warehouseItem = item.Product.WarehouseProductItems.First(
+                        i => i.ProductionFacilityId == ProductionFacilityId
+                    );
+                warehouseItem.Quantity -= item.Quantity;
+            }
+        }
+
+        private bool CheckStock(IEnumerable<SalesOrderItem> items, int facilityId)
+        {
+            foreach (SalesOrderItem item in items)
+            {
+                WarehouseProductItem warehouseItem = item.Product.WarehouseProductItems.First(
+                        i => i.ProductionFacilityId == facilityId
+                    );
+                if (item.Quantity > warehouseItem.Quantity)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool CheckStock(IEnumerable<SalesOrderItem> items, ProductionFacility facility)
+        {
+            return CheckStock(items, facility.Id);
         }
     }
 

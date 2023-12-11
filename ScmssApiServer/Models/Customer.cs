@@ -14,6 +14,7 @@ namespace ScmssApiServer.Models
         public CustomerMappingProfile()
         {
             CreateMap<Customer, CompanyDto>();
+            CreateMap<CompanyInputDto, Customer>();
         }
     }
 }

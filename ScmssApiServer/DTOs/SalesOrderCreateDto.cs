@@ -2,7 +2,7 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class SalesOrderCreateDto : OrderCreateDto
+    public class SalesOrderCreateDto : OrderCreateDto<OrderItemInputDto>
     {
         [Required]
         public int CustomerId { get; set; }

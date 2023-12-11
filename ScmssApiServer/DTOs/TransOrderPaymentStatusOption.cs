@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public enum TransOrderPaymentStatusSelection
+    public enum TransOrderPaymentStatusOption
     {
         Due,
         Completed,
