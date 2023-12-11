@@ -21,14 +21,14 @@ namespace ScmssApiServer.Controllers
         [HttpPost]
         public async Task<ActionResult<CompanyDto>> Create([FromBody] CompanyInputDto body)
         {
-            CompanyDto item = await _vendorsService.Add(body);
+            CompanyDto item = await _vendorsService.AddAsync(body);
             return Ok(item);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CompanyDto>> Get(int id)
         {
-            CompanyDto? item = await _vendorsService.Get(id);
+            CompanyDto? item = await _vendorsService.GetAsync(id);
             if (item == null)
             {
                 return NotFound();
@@ -39,14 +39,14 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<CompanyDto>>> GetMany([FromQuery] SimpleQueryDto query)
         {
-            IList<CompanyDto> items = await _vendorsService.GetMany(query);
+            IList<CompanyDto> items = await _vendorsService.GetManyAsync(query);
             return Ok(items);
         }
 
         [HttpPatch("{id}")]
         public async Task<ActionResult<CompanyDto>> Update(int id, [FromBody] CompanyInputDto body)
         {
-            CompanyDto item = await _vendorsService.Update(id, body);
+            CompanyDto item = await _vendorsService.UpdateAsync(id, body);
             return Ok(item);
         }
     }

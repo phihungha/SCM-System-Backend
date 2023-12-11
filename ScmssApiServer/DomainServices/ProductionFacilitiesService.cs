@@ -5,27 +5,22 @@ namespace ScmssApiServer.DomainServices
 {
     public class ProductionFacilitiesService : IProductionFacilitiesService
     {
-        public Task<ProductionFacilityDto> Add(ProductionFacilityInputDto dto)
+        public Task<ProductionFacilityDto> AddAsync(ProductionFacilityInputDto dto)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ProductionFacilityDto> Delete(int id)
+        public Task<ProductionFacilityDto> GetAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ProductionFacilityDto> Get(int id)
+        public Task<IList<ProductionFacilityDto>> GetManyAsync(SimpleQueryDto queryDto)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IList<ProductionFacilityDto>> GetMany(SimpleQueryDto queryDto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ProductionFacilityDto> Update(int id, ProductionFacilityInputDto dto)
+        public Task<ProductionFacilityDto> UpdateAsync(int id, ProductionFacilityInputDto dto)
         {
             throw new NotImplementedException();
         }
