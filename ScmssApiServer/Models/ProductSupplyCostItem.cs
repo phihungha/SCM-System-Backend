@@ -26,8 +26,8 @@ namespace ScmssApiServer.Models
     {
         public ProductSupplyCostItemMp()
         {
-            CreateMap<ProductionSupplyCostItem, ProductionSupplyCostItemDto>();
-            CreateMap<ProductionSupplyCostItemInputDto, ProductionSupplyCostItem>();
+            CreateMap<ProductSupplyCostItem, ProductSupplyCostItemDto>();
+            CreateMap<ProductSupplyCostItemInputDto, ProductSupplyCostItem>();
         }
     }
 }

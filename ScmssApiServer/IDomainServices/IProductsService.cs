@@ -8,7 +8,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<ProductDto?> GetAsync(int id);
 
-        Task<IList<ProductDto>> GetManyAsync();
+        Task<IList<ProductDto>> GetManyAsync(SimpleQueryDto queryDto);
 
         Task<ProductDto> UpdateAsync(int id, ProductInputDto dto);
     }

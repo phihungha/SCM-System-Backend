@@ -8,7 +8,7 @@
         public decimal Profit { get; set; }
         public decimal SupplyCost { get; set; }
 
-        public ICollection<ProductionSupplyCostItemDto> SupplyCostItems { get; set; }
-                    = new List<ProductionSupplyCostItemDto>();
+        public ICollection<ProductSupplyCostItemDto> SupplyCostItems { get; set; }
+                    = new List<ProductSupplyCostItemDto>();
     }
 }

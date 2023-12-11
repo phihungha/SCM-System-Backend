@@ -5,7 +5,7 @@
         public decimal MiscCost { get; set; }
         public double NetWeight { get; set; }
 
-        public ICollection<ProductionSupplyCostItemInputDto> SupplyCostItems { get; set; }
-            = new List<ProductionSupplyCostItemInputDto>();
+        public ICollection<ProductSupplyCostItemInputDto> SupplyCostItems { get; set; }
+            = new List<ProductSupplyCostItemInputDto>();
     }
 }

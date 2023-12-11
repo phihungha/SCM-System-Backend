@@ -21,59 +21,67 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<ProductDto> CreateAsync(ProductInputDto dto)
         {
-            var item = _mapper.Map<Product>(dto);
-            _dbContext.Add(item);
+            var product = _mapper.Map<Product>(dto);
+            _dbContext.Add(product);
             await _dbContext.SaveChangesAsync();
-            item = await _dbContext.Products.Include(i => i.SupplyCostItems)
-                                            .ThenInclude(i => i.Supply)
-                                            .FirstAsync(x => x.Id == item.Id);
-            return GetProductDto(item);
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            Product? item = await _dbContext.Products.FirstOrDefaultAsync(x => x.Id == id);
-            if (item == null)
-            {
-                throw new EntityNotFoundException();
-            }
-            item.IsActive = false;
-            await _dbContext.SaveChangesAsync();
+            product = await _dbContext.Products.Include(i => i.SupplyCostItems)
+                                               .ThenInclude(i => i.Supply)
+                                               .FirstAsync(x => x.Id == product.Id);
+            return _mapper.Map<ProductDto>(product);
         }
 
         public async Task<ProductDto?> GetAsync(int id)
         {
-            Product? users = await _dbContext.Products.Include(i => i.SupplyCostItems)
-                                                      .ThenInclude(i => i.Supply)
-                                                      .FirstOrDefaultAsync(x => x.Id == id);
-            return _mapper.Map<ProductDto?>(users);
+            Product? products = await _dbContext.Products
+                .Include(i => i.SupplyCostItems)
+                .ThenInclude(i => i.Supply)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            return _mapper.Map<ProductDto?>(products);
         }
 
-        public async Task<IList<ProductDto>> GetManyAsync()
+        public async Task<IList<ProductDto>> GetManyAsync(SimpleQueryDto queryDto)
         {
-            IList<Product> users = await _dbContext.Products.ToListAsync();
-            return _mapper.Map<IList<ProductDto>>(users);
+            string? searchTerm = queryDto.SearchTerm;
+            SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
+            bool? displayAll = queryDto.All;
+
+            var query = _dbContext.Products.AsQueryable();
+
+            if (searchTerm != null)
+            {
+                if (searchCriteria == SimpleSearchCriteria.Name)
+                {
+                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm.ToLower()));
+                }
+                else
+                {
+                    query = query.Where(i => i.Id == int.Parse(searchTerm));
+                }
+            }
+
+            if (!displayAll ?? true)
+            {
+                query = query.Where(i => i.IsActive);
+            }
+
+            IList<Product> products = await query.ToListAsync();
+            return _mapper.Map<IList<ProductDto>>(products);
         }
 
         public async Task<ProductDto> UpdateAsync(int id, ProductInputDto dto)
         {
-            Product? item = await _dbContext.Products.Include(i => i.SupplyCostItems)
-                                                     .ThenInclude(i => i.Supply)
-                                                     .FirstOrDefaultAsync(x => x.Id == id);
-            if (item == null)
+            Product? product = await _dbContext.Products.Include(i => i.SupplyCostItems)
+                                                        .ThenInclude(i => i.Supply)
+                                                        .FirstOrDefaultAsync(x => x.Id == id);
+            if (product == null)
             {
                 throw new EntityNotFoundException();
             }
 
-            _dbContext.RemoveRange(item.SupplyCostItems);
-            _mapper.Map(dto, item);
+            _dbContext.RemoveRange(product.SupplyCostItems);
+            _mapper.Map(dto, product);
 
             await _dbContext.SaveChangesAsync();
-            return GetProductDto(item);
-        }
-
-        private ProductDto GetProductDto(Product product)
-        {
             return _mapper.Map<ProductDto>(product);
         }
     }

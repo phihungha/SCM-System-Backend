@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
-using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Models;
 using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
@@ -22,15 +20,15 @@ namespace ScmssApiServer.Controllers
             _productsService = productsService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IList<ProductDto>>> Get()
+        [HttpPost]
+        public async Task<ActionResult<ProductDto>> Create([FromBody] ProductInputDto body)
         {
-            IList<ProductDto> items = await _productsService.GetManyAsync();
-            return Ok(items);
+            ProductDto item = await _productsService.CreateAsync(body);
+            return Ok(item);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDto>> GetId(int id)
+        public async Task<ActionResult<ProductDto>> Get(int id)
         {
             ProductDto? item = await _productsService.GetAsync(id);
             if (item == null)
@@ -40,11 +38,11 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ProductDto>> Create([FromBody] ProductInputDto body)
+        [HttpGet]
+        public async Task<ActionResult<IList<ProductDto>>> GetMany([FromQuery] SimpleQueryDto query)
         {
-            ProductDto item = await _productsService.CreateAsync(body);
-            return Ok(item);
+            IList<ProductDto> items = await _productsService.GetManyAsync(query);
+            return Ok(items);
         }
 
         [HttpPatch("{id}")]
@@ -54,20 +52,6 @@ namespace ScmssApiServer.Controllers
             {
                 ProductDto item = await _productsService.UpdateAsync(id, body);
                 return Ok(item);
-            }
-            catch (EntityNotFoundException)
-            {
-                return NotFound();
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<ProductDto>> Delete(int id)
-        {
-            try
-            {
-                await _productsService.DeleteAsync(id);
-                return Ok();
             }
             catch (EntityNotFoundException)
             {

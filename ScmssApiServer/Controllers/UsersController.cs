@@ -80,10 +80,6 @@ namespace ScmssApiServer.Controllers
                 UserDto item = await _usersService.UpdateUserAsync(id, body);
                 return Ok(item);
             }
-            catch (EntityNotFoundException)
-            {
-                return NotFound();
-            }
             catch (IdentityException ex)
             {
                 ex.AddToModelState(ModelState);
@@ -98,10 +94,6 @@ namespace ScmssApiServer.Controllers
             {
                 await _usersService.ChangePasswordAsync(id, body);
                 return Ok();
-            }
-            catch (EntityNotFoundException)
-            {
-                return NotFound();
             }
             catch (IdentityException ex)
             {
