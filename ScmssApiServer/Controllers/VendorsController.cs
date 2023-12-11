@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class VendorsController : CustomControllerBase
