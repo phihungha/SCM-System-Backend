@@ -19,7 +19,7 @@ namespace ScmssApiServer.DomainServices
             _mapper = mapper;
         }
 
-        public async Task<CompanyDto> Add(CompanyInputDto dto)
+        public async Task<CompanyDto> AddAsync(CompanyInputDto dto)
         {
             var vendor = _mapper.Map<Vendor>(dto);
             _dbContext.Add(vendor);
@@ -27,13 +27,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<CompanyDto>(vendor);
         }
 
-        public async Task<CompanyDto?> Get(int id)
+        public async Task<CompanyDto?> GetAsync(int id)
         {
             Vendor? vendor = await _dbContext.Vendors.FindAsync(id);
             return _mapper.Map<CompanyDto?>(vendor);
         }
 
-        public async Task<IList<CompanyDto>> GetMany(SimpleQueryDto queryDto)
+        public async Task<IList<CompanyDto>> GetManyAsync(SimpleQueryDto queryDto)
         {
             string? searchTerm = queryDto.SearchTerm;
             SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
@@ -62,7 +62,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<CompanyDto>>(vendors);
         }
 
-        public async Task<CompanyDto> Update(int id, CompanyInputDto dto)
+        public async Task<CompanyDto> UpdateAsync(int id, CompanyInputDto dto)
         {
             Vendor? vendor = await _dbContext.Vendors.FindAsync(id);
             if (vendor == null)

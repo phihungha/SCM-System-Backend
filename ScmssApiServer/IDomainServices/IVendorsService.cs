@@ -4,12 +4,12 @@ namespace ScmssApiServer.IDomainServices
 {
     public interface IVendorsService
     {
-        public Task<CompanyDto> Add(CompanyInputDto dto);
+        public Task<CompanyDto> AddAsync(CompanyInputDto dto);
 
-        public Task<CompanyDto?> Get(int id);
+        public Task<CompanyDto?> GetAsync(int id);
 
-        public Task<IList<CompanyDto>> GetMany(SimpleQueryDto queryDto);
+        public Task<IList<CompanyDto>> GetManyAsync(SimpleQueryDto queryDto);
 
-        public Task<CompanyDto> Update(int id, CompanyInputDto dto);
+        public Task<CompanyDto> UpdateAsync(int id, CompanyInputDto dto);
     }
 }
