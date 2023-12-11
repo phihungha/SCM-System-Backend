@@ -1,5 +1,8 @@
-﻿namespace ScmssApiServer.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace ScmssApiServer.Models
 {
+    [Index(nameof(Name), IsUnique = true)]
     public class Company : ISoftDeletable
     {
         public string? ContactPerson { get; set; }

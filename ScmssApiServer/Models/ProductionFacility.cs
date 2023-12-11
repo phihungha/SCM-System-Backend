@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
+    [Index(nameof(Name), IsUnique = true)]
     public class ProductionFacility : ISoftDeletable
     {
         public DateTime CreateTime { get; set; }

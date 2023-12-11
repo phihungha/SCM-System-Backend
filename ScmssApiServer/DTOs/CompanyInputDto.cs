@@ -14,7 +14,8 @@ namespace ScmssApiServer.DTOs
         [EmailAddress]
         public string? Email { get; set; }
 
-        public bool? IsActive { get; set; }
+        [Required]
+        public bool IsActive { get; set; }
 
         [Required]
         public required string Name { get; set; }

@@ -45,7 +45,7 @@ namespace ScmssApiServer.DomainServices
             {
                 if (searchCriteria == SimpleSearchCriteria.Name)
                 {
-                    query = query.Where(i => i.Name.Contains(searchTerm));
+                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm.ToLower()));
                 }
                 else
                 {
@@ -55,7 +55,7 @@ namespace ScmssApiServer.DomainServices
 
             if (!displayAll ?? true)
             {
-                query = query.Where(i => i.IsActive == !displayAll);
+                query = query.Where(i => i.IsActive);
             }
 
             IList<Vendor> vendors = await query.ToListAsync();
@@ -71,6 +71,8 @@ namespace ScmssApiServer.DomainServices
             }
 
             _mapper.Map(dto, vendor);
+
+            await _dbContext.SaveChangesAsync();
             return _mapper.Map<CompanyDto>(vendor);
         }
     }

@@ -610,7 +610,6 @@ namespace ScmssApiServer.Data
             {
                 var entity = (ISoftDeletable)entry.Entity;
                 entity.CreateTime = DateTime.UtcNow;
-                entity.IsActive = true;
             }
             else if (entry.Entity is ILifecycle)
             {
