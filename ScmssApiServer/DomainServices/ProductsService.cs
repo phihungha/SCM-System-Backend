@@ -82,6 +82,9 @@ namespace ScmssApiServer.DomainServices
             _mapper.Map(dto, product);
 
             await _dbContext.SaveChangesAsync();
+            product = await _dbContext.Products.Include(i => i.SupplyCostItems)
+                                               .ThenInclude(i => i.Supply)
+                                               .FirstAsync(x => x.Id == product.Id);
             return _mapper.Map<ProductDto>(product);
         }
     }

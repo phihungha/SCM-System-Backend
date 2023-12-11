@@ -2,12 +2,15 @@
 
 namespace ScmssApiServer.DTOs
 {
-    public class GoodsInputDto
+    public class GoodsInputDto : ISoftDeletableInputDto
     {
         public string? Description { get; set; }
 
         [Required]
         public int ExpirationMonth { get; set; }
+
+        [Required]
+        public bool IsActive { get; set; }
 
         [Required]
         public required string Name { get; set; }
