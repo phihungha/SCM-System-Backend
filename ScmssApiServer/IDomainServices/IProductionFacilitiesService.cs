@@ -6,7 +6,7 @@ namespace ScmssApiServer.IDomainServices
     {
         public Task<ProductionFacilityDto> AddAsync(ProductionFacilityInputDto dto);
 
-        public Task<ProductionFacilityDto> GetAsync(int id);
+        public Task<ProductionFacilityDto?> GetAsync(int id);
 
         public Task<IList<ProductionFacilityDto>> GetManyAsync(SimpleQueryDto queryDto);
 
