@@ -66,7 +66,12 @@ namespace ScmssApiServer.Models
         public required string Name { get; set; }
 
         public ProductionFacility? ProductionFacility { get; set; }
+
         public int? ProductionFacilityId { get; set; }
+
+        [NotMapped]
+        public IList<string> Roles { get; set; } = new List<string>();
+
         public DateTime? UpdateTime { get; set; }
     }
 

@@ -1,10 +1,21 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Services
 {
     public static class UserManagerExtensionMethods
     {
+        public static async Task<User> FindFullUserByIdAsync(
+            this UserManager<User> manager,
+            string id)
+        {
+            User user = await manager.Users.Include(i => i.ProductionFacility)
+                                           .FirstAsync(i => i.Id == id);
+            user.Roles = await manager.GetRolesAsync(user);
+            return user;
+        }
+
         /// <summary>
         /// Get a list of role names the specified user belongs to.
         /// </summary>
@@ -15,13 +26,8 @@ namespace ScmssApiServer.Services
             this UserManager<User> manager,
             string userId)
         {
-            User? user = await manager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found.");
-            }
-
-            return await manager.GetRolesAsync(user);
+            User user = await manager.FindFullUserByIdAsync(userId);
+            return user.Roles;
         }
 
         /// <summary>
@@ -31,7 +37,6 @@ namespace ScmssApiServer.Services
         /// <param name="rolesToCheck">Roles to check</param>
         /// <returns>True if user has a role in the specified roles.
         /// False otherwise.</returns>
-        /// <exception cref="KeyNotFoundException">User not found</exception>
         public static async Task<bool> IsInAnyRolesAsync(
             this UserManager<User> manager,
             string userId,
