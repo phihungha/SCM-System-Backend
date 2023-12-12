@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class PurchaseOrdersController : CustomControllerBase

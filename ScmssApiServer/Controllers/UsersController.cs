@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : CustomControllerBase

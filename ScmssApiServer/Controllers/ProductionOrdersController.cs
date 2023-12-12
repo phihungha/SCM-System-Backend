@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,ProductionPlanner,ProductionManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductionOrdersController : CustomControllerBase
@@ -47,14 +46,14 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IList<ProductionOrderDto>>> Get()
+        public async Task<ActionResult<IList<ProductionOrderDto>>> GetMany()
         {
             IList<ProductionOrderDto> items = await _productionOrdersService.GetManyAsync();
             return Ok(items);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductionOrderDto>> GetId(int id)
+        public async Task<ActionResult<ProductionOrderDto>> Get(int id)
         {
             ProductionOrderDto? item = await _productionOrdersService.GetAsync(id);
             if (item == null)

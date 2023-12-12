@@ -1,6 +1,7 @@
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace ScmssApiServer
@@ -115,9 +117,11 @@ namespace ScmssApiServer
 
             builder.Services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                .AddCookie(options =>
                     {
                         options.SlidingExpiration = true;
+                        options.Events.OnRedirectToAccessDenied = GetForbiddenResp;
+                        options.Events.OnRedirectToLogin = GetUnauthorizaedResp;
                     }
                 );
         }
@@ -146,6 +150,18 @@ namespace ScmssApiServer
                     throw;
                 }
             }
+        }
+
+        internal static Task GetForbiddenResp(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            return Task.CompletedTask;
+        }
+
+        internal static Task GetUnauthorizaedResp(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            return Task.CompletedTask;
         }
 
         /// <summary>

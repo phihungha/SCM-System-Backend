@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,ProductionPlanner,ProductionManager,PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class PurchaseRequisitionsController : CustomControllerBase
@@ -20,6 +19,7 @@ namespace ScmssApiServer.Controllers
             _purchaseRequisitionsService = purchaseRequisitionsService;
         }
 
+        [Authorize(Roles = "Admin,ProductionPlanner,ProductionManager")]
         [HttpPost]
         public async Task<ActionResult<PurchaseRequisitionDto>> Create([FromBody] PurchaseRequisitionCreateDto body)
         {
@@ -28,14 +28,14 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IList<PurchaseRequisitionDto>>> Get()
+        public async Task<ActionResult<IList<PurchaseRequisitionDto>>> GetMany()
         {
             IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync();
             return Ok(items);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PurchaseRequisitionDto>> GetId(int id)
+        public async Task<ActionResult<PurchaseRequisitionDto>> Get(int id)
         {
             PurchaseRequisitionDto? item = await _purchaseRequisitionsService.GetAsync(id);
             if (item == null)
@@ -45,6 +45,7 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [Authorize(Roles = "Admin,ProductionPlanner,ProductionManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<PurchaseRequisitionDto>> Update(
             int id,

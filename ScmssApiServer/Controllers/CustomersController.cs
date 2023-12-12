@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,SalesSpecialist,SalesManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomersController : CustomControllerBase
@@ -20,6 +19,7 @@ namespace ScmssApiServer.Controllers
             _customersService = customersService;
         }
 
+        [Authorize(Roles = "Admin,SalesManager")]
         [HttpPost]
         public async Task<ActionResult<CompanyDto>> Create([FromBody] CompanyInputDto body)
         {
@@ -45,6 +45,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
+        [Authorize(Roles = "Admin,SalesManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<CompanyDto>> Update(int id, [FromBody] CompanyInputDto body)
         {

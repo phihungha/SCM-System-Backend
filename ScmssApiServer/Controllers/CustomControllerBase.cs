@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.IDomainServices;
 
-namespace ScmssApiServer.Utilities
+namespace ScmssApiServer.Controllers
 {
     public abstract class CustomControllerBase : ControllerBase
     {

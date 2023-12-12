@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,SalesSpecialist,SalesManager,LogisticsSpecialist")]
     [Route("api/[controller]")]
     [ApiController]
     public class SalesOrdersController : CustomControllerBase
@@ -39,6 +38,7 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [Authorize(Roles = "Admin,SalesSpecialist,SalesManager")]
         [HttpPost]
         public async Task<ActionResult<SalesOrderDto>> Create([FromBody] SalesOrderCreateDto body)
         {
@@ -47,14 +47,14 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IList<SalesOrderDto>>> Get()
+        public async Task<ActionResult<IList<SalesOrderDto>>> GetMany()
         {
             IList<SalesOrderDto> items = await _salesOrdersService.GetManyAsync();
             return Ok(items);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<SalesOrderDto>> GetId(int id)
+        public async Task<ActionResult<SalesOrderDto>> Get(int id)
         {
             SalesOrderDto? item = await _salesOrdersService.GetAsync(id);
             if (item == null)
@@ -64,6 +64,7 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [Authorize(Roles = "Admin,SalesSpecialist,SalesManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<SalesOrderDto>> Update(
             int id,

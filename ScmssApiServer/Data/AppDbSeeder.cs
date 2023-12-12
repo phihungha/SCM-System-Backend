@@ -23,6 +23,7 @@ namespace ScmssApiServer.Data
                 "PurchaseManager",
                 "ProductionPlanner",
                 "ProductionManager",
+                "LogisticsSpecialist",
             };
 
             foreach (string role in roles)

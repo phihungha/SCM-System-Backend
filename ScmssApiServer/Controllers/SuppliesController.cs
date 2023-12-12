@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class SuppliesController : CustomControllerBase
@@ -20,6 +19,7 @@ namespace ScmssApiServer.Controllers
             _suppliesService = suppliesService;
         }
 
+        [Authorize(Roles = "Admin,PurchaseManager")]
         [HttpPost]
         public async Task<ActionResult<SupplyDto>> Create([FromBody] SupplyInputDto body)
         {
@@ -45,6 +45,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
+        [Authorize(Roles = "Admin,PurchaseManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<ProductDto>> Update(int id, [FromBody] SupplyInputDto body)
         {
