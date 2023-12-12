@@ -6,9 +6,9 @@ namespace ScmssApiServer.IDomainServices
     {
         Task<PurchaseRequisitionDto> CreateAsync(PurchaseRequisitionCreateDto dto, string userId);
 
-        Task<PurchaseRequisitionDto?> GetAsync(int id);
+        Task<PurchaseRequisitionDto?> GetAsync(int id, string userId);
 
-        Task<IList<PurchaseRequisitionDto>> GetManyAsync();
+        Task<IList<PurchaseRequisitionDto>> GetManyAsync(string userId);
 
         Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, string userId);
     }

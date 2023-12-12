@@ -145,6 +145,7 @@ namespace ScmssApiServer.DomainServices
             }
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
+
             bool isManager = user.Roles.Contains("ProductionManager") ||
                              user.Roles.Contains("InventoryManager");
             bool isSameFacility = user.ProductionFacilityId == order.ProductionFacilityId;
@@ -157,7 +158,29 @@ namespace ScmssApiServer.DomainServices
 
             if (RolesUtils.IsInventoryUser(user))
             {
-                HandleInventoryOperation(order, dto, user);
+                if (dto.ApprovalStatus != null || dto.Items != null)
+                {
+                    throw new UnauthorizedException(
+                            "Not authorized to handle approval and update items."
+                        );
+                }
+            }
+
+            if (dto.Status != null)
+            {
+                if (RolesUtils.IsInventoryUser(user))
+                {
+                    HandleInventoryOperation(order, dto, user);
+                }
+                else
+                {
+                    HandleStatusChange(order, dto, user);
+                }
+            }
+
+            if (dto.ApprovalStatus != null)
+            {
+                HandleApproval(order, dto, user);
             }
 
             if (dto.Items != null)
@@ -165,16 +188,6 @@ namespace ScmssApiServer.DomainServices
                 _dbContext.RemoveRange(order.Items);
                 _dbContext.RemoveRange(order.SupplyUsageItems);
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
-            }
-
-            if (dto.Status != null)
-            {
-                HandleStatusChange(order, dto, user);
-            }
-
-            if (dto.ApprovalStatus != null)
-            {
-                HandleApproval(order, dto, user);
             }
 
             await _dbContext.SaveChangesAsync();
@@ -263,21 +276,19 @@ namespace ScmssApiServer.DomainServices
         {
             string userId = user.Id;
 
-            switch (dto.Status)
+            if (dto.Status == OrderStatusOption.Canceled)
             {
-                case OrderStatusOption.WaitingAcceptance:
-                    order.FinishExecution();
-                    break;
-
-                case OrderStatusOption.Canceled:
-                    if (dto.Problem == null)
-                    {
-                        throw new InvalidDomainOperationException(
-                                "Cannot cancel an order without a problem."
-                            );
-                    }
-                    order.Cancel(userId, dto.Problem);
-                    break;
+                if (dto.Problem == null)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot cancel an order without a problem."
+                        );
+                }
+                order.Cancel(userId, dto.Problem);
+            }
+            else
+            {
+                throw new UnauthorizedException("Not authorized for this status");
             }
         }
 

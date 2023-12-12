@@ -6,6 +6,7 @@ using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -67,9 +68,20 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
-        public async Task<PurchaseRequisitionDto?> GetAsync(int id)
+        public async Task<PurchaseRequisitionDto?> GetAsync(int id, string userId)
         {
-            PurchaseRequisition? requisition = await _dbContext.PurchaseRequisitions
+            var query = _dbContext.PurchaseRequisitions.AsNoTracking();
+
+            User user = await _userManager.FindFullUserByIdAsync(userId);
+
+            if (!user.Roles.Contains("Director") ||
+                !user.Roles.Contains("Finance") ||
+                !user.Roles.Contains("ProductionManager"))
+            {
+                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+            }
+
+            PurchaseRequisition? requisition = await query
                 .AsNoTracking()
                 .Include(i => i.Items)
                 .ThenInclude(i => i.Supply)
@@ -84,10 +96,20 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto?>(requisition);
         }
 
-        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync()
+        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(string userId)
         {
-            IList<PurchaseRequisition> requisitions = await _dbContext.PurchaseRequisitions
-                .AsNoTracking()
+            var query = _dbContext.PurchaseRequisitions.AsNoTracking();
+
+            User user = await _userManager.FindFullUserByIdAsync(userId);
+
+            if (!user.Roles.Contains("Director") ||
+                !user.Roles.Contains("Finance") ||
+                !user.Roles.Contains("ProductionManager"))
+            {
+                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+            }
+
+            IList<PurchaseRequisition> requisitions = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Vendor)
                 .Include(i => i.CreateUser)
@@ -116,18 +138,22 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
+            User user = await _userManager.FindFullUserByIdAsync(userId);
+
+            bool isManager = user.Roles.Contains("ProductionManager") ||
+                             user.Roles.Contains("Finance");
+            bool isSameFacility = user.ProductionFacilityId == requisition.ProductionFacilityId;
+            if (!isManager && !isSameFacility)
+            {
+                throw new UnauthorizedException(
+                        "Not authorized to update purchase requisitions of another facility."
+                    );
+            }
+
             if (requisition.ApprovalStatus == ApprovalStatus.PendingApproval)
             {
                 Config config = await _configService.GetAsync();
                 requisition.VatRate = config.VatRate;
-            }
-
-            if (dto.Items != null)
-            {
-                _dbContext.RemoveRange(requisition.Items);
-                requisition.AddItems(
-                        await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
-                );
             }
 
             if (dto.IsCanceled ?? false)
@@ -143,33 +169,41 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.ApprovalStatus != null)
             {
-                await HandleApprovalAsync(requisition, dto, userId);
+                HandleApproval(requisition, dto, user);
+            }
+
+            if (dto.Items != null)
+            {
+                _dbContext.RemoveRange(requisition.Items);
+                requisition.AddItems(
+                        await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
+                );
             }
 
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
-        private async Task HandleApprovalAsync(PurchaseRequisition requisition,
+        private void HandleApproval(PurchaseRequisition requisition,
                                                PurchaseRequisitionUpdateDto dto,
-                                               string userId)
+                                               User user)
         {
-            User user = (await _userManager.FindByIdAsync(userId))!;
-            IList<string> userRoles = await _userManager.GetRolesAsync(user);
+            bool isFinance = user.Roles.Contains("Finance");
+            bool isManager = user.Roles.Contains("ProductionManager");
 
-            if (!userRoles.Contains("ProductionManager") && !userRoles.Contains("Finance"))
+            if (!isFinance && !isManager)
             {
-                throw new UnauthorizedException("Not permitted to handle approval.");
+                throw new UnauthorizedException("Not authorized to handle approval.");
             }
 
             if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
             {
-                if (userRoles.Contains("ProductionManager"))
+                if (isManager)
                 {
                     requisition.ApproveAsProductionManager(user);
                 }
 
-                if (userRoles.Contains("Finance"))
+                if (isFinance)
                 {
                     requisition.ApproveAsFinance(user);
                 }
@@ -182,7 +216,7 @@ namespace ScmssApiServer.DomainServices
                             "Cannot reject a requisition without a problem."
                         );
                 }
-                requisition.Reject(userId, dto.Problem);
+                requisition.Reject(user.Id, dto.Problem);
             }
         }
 

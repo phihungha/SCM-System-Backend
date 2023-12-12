@@ -36,7 +36,7 @@ namespace ScmssApiServer.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<PurchaseRequisitionDto>> Get(int id)
         {
-            PurchaseRequisitionDto? item = await _purchaseRequisitionsService.GetAsync(id);
+            PurchaseRequisitionDto? item = await _purchaseRequisitionsService.GetAsync(id, CurrentUserId);
             if (item == null)
             {
                 return NotFound();
@@ -47,7 +47,7 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<PurchaseRequisitionDto>>> GetMany()
         {
-            IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync();
+            IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync(CurrentUserId);
             return Ok(items);
         }
 
