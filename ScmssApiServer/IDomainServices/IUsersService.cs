@@ -5,18 +5,18 @@ namespace ScmssApiServer.IDomainServices
 {
     public interface IUsersService
     {
+        Task ChangePasswordAsync(string id, UserPasswordChangeDto dto);
+
+        Task<UserDto> CreateUserAsync(UserCreateDto dto);
+
+        string GetProfileImageUploadUrl(string userId);
+
+        Task<UserDto?> GetUserAsync(string id);
+
         string? GetUserIdFromPrincipal(ClaimsPrincipal principal);
 
         Task<IList<UserDto>> GetUsersAsync();
 
-        Task<UserDto?> GetUserAsync(string id);
-
-        Task<UserDto> CreateUserAsync(UserCreateDto dto);
-
         Task<UserDto> UpdateUserAsync(string id, UserInputDto dto);
-
-        Task ChangePasswordAsync(string id, UserPasswordChangeDto dto);
-
-        string GetProfileImageUploadUrl(string userId);
     }
 }

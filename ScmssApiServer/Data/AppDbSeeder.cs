@@ -21,8 +21,11 @@ namespace ScmssApiServer.Data
                 "SalesManager",
                 "PurchaseSpecialist",
                 "PurchaseManager",
+                "PurchaseManager",
                 "ProductionPlanner",
                 "ProductionManager",
+                "InventorySpecialist",
+                "InventoryManager",
                 "LogisticsSpecialist",
             };
 

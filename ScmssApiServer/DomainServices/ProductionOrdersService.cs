@@ -131,6 +131,45 @@ namespace ScmssApiServer.DomainServices
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             }
 
+            if (dto.Status != null)
+            {
+                await ChangeStatusAsync(order, dto, userId);
+            }
+
+            if (dto.ApprovalStatus != null)
+            {
+                await HandleApprovalAsync(order, dto, userId);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<ProductionOrderDto>(order);
+        }
+
+        public async Task<ProductionOrderEventDto> UpdateEventAsync(
+            int id,
+            int orderId,
+            OrderEventUpdateDto dto)
+        {
+            ProductionOrder? order = await _dbContext.ProductionOrders
+                .Include(i => i.Events)
+                .FirstOrDefaultAsync(i => i.Id == orderId);
+            if (order == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            ProductionOrderEvent orderEvent = order.UpdateEvent(id, dto.Message, dto.Location);
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<ProductionOrderEventDto>(orderEvent);
+        }
+
+        private async Task ChangeStatusAsync(ProductionOrder order,
+                                             ProductionOrderUpdateDto dto,
+                                             string userId)
+        {
+            User user = (await _userManager.FindByIdAsync(userId))!;
+
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
@@ -165,42 +204,34 @@ namespace ScmssApiServer.DomainServices
                     order.Return(userId, dto.Problem);
                     break;
             }
-
-            switch (dto.ApprovalStatus)
-            {
-                case ApprovalStatusOption.Approved:
-                    order.Approve(userId);
-                    break;
-
-                case ApprovalStatusOption.Rejected:
-                    if (dto.Problem == null)
-                    {
-                        throw new InvalidDomainOperationException(
-                                "Cannot reject an order without a problem."
-                            );
-                    }
-                    order.Reject(userId, dto.Problem);
-                    break;
-            }
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<ProductionOrderDto>(order);
         }
 
-        public async Task<ProductionOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto)
+        private async Task HandleApprovalAsync(ProductionOrder order,
+                                               ProductionOrderUpdateDto dto,
+                                               string userId)
         {
-            ProductionOrder? order = await _dbContext.ProductionOrders
-                .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
-            if (order == null)
+            User user = (await _userManager.FindByIdAsync(userId))!;
+            IList<string> userRoles = await _userManager.GetRolesAsync(user);
+
+            if (!userRoles.Contains("ProductionManager"))
             {
-                throw new EntityNotFoundException();
+                throw new UnauthorizedException("Not permitted to handle approval.");
             }
 
-            ProductionOrderEvent orderEvent = order.UpdateEvent(id, dto.Message, dto.Location);
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<ProductionOrderEventDto>(orderEvent);
+            if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
+            {
+                order.Approve(user);
+            }
+            else if (dto.ApprovalStatus == ApprovalStatusOption.Rejected)
+            {
+                if (dto.Problem == null)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot reject a production order without a problem."
+                        );
+                }
+                order.Reject(user, dto.Problem);
+            }
         }
 
         private async Task<IList<ProductionOrderItem>> MapOrderItemDtosToModels(IEnumerable<OrderItemInputDto> dtos)

@@ -116,18 +116,18 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
+            if (requisition.ApprovalStatus == ApprovalStatus.PendingApproval)
+            {
+                Config config = await _configService.GetAsync();
+                requisition.VatRate = config.VatRate;
+            }
+
             if (dto.Items != null)
             {
                 _dbContext.RemoveRange(requisition.Items);
                 requisition.AddItems(
                         await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
                 );
-            }
-
-            if (requisition.ApprovalStatus == ApprovalStatus.PendingApproval)
-            {
-                Config config = await _configService.GetAsync();
-                requisition.VatRate = config.VatRate;
             }
 
             if (dto.IsCanceled ?? false)
@@ -141,9 +141,38 @@ namespace ScmssApiServer.DomainServices
                 requisition.Cancel(userId, dto.Problem);
             }
 
+            if (dto.ApprovalStatus != null)
+            {
+                await HandleApprovalAsync(requisition, dto, userId);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<PurchaseRequisitionDto>(requisition);
+        }
+
+        private async Task HandleApprovalAsync(PurchaseRequisition requisition,
+                                               PurchaseRequisitionUpdateDto dto,
+                                               string userId)
+        {
+            User user = (await _userManager.FindByIdAsync(userId))!;
+            IList<string> userRoles = await _userManager.GetRolesAsync(user);
+
+            if (!userRoles.Contains("ProductionManager") && !userRoles.Contains("Finance"))
+            {
+                throw new UnauthorizedException("Not permitted to handle approval.");
+            }
+
             if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
             {
-                requisition.Approve(userId);
+                if (userRoles.Contains("ProductionManager"))
+                {
+                    requisition.ApproveAsProductionManager(user);
+                }
+
+                if (userRoles.Contains("Finance"))
+                {
+                    requisition.ApproveAsFinance(user);
+                }
             }
             else if (dto.ApprovalStatus == ApprovalStatusOption.Rejected)
             {
@@ -155,9 +184,6 @@ namespace ScmssApiServer.DomainServices
                 }
                 requisition.Reject(userId, dto.Problem);
             }
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
         private async Task<IList<PurchaseRequisitionItem>> MapRequisitionItemDtosToModels(
