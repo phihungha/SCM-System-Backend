@@ -56,16 +56,16 @@ namespace ScmssApiServer.Models
 
         public void ApproveAsFinance(User user)
         {
-            Approve();
             ApproveFinanceId = user.Id;
             ApproveFinance = user;
+            Approve();
         }
 
         public void ApproveAsProductionManager(User user)
         {
-            Approve();
             ApproveProductionManagerId = user.Id;
             ApproveProductionManager = user;
+            Approve();
         }
 
         public override void Begin(string userId)
