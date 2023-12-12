@@ -40,7 +40,7 @@ namespace ScmssApiServer.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductionOrderDto>> Get(int id)
         {
-            ProductionOrderDto? item = await _productionOrdersService.GetAsync(id);
+            ProductionOrderDto? item = await _productionOrdersService.GetAsync(id, CurrentUserId);
             if (item == null)
             {
                 return NotFound();
@@ -51,7 +51,7 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<ProductionOrderDto>>> GetMany()
         {
-            IList<ProductionOrderDto> items = await _productionOrdersService.GetManyAsync();
+            IList<ProductionOrderDto> items = await _productionOrdersService.GetManyAsync(CurrentUserId);
             return Ok(items);
         }
 

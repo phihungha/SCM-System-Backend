@@ -6,6 +6,8 @@ using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
+using ScmssApiServer.Services;
+using ScmssApiServer.Utils;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -42,10 +44,12 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderEventDto>(orderEvent);
         }
 
-        public async Task<ProductionOrderDto> CreateAsync(OrderCreateDto<OrderItemInputDto> dto, string userId)
+        public async Task<ProductionOrderDto> CreateAsync(
+            OrderCreateDto<OrderItemInputDto> dto,
+            string userId)
         {
             User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(x => x.Id == userId);
+                                                .FirstAsync(i => i.Id == userId);
             if (user.ProductionFacility == null)
             {
                 throw new InvalidDomainOperationException(
@@ -70,8 +74,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderDto>(order);
         }
 
-        public async Task<ProductionOrderDto?> GetAsync(int id)
+        public async Task<ProductionOrderDto?> GetAsync(int id, string userId)
         {
+            User user = await _userManager.FindFullUserByIdAsync(userId);
             ProductionOrder? order = await _dbContext.ProductionOrders
                 .AsNoTracking()
                 .Include(i => i.Items).ThenInclude(i => i.Product)
@@ -82,18 +87,21 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
+                .Where(i => i.ProductionFacilityId == user.ProductionFacilityId)
                 .FirstOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<ProductionOrderDto?>(order);
         }
 
-        public async Task<IList<ProductionOrderDto>> GetManyAsync()
+        public async Task<IList<ProductionOrderDto>> GetManyAsync(string userId)
         {
+            User user = await _userManager.FindFullUserByIdAsync(userId);
             IList<ProductionOrder> orders = await _dbContext.ProductionOrders
                 .AsNoTracking()
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
+                .Where(i => i.ProductionFacilityId == user.ProductionFacilityId)
                 .ToListAsync();
             return _mapper.Map<IList<ProductionOrderDto>>(orders);
         }
@@ -124,6 +132,22 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
+            User user = await _userManager.FindFullUserByIdAsync(userId);
+            bool isManager = user.Roles.Contains("ProductionManager") ||
+                             user.Roles.Contains("InventoryManager");
+            bool isSameFacility = user.ProductionFacilityId == order.ProductionFacilityId;
+            if (!isManager && !isSameFacility)
+            {
+                throw new UnauthorizedException(
+                        "Not authorized to update production orders of another facility."
+                    );
+            }
+
+            if (RolesUtils.IsInventoryUser(user))
+            {
+                HandleInventoryOperation(order, dto, user);
+            }
+
             if (dto.Items != null)
             {
                 _dbContext.RemoveRange(order.Items);
@@ -133,12 +157,12 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Status != null)
             {
-                await ChangeStatusAsync(order, dto, userId);
+                HandleStatusChange(order, dto, user);
             }
 
             if (dto.ApprovalStatus != null)
             {
-                await HandleApprovalAsync(order, dto, userId);
+                HandleApproval(order, dto, user);
             }
 
             await _dbContext.SaveChangesAsync();
@@ -164,58 +188,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderEventDto>(orderEvent);
         }
 
-        private async Task ChangeStatusAsync(ProductionOrder order,
-                                             ProductionOrderUpdateDto dto,
-                                             string userId)
+        private void HandleApproval(ProductionOrder order,
+                                    ProductionOrderUpdateDto dto,
+                                    User user)
         {
-            User user = (await _userManager.FindByIdAsync(userId))!;
-
-            switch (dto.Status)
+            if (!user.Roles.Contains("ProductionManager"))
             {
-                case OrderStatusOption.Executing:
-                    order.StartExecution();
-                    break;
-
-                case OrderStatusOption.WaitingAcceptance:
-                    order.FinishExecution();
-                    break;
-
-                case OrderStatusOption.Completed:
-                    order.Complete(userId);
-                    break;
-
-                case OrderStatusOption.Canceled:
-                    if (dto.Problem == null)
-                    {
-                        throw new InvalidDomainOperationException(
-                                "Cannot cancel an order without a problem."
-                            );
-                    }
-                    order.Cancel(userId, dto.Problem);
-                    break;
-
-                case OrderStatusOption.Returned:
-                    if (dto.Problem == null)
-                    {
-                        throw new InvalidDomainOperationException(
-                                "Cannot return an order without a problem."
-                            );
-                    }
-                    order.Return(userId, dto.Problem);
-                    break;
-            }
-        }
-
-        private async Task HandleApprovalAsync(ProductionOrder order,
-                                               ProductionOrderUpdateDto dto,
-                                               string userId)
-        {
-            User user = (await _userManager.FindByIdAsync(userId))!;
-            IList<string> userRoles = await _userManager.GetRolesAsync(user);
-
-            if (!userRoles.Contains("ProductionManager"))
-            {
-                throw new UnauthorizedException("Not permitted to handle approval.");
+                throw new UnauthorizedException("Not authorized to handle approval.");
             }
 
             if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
@@ -234,7 +213,64 @@ namespace ScmssApiServer.DomainServices
             }
         }
 
-        private async Task<IList<ProductionOrderItem>> MapOrderItemDtosToModels(IEnumerable<OrderItemInputDto> dtos)
+        private void HandleInventoryOperation(ProductionOrder order,
+                                              ProductionOrderUpdateDto dto,
+                                              User user)
+        {
+            string userId = user.Id;
+
+            switch (dto.Status)
+            {
+                case OrderStatusOption.Executing:
+
+                    order.StartExecution();
+                    break;
+
+                case OrderStatusOption.Completed:
+                    order.Complete(userId);
+                    break;
+
+                case OrderStatusOption.Returned:
+                    if (dto.Problem == null)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot return an order without a problem."
+                            );
+                    }
+                    order.Return(userId, dto.Problem);
+                    break;
+
+                default:
+                    throw new UnauthorizedException("Not authorized for this status.");
+            }
+        }
+
+        private void HandleStatusChange(ProductionOrder order,
+                                        ProductionOrderUpdateDto dto,
+                                        User user)
+        {
+            string userId = user.Id;
+
+            switch (dto.Status)
+            {
+                case OrderStatusOption.WaitingAcceptance:
+                    order.FinishExecution();
+                    break;
+
+                case OrderStatusOption.Canceled:
+                    if (dto.Problem == null)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot cancel an order without a problem."
+                            );
+                    }
+                    order.Cancel(userId, dto.Problem);
+                    break;
+            }
+        }
+
+        private async Task<IList<ProductionOrderItem>> MapOrderItemDtosToModels(
+            IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext

@@ -8,9 +8,9 @@ namespace ScmssApiServer.IDomainServices
 
         Task<ProductionOrderDto> CreateAsync(OrderCreateDto<OrderItemInputDto> dto, string userId);
 
-        Task<ProductionOrderDto?> GetAsync(int id);
+        Task<ProductionOrderDto?> GetAsync(int id, string userId);
 
-        Task<IList<ProductionOrderDto>> GetManyAsync();
+        Task<IList<ProductionOrderDto>> GetManyAsync(string userId);
 
         Task<ProductionOrderDto> UpdateAsync(int id, ProductionOrderUpdateDto dto, string userId);
 
