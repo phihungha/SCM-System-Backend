@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Models;
 using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
@@ -20,7 +18,7 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> Create([FromBody] UserCreateDto body)
+        public async Task<ActionResult<UserDto>> Create([FromBody] UserCreateDto body)
         {
             try
             {
@@ -53,13 +51,13 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet("{id}/profileImageUploadUrl")]
-        public string GetProfileImageUploadUrl(string id)
+        public string GetProfileImageUploadUrl()
         {
-            return _usersService.GetProfileImageUploadUrl(id);
+            return _usersService.GetProfileImageUploadUrl(CurrentUserId);
         }
 
         [HttpPatch("{id}")]
-        public async Task<ActionResult<User>> Update(string id, [FromBody] UserInputDto body)
+        public async Task<ActionResult<UserDto>> Update(string id, [FromBody] UserInputDto body)
         {
             try
             {
@@ -74,7 +72,7 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpPut("{id}/changePassword")]
-        public async Task<ActionResult<User>> Update(string id, [FromBody] UserPasswordChangeDto body)
+        public async Task<ActionResult<UserDto>> Update(string id, [FromBody] UserPasswordChangeDto body)
         {
             try
             {

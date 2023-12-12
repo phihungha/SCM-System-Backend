@@ -9,7 +9,7 @@ namespace ScmssApiServer.DTOs
         public string? Address { get; set; }
 
         [Required]
-        public required DateTime DateOfBirth { get; set; }
+        public required string DateOfBirth { get; set; }
 
         public string? Description { get; set; }
 
@@ -33,6 +33,9 @@ namespace ScmssApiServer.DTOs
         [Required]
         [Phone]
         public required string PhoneNumber { get; set; }
+
+        [Required]
+        public ICollection<string> Roles { get; set; } = new List<string>();
 
         [Required]
         [StringLength(maximumLength: 20, MinimumLength = 5)]
