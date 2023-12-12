@@ -45,16 +45,17 @@ namespace ScmssApiServer
 
             // Add domain services
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IUsersService, UsersService>();
+            builder.Services.AddScoped<IConfigService, ConfigService>();
+            builder.Services.AddScoped<ICustomersService, CustomersService>();
             builder.Services.AddScoped<ISalesOrdersService, SalesOrdersService>();
-            builder.Services.AddScoped<IProductionOrdersService, ProductionOrdersService>();
+            builder.Services.AddScoped<ISuppliesService, SuppliesService>();
             builder.Services.AddScoped<IProductsService, ProductsService>();
+            builder.Services.AddScoped<IProductionOrdersService, ProductionOrdersService>();
+            builder.Services.AddScoped<IProductionFacilitiesService, ProductionFacilitiesService>();
             builder.Services.AddScoped<IPurchaseRequisitionsService, PurchaseRequisitionsService>();
             builder.Services.AddScoped<IPurchaseOrdersService, PurchaseOrdersService>();
-            builder.Services.AddScoped<IProductionFacilitiesService, ProductionFacilitiesService>();
-            builder.Services.AddScoped<ICustomersService, CustomersService>();
+            builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IVendorsService, VendorsService>();
-            builder.Services.AddScoped<IConfigService, ConfigService>();
 
             builder.Services.AddCors(o => o.AddPolicy(
                 name: CorsPolicyName,

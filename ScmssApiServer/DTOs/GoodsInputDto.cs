@@ -7,6 +7,7 @@ namespace ScmssApiServer.DTOs
         public string? Description { get; set; }
 
         [Required]
+        [Range(1, double.MaxValue)]
         public int ExpirationMonth { get; set; }
 
         [Required]
@@ -16,6 +17,7 @@ namespace ScmssApiServer.DTOs
         public required string Name { get; set; }
 
         [Required]
+        [Range(double.Epsilon, double.MaxValue)]
         public decimal Price { get; set; }
 
         [Required]
