@@ -6,7 +6,7 @@ using ScmssApiServer.IDomainServices;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize(Roles = "Admin,PurchaseSpecialist,PurchaseManager")]
+    [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class SuppliesController : CustomControllerBase
@@ -19,7 +19,7 @@ namespace ScmssApiServer.Controllers
             _suppliesService = suppliesService;
         }
 
-        [Authorize(Roles = "Admin,PurchaseManager")]
+        [Authorize(Roles = "PurchaseManager")]
         [HttpPost]
         public async Task<ActionResult<SupplyDto>> Create([FromBody] SupplyInputDto body)
         {
@@ -45,7 +45,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
-        [Authorize(Roles = "Admin,PurchaseManager")]
+        [Authorize(Roles = "PurchaseManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<ProductDto>> Update(int id, [FromBody] SupplyInputDto body)
         {

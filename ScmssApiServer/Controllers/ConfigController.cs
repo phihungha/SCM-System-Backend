@@ -6,7 +6,7 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Director,Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class ConfigController : CustomControllerBase
@@ -25,6 +25,7 @@ namespace ScmssApiServer.Controllers
             return await _configService.GetAsync();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch]
         public async Task<ActionResult<Config>> Set(ConfigInputDto body)
         {

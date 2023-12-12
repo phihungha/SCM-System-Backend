@@ -5,7 +5,7 @@ using ScmssApiServer.IDomainServices;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize(Roles = "Admin,SalesSpecialist,SalesManager")]
+    [Authorize(Roles = "Director,SalesSpecialist,SalesManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomersController : CustomControllerBase
@@ -19,7 +19,7 @@ namespace ScmssApiServer.Controllers
             _customersService = customersService;
         }
 
-        [Authorize(Roles = "Admin,SalesManager")]
+        [Authorize(Roles = "SalesManager")]
         [HttpPost]
         public async Task<ActionResult<CompanyDto>> Create([FromBody] CompanyInputDto body)
         {
@@ -45,7 +45,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
-        [Authorize(Roles = "Admin,SalesManager")]
+        [Authorize(Roles = "SalesManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<CompanyDto>> Update(int id, [FromBody] CompanyInputDto body)
         {

@@ -6,10 +6,10 @@ using ScmssApiServer.IDomainServices;
 namespace ScmssApiServer.Controllers
 {
     [Authorize(Roles =
-        "Admin," +
+        "Director," +
+        "Finance," +
         "ProductionPlanner," +
         "ProductionManager," +
-        "Finance," +
         "PurchaseSpecialist," +
         "PurchaseManager")]
     [Route("api/[controller]")]
@@ -25,7 +25,7 @@ namespace ScmssApiServer.Controllers
             _purchaseRequisitionsService = purchaseRequisitionsService;
         }
 
-        [Authorize(Roles = "Admin,ProductionPlanner,ProductionManager")]
+        [Authorize(Roles = "ProductionPlanner,ProductionManager")]
         [HttpPost]
         public async Task<ActionResult<PurchaseRequisitionDto>> Create([FromBody] PurchaseRequisitionCreateDto body)
         {
@@ -50,7 +50,8 @@ namespace ScmssApiServer.Controllers
             IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync();
             return Ok(items);
         }
-        [Authorize(Roles = "Admin,ProductionPlanner,ProductionManager,Finance")]
+
+        [Authorize(Roles = "Finance,ProductionPlanner,ProductionManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<PurchaseRequisitionDto>> Update(
             int id,

@@ -6,30 +6,30 @@ namespace ScmssApiServer.Data
 {
     public static class AppDbSeeder
     {
+        public static readonly string[] Roles =
+        {
+            "Admin",
+            "Director",
+            "Finance",
+            "SalesSpecialist",
+            "SalesManager",
+            "PurchaseSpecialist",
+            "PurchaseManager",
+            "PurchaseManager",
+            "ProductionPlanner",
+            "ProductionManager",
+            "InventorySpecialist",
+            "InventoryManager",
+            "LogisticsSpecialist",
+        };
+
         public static void SeedRoles(IServiceScope scope, WebApplication app)
         {
             ILogger logger = app.Logger;
 
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            var roles = new string[]
-            {
-                "Admin",
-                "Director",
-                "Finance",
-                "SalesSpecialist",
-                "SalesManager",
-                "PurchaseSpecialist",
-                "PurchaseManager",
-                "PurchaseManager",
-                "ProductionPlanner",
-                "ProductionManager",
-                "InventorySpecialist",
-                "InventoryManager",
-                "LogisticsSpecialist",
-            };
-
-            foreach (string role in roles)
+            foreach (string role in Roles)
             {
                 if (roleManager.FindByNameAsync(role).Result != null)
                 {
@@ -103,7 +103,7 @@ namespace ScmssApiServer.Data
                 throw new ApplicationException("Failed to create root admin user.");
             }
 
-            IdentityResult roleResult = userManager.AddToRoleAsync(newUser, "Admin").Result;
+            IdentityResult roleResult = userManager.AddToRolesAsync(newUser, Roles).Result;
             if (!roleResult.Succeeded)
             {
                 throw new ApplicationException("Failed to assign roles to root admin user.");

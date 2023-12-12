@@ -5,7 +5,6 @@ using ScmssApiServer.IDomainServices;
 
 namespace ScmssApiServer.Controllers
 {
-    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : CustomControllerBase

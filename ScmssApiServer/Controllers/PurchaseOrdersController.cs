@@ -5,7 +5,7 @@ using ScmssApiServer.IDomainServices;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize(Roles = "Admin,PurchaseSpecialist,PurchaseManager")]
+    [Authorize(Roles = "Director,Finance,PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class PurchaseOrdersController : CustomControllerBase
@@ -19,6 +19,7 @@ namespace ScmssApiServer.Controllers
             _purchaseOrdersService = purchaseOrdersService;
         }
 
+        [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
         [HttpPost("{orderId}/events")]
         public async Task<ActionResult<TransOrderEventDto>> AddManualEvent(
             int orderId,
@@ -28,6 +29,7 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
         [HttpPost]
         public async Task<ActionResult<PurchaseOrderDto>> Create([FromBody] PurchaseOrderCreateDto body)
         {
@@ -53,6 +55,7 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [Authorize(Roles = "Finance,PurchaseSpecialist,PurchaseManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<PurchaseOrderDto>> Update(
             int id,
@@ -62,6 +65,7 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
         [HttpPatch("{orderId}/events/{id}")]
         public async Task<ActionResult<TransOrderEventDto>> UpdateEvent(
             int orderId,

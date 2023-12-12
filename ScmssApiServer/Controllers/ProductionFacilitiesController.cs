@@ -5,7 +5,7 @@ using ScmssApiServer.IDomainServices;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize(Roles = "Admin,ProductionPlanner,ProductionManager")]
+    [Authorize(Roles = "Director,ProductionPlanner,ProductionManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductionFacilitiesController : CustomControllerBase
@@ -19,7 +19,7 @@ namespace ScmssApiServer.Controllers
             _facilitiesService = facilitiesService;
         }
 
-        [Authorize(Roles = "Admin,ProductionManager")]
+        [Authorize(Roles = "ProductionManager")]
         [HttpPost]
         public async Task<ActionResult<ProductionFacilityDto>> Create([FromBody] ProductionFacilityInputDto body)
         {
@@ -45,7 +45,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
-        [Authorize(Roles = "Admin,ProductionManager")]
+        [Authorize(Roles = "ProductionManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<ProductionFacilityDto>> Update(
             int id,
