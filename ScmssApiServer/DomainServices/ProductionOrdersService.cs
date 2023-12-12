@@ -76,9 +76,16 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<ProductionOrderDto?> GetAsync(int id, string userId)
         {
+            var query = _dbContext.ProductionOrders.AsNoTracking();
+
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            ProductionOrder? order = await _dbContext.ProductionOrders
-                .AsNoTracking()
+            if (!user.Roles.Contains("ProductionManager") ||
+                !user.Roles.Contains("Director"))
+            {
+                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+            }
+
+            ProductionOrder? order = await query
                 .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.SupplyUsageItems)
                 .ThenInclude(i => i.Supply)
@@ -87,21 +94,26 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
-                .Where(i => i.ProductionFacilityId == user.ProductionFacilityId)
                 .FirstOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<ProductionOrderDto?>(order);
         }
 
         public async Task<IList<ProductionOrderDto>> GetManyAsync(string userId)
         {
+            var query = _dbContext.ProductionOrders.AsNoTracking();
+
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            IList<ProductionOrder> orders = await _dbContext.ProductionOrders
-                .AsNoTracking()
+            if (!user.Roles.Contains("ProductionManager") ||
+                !user.Roles.Contains("Director"))
+            {
+                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+            }
+
+            IList<ProductionOrder> orders = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
-                .Where(i => i.ProductionFacilityId == user.ProductionFacilityId)
                 .ToListAsync();
             return _mapper.Map<IList<ProductionOrderDto>>(orders);
         }
