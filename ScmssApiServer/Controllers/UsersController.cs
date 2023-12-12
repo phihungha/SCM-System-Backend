@@ -34,20 +34,6 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<User>> Delete(string id)
-        {
-            try
-            {
-                await _usersService.DeleteUserAsync(id);
-                return Ok();
-            }
-            catch (EntityNotFoundException)
-            {
-                return NotFound();
-            }
-        }
-
         [HttpGet]
         public async Task<ActionResult<IList<UserDto>>> Get()
         {

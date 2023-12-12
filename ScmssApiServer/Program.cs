@@ -75,7 +75,11 @@ namespace ScmssApiServer
 
             var app = builder.Build();
 
-            AppDbSeeder.SeedRootAdminUser(app);
+            using (var scope = app.Services.CreateScope())
+            {
+                AppDbSeeder.SeedRoles(scope, app);
+                AppDbSeeder.SeedRootAdminUser(scope, app);
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -106,13 +110,16 @@ namespace ScmssApiServer
                         options.User.RequireUniqueEmail = true;
                     }
                 )
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+
+            builder.Services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-                        {
-                            options.SlidingExpiration = true;
-                        }
-                    );
+                    {
+                        options.SlidingExpiration = true;
+                    }
+                );
         }
 
         /// <summary>

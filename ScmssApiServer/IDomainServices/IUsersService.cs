@@ -17,8 +17,6 @@ namespace ScmssApiServer.IDomainServices
 
         Task ChangePasswordAsync(string id, UserPasswordChangeDto dto);
 
-        Task DeleteUserAsync(string id);
-
         string GetProfileImageUploadUrl(string userId);
     }
 }

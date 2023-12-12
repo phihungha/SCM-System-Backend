@@ -57,17 +57,6 @@ namespace ScmssApiServer.DomainServices
             return GetUserDto(user);
         }
 
-        public async Task DeleteUserAsync(string id)
-        {
-            User? user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                throw new EntityNotFoundException();
-            }
-            user.IsActive = false;
-            await _userManager.UpdateAsync(user);
-        }
-
         public string GetProfileImageUploadUrl(string userId)
         {
             string key = $"user-profile-images/{userId}";
@@ -76,9 +65,18 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<UserDto?> GetUserAsync(string id)
         {
-            User? user = await _userManager.Users.AsNoTracking()
-                                                 .FirstOrDefaultAsync(x => x.Id == id);
-            return _mapper.Map<UserDto?>(user);
+            User? user = await _userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Roles = await _userManager.GetRolesAsync(user);
+            return userDto;
         }
 
         public string? GetUserIdFromPrincipal(ClaimsPrincipal principal)
@@ -89,7 +87,15 @@ namespace ScmssApiServer.DomainServices
         public async Task<IList<UserDto>> GetUsersAsync()
         {
             IList<User> users = await _userManager.Users.AsNoTracking().ToListAsync();
-            return _mapper.Map<IList<UserDto>>(users);
+
+            var userDtos = _mapper.Map<IList<UserDto>>(users);
+
+            for (int i = 0; i < users.Count; i++)
+            {
+                userDtos[i].Roles = await _userManager.GetRolesAsync(users[i]);
+            }
+
+            return userDtos;
         }
 
         public async Task<UserDto> UpdateUserAsync(string id, UserInputDto dto)

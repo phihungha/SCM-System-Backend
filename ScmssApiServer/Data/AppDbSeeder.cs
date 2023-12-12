@@ -6,12 +6,48 @@ namespace ScmssApiServer.Data
 {
     public static class AppDbSeeder
     {
+        public static void SeedRoles(IServiceScope scope, WebApplication app)
+        {
+            ILogger logger = app.Logger;
+
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            var roles = new string[]
+            {
+                "Admin",
+                "Director",
+                "Finance",
+                "SalesSpecialist",
+                "SalesManager",
+                "PurchaseSpecialist",
+                "PurchaseManager",
+                "ProductionPlanner",
+                "ProductionManager",
+            };
+
+            foreach (string role in roles)
+            {
+                if (roleManager.FindByNameAsync(role).Result != null)
+                {
+                    continue;
+                }
+
+                IdentityResult result = roleManager.CreateAsync(new IdentityRole(role)).Result;
+                if (!result.Succeeded)
+                {
+                    throw new ApplicationException($"Failed to create role {role}.");
+                }
+            }
+
+            logger.LogInformation("Created roles.");
+        }
+
         /// <summary>
         /// Create initial root admin user if it doesn't exist yet.
         /// </summary>
         /// <param name="userManager">User manager</param>
         /// <exception cref="Exception">Failed to create root admin user</exception>
-        public static void SeedRootAdminUser(WebApplication app)
+        public static void SeedRootAdminUser(IServiceScope scope, WebApplication app)
         {
             ILogger logger = app.Logger;
             IConfiguration configuration = app.Configuration;
@@ -38,34 +74,38 @@ namespace ScmssApiServer.Data
                 }
             }
 
-            using (var scope = app.Services.CreateScope())
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+            User? user = userManager.FindByNameAsync(userName).Result;
+            if (user != null)
             {
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-                User? user = userManager.FindByNameAsync(userName).Result;
-                if (user != null)
-                {
-                    return;
-                }
-
-                var newUser = new User()
-                {
-                    UserName = userName,
-                    Email = email,
-                    Name = name,
-                    Gender = Gender.Male,
-                    ProductionFacilityId = 1,
-                    DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
-                    Description = description,
-                };
-
-                IdentityResult result = userManager.CreateAsync(newUser, password).Result;
-
-                if (!result.Succeeded)
-                {
-                    throw new ApplicationException("Failed to create root admin user.");
-                }
+                return;
             }
+
+            var newUser = new User()
+            {
+                UserName = userName,
+                Email = email,
+                Name = name,
+                Gender = Gender.Male,
+                ProductionFacilityId = 1,
+                DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
+                Description = description,
+            };
+
+            IdentityResult createResult = userManager.CreateAsync(newUser, password).Result;
+            if (!createResult.Succeeded)
+            {
+                throw new ApplicationException("Failed to create root admin user.");
+            }
+
+            IdentityResult roleResult = userManager.AddToRoleAsync(newUser, "Admin").Result;
+            if (!roleResult.Succeeded)
+            {
+                throw new ApplicationException("Failed to assign roles to root admin user.");
+            }
+
+            logger.LogInformation("Created initial root admin user.");
         }
     }
 }
