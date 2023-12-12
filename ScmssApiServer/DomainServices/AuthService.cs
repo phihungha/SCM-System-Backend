@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
@@ -7,14 +9,20 @@ namespace ScmssApiServer.DomainServices
 {
     public class AuthService : IAuthService
     {
+        private readonly IMapper _mapper;
         private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _usersManager;
 
-        public AuthService(SignInManager<User> signInManager)
+        public AuthService(IMapper mapper,
+                           SignInManager<User> signInManager,
+                           UserManager<User> usersManager)
         {
+            _mapper = mapper;
             _signInManager = signInManager;
+            _usersManager = usersManager;
         }
 
-        public async Task<bool> SignInAsync(AuthSignInDto dto)
+        public async Task<UserDto?> SignInAsync(AuthSignInDto dto)
         {
             var result = await _signInManager.PasswordSignInAsync(
                 dto.UserName, dto.Password, isPersistent: true, lockoutOnFailure: false
@@ -22,9 +30,11 @@ namespace ScmssApiServer.DomainServices
 
             if (!result.Succeeded)
             {
-                return false;
+                return null;
             }
-            return true;
+
+            User user = (await _usersManager.FindByNameAsync(dto.UserName))!;
+            return _mapper.Map<UserDto>(user);
         }
 
         public async Task SignOutAsync()

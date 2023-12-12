@@ -19,12 +19,12 @@ namespace ScmssApiServer.Controllers
 
         [HttpPost]
         [Route("SignIn")]
-        public async Task<ActionResult> SignIn([FromBody] AuthSignInDto body)
+        public async Task<ActionResult<UserDto>> SignIn([FromBody] AuthSignInDto body)
         {
-            bool result = await _authService.SignInAsync(body);
-            if (result)
+            UserDto? user = await _authService.SignInAsync(body);
+            if (user != null)
             {
-                return OkMessage("Signed in");
+                return Ok(user);
             }
             return Forbid();
         }
