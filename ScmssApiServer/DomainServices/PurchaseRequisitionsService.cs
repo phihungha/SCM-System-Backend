@@ -7,7 +7,6 @@ using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
-using ScmssApiServer.Utils;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -139,7 +138,7 @@ namespace ScmssApiServer.DomainServices
                 user.ProductionFacilityId != requisition.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
-                        "Not authorized to handle purchase requisitions of another facility."
+                        "Unauthorized to handle purchase requisitions of another facility."
                     );
             }
 
@@ -147,7 +146,7 @@ namespace ScmssApiServer.DomainServices
             {
                 if (!user.IsProductionUser)
                 {
-                    throw new UnauthorizedException("Not authorized to cancel.");
+                    throw new UnauthorizedException("Unauthorized to cancel.");
                 }
 
                 if (dto.Problem == null)
@@ -168,7 +167,7 @@ namespace ScmssApiServer.DomainServices
             {
                 if (!user.IsProductionUser)
                 {
-                    throw new UnauthorizedException("Not authorized to change items.");
+                    throw new UnauthorizedException("Unauthorized to change items.");
                 }
 
                 _dbContext.RemoveRange(requisition.Items);

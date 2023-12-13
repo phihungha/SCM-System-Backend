@@ -7,7 +7,6 @@ using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
-using ScmssApiServer.Utils;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -148,7 +147,7 @@ namespace ScmssApiServer.DomainServices
                 user.ProductionFacilityId != order.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
-                        "Not authorized to handle production orders of another facility."
+                        "Unauthorized to handle production orders of another facility."
                     );
             }
 
@@ -164,9 +163,9 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Items != null)
             {
-                if (!RolesUtils.IsProductionUser(user))
+                if (!user.IsProductionUser)
                 {
-                    throw new UnauthorizedException("Not authorized to change items.");
+                    throw new UnauthorizedException("Unauthorized to change items.");
                 }
 
                 _dbContext.RemoveRange(order.Items);
@@ -204,12 +203,10 @@ namespace ScmssApiServer.DomainServices
             bool isInventoryStatus = dto.Status == OrderStatusOption.Executing ||
                                      dto.Status == OrderStatusOption.Completed ||
                                      dto.Status == OrderStatusOption.Returned;
-            bool isInventoryUser = RolesUtils.IsInventoryUser(user);
-            bool isProductionUser = RolesUtils.IsProductionUser(user);
-            if ((isInventoryStatus && !isInventoryUser) ||
-                (!isInventoryStatus && !isProductionUser))
+            if ((isInventoryStatus && !user.IsInventoryUser) ||
+                (!isInventoryStatus && !user.IsProductionUser))
             {
-                throw new UnauthorizedException("Not authorized for this status.");
+                throw new UnauthorizedException("Unauthorized for this status.");
             }
 
             string userId = user.Id;
@@ -247,13 +244,6 @@ namespace ScmssApiServer.DomainServices
                             );
                     }
                     order.Return(userId, dto.Problem);
-                    break;
-
-                default:
-                    if (RolesUtils.IsInventoryUser(user))
-                    {
-                        throw new UnauthorizedException("Not authorized for this status.");
-                    }
                     break;
             }
         }

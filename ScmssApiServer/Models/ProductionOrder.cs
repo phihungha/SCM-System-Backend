@@ -99,11 +99,6 @@ namespace ScmssApiServer.Models
                     Status = OrderStatus.Interrupted;
                     break;
 
-                case ProductionOrderEventTypeOption.Produced:
-                    type = ProductionOrderEventType.Produced;
-                    FinishExecution();
-                    break;
-
                 default:
                     throw new ArgumentException("Invalid event type.");
             }

@@ -233,6 +233,7 @@ namespace ScmssApiServer.DomainServices
             }
 
             string userId = user.Id;
+
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
