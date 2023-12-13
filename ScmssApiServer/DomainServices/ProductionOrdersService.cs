@@ -53,7 +53,7 @@ namespace ScmssApiServer.DomainServices
             if (user.ProductionFacility == null)
             {
                 throw new InvalidDomainOperationException(
-                        "User needs to belong to a production facility " +
+                        "User must belong to a production facility " +
                         "to create a production order."
                     );
             }
@@ -79,8 +79,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (!user.Roles.Contains("ProductionManager") ||
-                !user.Roles.Contains("Director"))
+            if (user.ProductionFacilityId != null)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -103,8 +102,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (!user.Roles.Contains("ProductionManager") ||
-                !user.Roles.Contains("Director"))
+            if (user.ProductionFacilityId != null)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -146,36 +144,27 @@ namespace ScmssApiServer.DomainServices
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
 
-            bool isManager = user.Roles.Contains("ProductionManager") ||
-                             user.Roles.Contains("InventoryManager");
-            bool isSameFacility = user.ProductionFacilityId == order.ProductionFacilityId;
-            if (!isManager && !isSameFacility)
+            if (user.ProductionFacilityId != null &&
+                user.ProductionFacilityId != order.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
-                        "Not authorized to update production orders of another facility."
+                        "Not authorized to handle production orders of another facility."
                     );
             }
 
-            if (RolesUtils.IsInventoryUser(user))
+            if (!RolesUtils.IsProductionUser(user) && RolesUtils.IsInventoryUser(user))
             {
                 if (dto.ApprovalStatus != null || dto.Items != null)
                 {
                     throw new UnauthorizedException(
-                            "Not authorized to handle approval and update items."
+                            "Not authorized to handle approval and item changes."
                         );
                 }
             }
 
             if (dto.Status != null)
             {
-                if (RolesUtils.IsInventoryUser(user))
-                {
-                    HandleInventoryOperation(order, dto, user);
-                }
-                else
-                {
-                    HandleStatusChange(order, dto, user);
-                }
+                HandleStatusChange(order, dto, user);
             }
 
             if (dto.ApprovalStatus != null)
@@ -238,10 +227,21 @@ namespace ScmssApiServer.DomainServices
             }
         }
 
-        private void HandleInventoryOperation(ProductionOrder order,
-                                              ProductionOrderUpdateDto dto,
-                                              User user)
+        private void HandleStatusChange(ProductionOrder order,
+                                        ProductionOrderUpdateDto dto,
+                                        User user)
         {
+            bool isInventoryStatus = dto.Status == OrderStatusOption.Executing ||
+                                     dto.Status == OrderStatusOption.Completed ||
+                                     dto.Status == OrderStatusOption.Returned;
+            bool isInventoryUser = RolesUtils.IsInventoryUser(user);
+            bool isProductionUser = RolesUtils.IsProductionUser(user);
+            if ((isInventoryStatus && !isInventoryUser) ||
+                (!isInventoryStatus && !isProductionUser))
+            {
+                throw new UnauthorizedException("Not authorized for this status.");
+            }
+
             string userId = user.Id;
 
             switch (dto.Status)
@@ -251,8 +251,22 @@ namespace ScmssApiServer.DomainServices
                     order.StartExecution();
                     break;
 
+                case OrderStatusOption.WaitingAcceptance:
+                    order.FinishExecution();
+                    break;
+
                 case OrderStatusOption.Completed:
                     order.Complete(userId);
+                    break;
+
+                case OrderStatusOption.Canceled:
+                    if (dto.Problem == null)
+                    {
+                        throw new InvalidDomainOperationException(
+                                "Cannot cancel an order without a problem."
+                            );
+                    }
+                    order.Cancel(userId, dto.Problem);
                     break;
 
                 case OrderStatusOption.Returned:
@@ -266,29 +280,11 @@ namespace ScmssApiServer.DomainServices
                     break;
 
                 default:
-                    throw new UnauthorizedException("Not authorized for this status.");
-            }
-        }
-
-        private void HandleStatusChange(ProductionOrder order,
-                                        ProductionOrderUpdateDto dto,
-                                        User user)
-        {
-            string userId = user.Id;
-
-            if (dto.Status == OrderStatusOption.Canceled)
-            {
-                if (dto.Problem == null)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot cancel an order without a problem."
-                        );
-                }
-                order.Cancel(userId, dto.Problem);
-            }
-            else
-            {
-                throw new UnauthorizedException("Not authorized for this status");
+                    if (RolesUtils.IsInventoryUser(user))
+                    {
+                        throw new UnauthorizedException("Not authorized for this status.");
+                    }
+                    break;
             }
         }
 
