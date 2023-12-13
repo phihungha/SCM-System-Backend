@@ -29,14 +29,14 @@ namespace ScmssApiServer.Controllers
         [HttpPost]
         public async Task<ActionResult<PurchaseRequisitionDto>> Create([FromBody] PurchaseRequisitionCreateDto body)
         {
-            PurchaseRequisitionDto item = await _purchaseRequisitionsService.CreateAsync(body, CurrentUserId);
+            PurchaseRequisitionDto item = await _purchaseRequisitionsService.CreateAsync(body, CurrentIdentity);
             return Ok(item);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PurchaseRequisitionDto>> Get(int id)
         {
-            PurchaseRequisitionDto? item = await _purchaseRequisitionsService.GetAsync(id, CurrentUserId);
+            PurchaseRequisitionDto? item = await _purchaseRequisitionsService.GetAsync(id, CurrentIdentity);
             if (item == null)
             {
                 return NotFound();
@@ -47,7 +47,7 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<PurchaseRequisitionDto>>> GetMany()
         {
-            IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync(CurrentUserId);
+            IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync(CurrentIdentity);
             return Ok(items);
         }
 
@@ -57,7 +57,7 @@ namespace ScmssApiServer.Controllers
             int id,
             [FromBody] PurchaseRequisitionUpdateDto body)
         {
-            PurchaseRequisitionDto item = await _purchaseRequisitionsService.UpdateAsync(id, body, CurrentUserId);
+            PurchaseRequisitionDto item = await _purchaseRequisitionsService.UpdateAsync(id, body, CurrentIdentity);
             return Ok(item);
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.Controllers
 {
@@ -14,6 +15,8 @@ namespace ScmssApiServer.Controllers
 
         // Auth check ensures a user ID always exists
         public string CurrentUserId => _usersService.GetUserIdFromPrincipal(User)!;
+
+        public Identity CurrentIdentity => Identity.FromClaims(User, _usersService.GetUserIdFromPrincipal(User)!);
 
         [NonAction]
         public OkObjectResult OkMessage(string message)

@@ -28,10 +28,12 @@ namespace ScmssApiServer.DomainServices
             _userManager = userManager;
         }
 
-        public async Task<PurchaseRequisitionDto> CreateAsync(PurchaseRequisitionCreateDto dto, string userId)
+        public async Task<PurchaseRequisitionDto> CreateAsync(
+            PurchaseRequisitionCreateDto dto,
+            Identity identity)
         {
             User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(x => x.Id == userId);
+                                                .FirstAsync(i => i.Id == identity.Id);
             ProductionFacility? facility = user.ProductionFacility;
             if (facility == null)
             {
@@ -55,27 +57,26 @@ namespace ScmssApiServer.DomainServices
                 Vendor = vendor,
                 ProductionFacilityId = facility.Id,
                 ProductionFacility = facility,
-                CreateUserId = userId,
+                CreateUserId = user.Id,
                 CreateUser = user,
                 VatRate = config.VatRate,
             };
 
             requisition.AddItems(await MapRequisitionItemDtosToModels(dto.VendorId, dto.Items));
-            requisition.Begin(userId);
+            requisition.Begin(user.Id);
 
             _dbContext.PurchaseRequisitions.Add(requisition);
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
-        public async Task<PurchaseRequisitionDto?> GetAsync(int id, string userId)
+        public async Task<PurchaseRequisitionDto?> GetAsync(int id, Identity identity)
         {
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.IsInProductionFacility)
+            if (identity.IsInProductionFacility)
             {
-                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
             PurchaseRequisition? requisition = await query
@@ -93,14 +94,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto?>(requisition);
         }
 
-        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(string userId)
+        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity identity)
         {
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.IsInProductionFacility)
+            if (identity.IsInProductionFacility)
             {
-                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
             IList<PurchaseRequisition> requisitions = await query
@@ -114,7 +114,7 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<PurchaseRequisitionDto> UpdateAsync(int id,
                                                               PurchaseRequisitionUpdateDto dto,
-                                                              string userId)
+                                                              Identity identity)
         {
             PurchaseRequisition? requisition = await _dbContext.PurchaseRequisitions
                 .Include(i => i.Items)
@@ -132,18 +132,18 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-
-            if (user.IsInProductionFacility && user.ProductionFacilityId != requisition.ProductionFacilityId)
+            if (identity.IsInProductionFacility && identity.ProductionFacilityId != requisition.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
                         "Unauthorized to handle purchase requisitions of another facility."
                     );
             }
 
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
+
             if (dto.IsCanceled ?? false)
             {
-                if (!user.IsProductionUser)
+                if (!identity.IsProductionUser)
                 {
                     throw new UnauthorizedException("Unauthorized to cancel.");
                 }
@@ -154,17 +154,17 @@ namespace ScmssApiServer.DomainServices
                             "Cannot cancel a requisition without a problem."
                         );
                 }
-                requisition.Cancel(userId, dto.Problem);
+                requisition.Cancel(identity.Id, dto.Problem);
             }
 
             if (dto.ApprovalStatus != null)
             {
-                HandleApproval(requisition, dto, user);
+                HandleApproval(requisition, dto, identity, user);
             }
 
             if (dto.Items != null)
             {
-                if (!user.IsProductionUser)
+                if (!identity.IsProductionUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change items.");
                 }
@@ -186,11 +186,12 @@ namespace ScmssApiServer.DomainServices
         }
 
         private void HandleApproval(PurchaseRequisition requisition,
-                                               PurchaseRequisitionUpdateDto dto,
-                                               User user)
+                                    PurchaseRequisitionUpdateDto dto,
+                                    Identity identity,
+                                    User user)
         {
-            bool isFinance = user.IsFinanceUser;
-            bool isManager = user.Roles.Contains("ProductionManager");
+            bool isFinance = identity.IsFinanceUser;
+            bool isManager = identity.Roles.Contains("ProductionManager");
 
             if (!isFinance && !isManager)
             {
