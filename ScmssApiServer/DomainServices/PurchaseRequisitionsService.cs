@@ -140,8 +140,6 @@ namespace ScmssApiServer.DomainServices
                     );
             }
 
-            User user = (await _userManager.FindByIdAsync(identity.Id))!;
-
             if (dto.IsCanceled ?? false)
             {
                 if (!identity.IsProductionUser)
@@ -155,12 +153,14 @@ namespace ScmssApiServer.DomainServices
                             "Cannot cancel a requisition without a problem."
                         );
                 }
+
+                User user = (await _userManager.FindByIdAsync(identity.Id))!;
                 requisition.Cancel(user.Id, dto.Problem);
             }
 
             if (dto.ApprovalStatus != null)
             {
-                HandleApproval(requisition, dto, identity, user);
+                await HandleApprovalAsync(requisition, dto, identity);
             }
 
             if (dto.Items != null)
@@ -186,10 +186,10 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
-        private void HandleApproval(PurchaseRequisition requisition,
-                                    PurchaseRequisitionUpdateDto dto,
-                                    Identity identity,
-                                    User user)
+        private async Task HandleApprovalAsync(
+            PurchaseRequisition requisition,
+            PurchaseRequisitionUpdateDto dto,
+            Identity identity)
         {
             bool isFinance = identity.IsFinanceUser;
             bool isManager = identity.Roles.Contains("ProductionManager");
@@ -198,6 +198,8 @@ namespace ScmssApiServer.DomainServices
             {
                 throw new UnauthorizedException("Not authorized to handle approval.");
             }
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
             if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
             {

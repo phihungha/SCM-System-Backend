@@ -54,6 +54,7 @@ namespace ScmssApiServer.DomainServices
                         "to create a production order."
                     );
             }
+
             User user = await _userManager.Users.Include(i => i.ProductionFacility)
                                                 .FirstAsync(i => i.Id == identity.Id);
             ProductionFacility facility = user.ProductionFacility!;
@@ -147,16 +148,14 @@ namespace ScmssApiServer.DomainServices
                     );
             }
 
-            User user = (await _userManager.FindByIdAsync(identity.Id))!;
-
             if (dto.Status != null)
             {
-                ChangeStatus(order, dto, identity, user);
+                await ChangeStatusAsync(order, dto, identity);
             }
 
             if (dto.ApprovalStatus != null)
             {
-                HandleApproval(order, dto, identity, user);
+                await HandleApprovalAsync(order, dto, identity);
             }
 
             if (dto.Items != null)
@@ -194,10 +193,10 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderEventDto>(orderEvent);
         }
 
-        private void ChangeStatus(ProductionOrder order,
-                                  ProductionOrderUpdateDto dto,
-                                  Identity identity,
-                                  User user)
+        private async Task ChangeStatusAsync(
+            ProductionOrder order,
+            ProductionOrderUpdateDto dto,
+            Identity identity)
         {
             bool isInventoryStatus = dto.Status == OrderStatusOption.Executing ||
                                      dto.Status == OrderStatusOption.Completed ||
@@ -207,6 +206,8 @@ namespace ScmssApiServer.DomainServices
             {
                 throw new UnauthorizedException("Unauthorized for this status.");
             }
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
             string userId = user.Id;
 
@@ -247,15 +248,17 @@ namespace ScmssApiServer.DomainServices
             }
         }
 
-        private void HandleApproval(ProductionOrder order,
-                                    ProductionOrderUpdateDto dto,
-                                    Identity identity,
-                                    User user)
+        private async Task HandleApprovalAsync(
+            ProductionOrder order,
+            ProductionOrderUpdateDto dto,
+            Identity identity)
         {
             if (!identity.Roles.Contains("ProductionManager"))
             {
                 throw new UnauthorizedException("Not authorized to handle approval.");
             }
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
             if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
             {
