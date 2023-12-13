@@ -7,7 +7,7 @@ namespace ScmssApiServer.Models
     /// <summary>
     /// Represents a purchase requisition.
     /// </summary>
-    public class PurchaseRequisition : StandardLifecycle, IApprovable
+    public class PurchaseRequisition : StandardLifecycle
     {
         public ApprovalStatus ApprovalStatus { get; protected set; }
         public User? ApproveFinance { get; protected set; }
@@ -31,7 +31,7 @@ namespace ScmssApiServer.Models
         public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
         public decimal TotalAmount { get; protected set; }
         public decimal VatAmount { get; protected set; }
-        public double VatRate { get; protected set; }
+        public double VatRate { get; set; }
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
 
@@ -54,17 +54,18 @@ namespace ScmssApiServer.Models
             CalculateTotals();
         }
 
-        public virtual void Approve(string userId)
+        public void ApproveAsFinance(User user)
         {
-            if (ApprovalStatus != ApprovalStatus.PendingApproval)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot approve a purchase requisition which isn't waiting approval."
-                    );
-            }
-            ApprovalStatus = ApprovalStatus.Approved;
-            ApproveProductionManagerId = userId;
-            ApproveFinanceId = userId;
+            ApproveFinanceId = user.Id;
+            ApproveFinance = user;
+            Approve();
+        }
+
+        public void ApproveAsProductionManager(User user)
+        {
+            ApproveProductionManagerId = user.Id;
+            ApproveProductionManager = user;
+            Approve();
         }
 
         public override void Begin(string userId)
@@ -164,6 +165,21 @@ namespace ScmssApiServer.Models
             }
             ApprovalStatus = ApprovalStatus.Rejected;
             Cancel(userId, problem);
+        }
+
+        protected virtual void Approve()
+        {
+            if (ApprovalStatus != ApprovalStatus.PendingApproval)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot approve a purchase requisition which isn't waiting approval."
+                    );
+            }
+
+            if (ApproveProductionManager != null && ApproveFinance != null)
+            {
+                ApprovalStatus = ApprovalStatus.Approved;
+            }
         }
 
         protected void CalculateTotals()

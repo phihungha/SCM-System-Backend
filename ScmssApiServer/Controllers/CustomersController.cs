@@ -7,31 +7,31 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
+    [Authorize(Roles = "Director,SalesSpecialist,SalesManager")]
     [Route("api/[controller]")]
     [ApiController]
-    public class VendorsController : CustomControllerBase
+    public class CustomersController : CustomControllerBase
     {
-        private readonly IVendorsService _vendorsService;
+        private readonly ICustomersService _customersService;
 
-        public VendorsController(IVendorsService vendorsService, UserManager<User> userManager)
+        public CustomersController(ICustomersService customersService, UserManager<User> userManager)
             : base(userManager)
         {
-            _vendorsService = vendorsService;
+            _customersService = customersService;
         }
 
-        [Authorize(Roles = "PurchaseManager")]
+        [Authorize(Roles = "SalesManager")]
         [HttpPost]
         public async Task<ActionResult<CompanyDto>> Create([FromBody] CompanyInputDto body)
         {
-            CompanyDto item = await _vendorsService.AddAsync(body);
+            CompanyDto item = await _customersService.AddAsync(body);
             return Ok(item);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CompanyDto>> Get(int id)
         {
-            CompanyDto? item = await _vendorsService.GetAsync(id);
+            CompanyDto? item = await _customersService.GetAsync(id);
             if (item == null)
             {
                 return NotFound();
@@ -42,15 +42,15 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<CompanyDto>>> GetMany([FromQuery] SimpleQueryDto query)
         {
-            IList<CompanyDto> items = await _vendorsService.GetManyAsync(query);
+            IList<CompanyDto> items = await _customersService.GetManyAsync(query);
             return Ok(items);
         }
 
-        [Authorize(Roles = "PurchaseManager")]
+        [Authorize(Roles = "SalesManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<CompanyDto>> Update(int id, [FromBody] CompanyInputDto body)
         {
-            CompanyDto item = await _vendorsService.UpdateAsync(id, body);
+            CompanyDto item = await _customersService.UpdateAsync(id, body);
             return Ok(item);
         }
     }

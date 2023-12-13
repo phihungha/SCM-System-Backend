@@ -17,6 +17,7 @@ namespace ScmssApiServer.Data
             ChangeTracker.StateChanged += ChangeTracker_StateChanged;
         }
 
+        public DbSet<Config> Config { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<ProductionFacility> ProductionFacilities { get; set; }
         public DbSet<ProductionOrder> ProductionOrders { get; set; }
@@ -223,6 +224,8 @@ namespace ScmssApiServer.Data
             #endregion ProductionFacility
 
             #region Seeding
+
+            builder.Entity<Config>().HasData(new Config { Id = 1, VatRate = 0.05 });
 
             builder.Entity<Customer>().HasData(
             new Customer

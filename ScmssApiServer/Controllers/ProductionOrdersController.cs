@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Director,ProductionPlanner,ProductionManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductionOrdersController : CustomControllerBase
@@ -14,12 +15,13 @@ namespace ScmssApiServer.Controllers
         private readonly IProductionOrdersService _productionOrdersService;
 
         public ProductionOrdersController(IProductionOrdersService ProductionOrdersService,
-                                          IUsersService usersService)
-            : base(usersService)
+                                          UserManager<User> userManager)
+            : base(userManager)
         {
             _productionOrdersService = ProductionOrdersService;
         }
 
+        [Authorize(Roles = "ProductionPlanner,ProductionManager")]
         [HttpPost("{orderId}/events")]
         public async Task<ActionResult<ProductionOrderEventDto>> AddManualEvent(
             int orderId,
@@ -29,34 +31,18 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpPatch("{orderId}/events/{id}")]
-        public async Task<ActionResult<ProductionOrderEventDto>> AddManualEvent(
-            int orderId,
-            int id,
-            [FromBody] OrderEventUpdateDto body)
-        {
-            ProductionOrderEventDto item = await _productionOrdersService.UpdateEventAsync(id, orderId, body);
-            return Ok(item);
-        }
-
+        [Authorize(Roles = "ProductionPlanner,ProductionManager")]
         [HttpPost]
         public async Task<ActionResult<ProductionOrderDto>> Create([FromBody] ProductionOrderCreateDto body)
         {
-            ProductionOrderDto item = await _productionOrdersService.CreateAsync(body, CurrentUserId);
+            ProductionOrderDto item = await _productionOrdersService.CreateAsync(body, CurrentIdentity);
             return Ok(item);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IList<ProductionOrderDto>>> Get()
-        {
-            IList<ProductionOrderDto> items = await _productionOrdersService.GetManyAsync();
-            return Ok(items);
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductionOrderDto>> GetId(int id)
+        public async Task<ActionResult<ProductionOrderDto>> Get(int id)
         {
-            ProductionOrderDto? item = await _productionOrdersService.GetAsync(id);
+            ProductionOrderDto? item = await _productionOrdersService.GetAsync(id, CurrentIdentity);
             if (item == null)
             {
                 return NotFound();
@@ -64,12 +50,31 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IList<ProductionOrderDto>>> GetMany()
+        {
+            IList<ProductionOrderDto> items = await _productionOrdersService.GetManyAsync(CurrentIdentity);
+            return Ok(items);
+        }
+
+        [Authorize(Roles = "ProductionPlanner,ProductionManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<ProductionOrderDto>> Update(
             int id,
             [FromBody] ProductionOrderUpdateDto body)
         {
-            ProductionOrderDto item = await _productionOrdersService.UpdateAsync(id, body, CurrentUserId);
+            ProductionOrderDto item = await _productionOrdersService.UpdateAsync(id, body, CurrentIdentity);
+            return Ok(item);
+        }
+
+        [Authorize(Roles = "ProductionPlanner,ProductionManager")]
+        [HttpPatch("{orderId}/events/{id}")]
+        public async Task<ActionResult<ProductionOrderEventDto>> UpdateEvent(
+            int orderId,
+            int id,
+            [FromBody] OrderEventUpdateDto body)
+        {
+            ProductionOrderEventDto item = await _productionOrdersService.UpdateEventAsync(id, orderId, body);
             return Ok(item);
         }
     }

@@ -4,5 +4,6 @@
     {
         StageDone,
         Interrupted,
+        Produced,
     }
 }

@@ -32,11 +32,12 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<ProductDto?> GetAsync(int id)
         {
-            Product? products = await _dbContext.Products
+            Product? product = await _dbContext.Products
+                .AsNoTracking()
                 .Include(i => i.SupplyCostItems)
                 .ThenInclude(i => i.Supply)
-                .FirstOrDefaultAsync(x => x.Id == id);
-            return _mapper.Map<ProductDto?>(products);
+                .FirstOrDefaultAsync(i => i.Id == id);
+            return _mapper.Map<ProductDto?>(product);
         }
 
         public async Task<IList<ProductDto>> GetManyAsync(SimpleQueryDto queryDto)
@@ -45,7 +46,7 @@ namespace ScmssApiServer.DomainServices
             SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
             bool? displayAll = queryDto.All;
 
-            var query = _dbContext.Products.AsQueryable();
+            var query = _dbContext.Products.AsNoTracking();
 
             if (searchTerm != null)
             {

@@ -41,6 +41,7 @@ namespace ScmssApiServer.Models
         public SupplyMp()
         {
             CreateMap<Supply, SupplyDto>();
+            CreateMap<SupplyInputDto, Supply>();
         }
     }
 }

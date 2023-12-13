@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Director,Finance,PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class PurchaseOrdersController : CustomControllerBase
@@ -14,12 +15,13 @@ namespace ScmssApiServer.Controllers
         private readonly IPurchaseOrdersService _purchaseOrdersService;
 
         public PurchaseOrdersController(IPurchaseOrdersService purchaseOrdersService,
-                                        IUsersService usersService)
-            : base(usersService)
+                                        UserManager<User> userManager)
+            : base(userManager)
         {
             _purchaseOrdersService = purchaseOrdersService;
         }
 
+        [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
         [HttpPost("{orderId}/events")]
         public async Task<ActionResult<TransOrderEventDto>> AddManualEvent(
             int orderId,
@@ -29,24 +31,18 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
         [HttpPost]
         public async Task<ActionResult<PurchaseOrderDto>> Create([FromBody] PurchaseOrderCreateDto body)
         {
-            PurchaseOrderDto item = await _purchaseOrdersService.CreateAsync(body, CurrentUserId);
+            PurchaseOrderDto item = await _purchaseOrdersService.CreateAsync(body, CurrentIdentity);
             return Ok(item);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IList<PurchaseOrderDto>>> Get()
-        {
-            IList<PurchaseOrderDto> items = await _purchaseOrdersService.GetManyAsync();
-            return Ok(items);
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<PurchaseOrderDto>> GetId(int id)
+        public async Task<ActionResult<PurchaseOrderDto>> Get(int id)
         {
-            PurchaseOrderDto? item = await _purchaseOrdersService.GetAsync(id);
+            PurchaseOrderDto? item = await _purchaseOrdersService.GetAsync(id, CurrentIdentity);
             if (item == null)
             {
                 return NotFound();
@@ -54,15 +50,24 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IList<PurchaseOrderDto>>> GetMany()
+        {
+            IList<PurchaseOrderDto> items = await _purchaseOrdersService.GetManyAsync(CurrentIdentity);
+            return Ok(items);
+        }
+
+        [Authorize(Roles = "Finance,PurchaseSpecialist,PurchaseManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<PurchaseOrderDto>> Update(
             int id,
             [FromBody] PurchaseOrderUpdateDto body)
         {
-            PurchaseOrderDto item = await _purchaseOrdersService.UpdateAsync(id, body, CurrentUserId);
+            PurchaseOrderDto item = await _purchaseOrdersService.UpdateAsync(id, body, CurrentIdentity);
             return Ok(item);
         }
 
+        [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
         [HttpPatch("{orderId}/events/{id}")]
         public async Task<ActionResult<TransOrderEventDto>> UpdateEvent(
             int orderId,

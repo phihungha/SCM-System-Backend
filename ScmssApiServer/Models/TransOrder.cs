@@ -85,7 +85,7 @@ namespace ScmssApiServer.Models
         /// <summary>
         /// VAT tax rate from 0 (0%) to 1 (100%).
         /// </summary>
-        public double VatRate { get; protected set; }
+        public double VatRate { get; set; }
 
         public override void AddItems(ICollection<TItem> items)
         {
@@ -159,6 +159,12 @@ namespace ScmssApiServer.Models
                         "Cannot complete order payment if there is no due payment."
                     );
             }
+
+            if (amount > RemainingAmount)
+            {
+                throw new InvalidDomainOperationException("Cannot pay more than remaining amount.");
+            }
+
             RemainingAmount = RemainingAmount - amount;
             if (RemainingAmount == 0)
             {

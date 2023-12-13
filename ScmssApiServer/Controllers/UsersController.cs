@@ -1,26 +1,28 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : CustomControllerBase
     {
-        public UsersController(IUsersService usersService)
-            : base(usersService)
+        private IUsersService _usersService;
+
+        public UsersController(IUsersService usersService, UserManager<User> userManager)
+            : base(userManager)
         {
+            _usersService = usersService;
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> Create([FromBody] UserCreateDto body)
+        public async Task<ActionResult<UserDto>> Create([FromBody] UserCreateDto body)
         {
             try
             {
@@ -31,20 +33,6 @@ namespace ScmssApiServer.Controllers
             {
                 ex.AddToModelState(ModelState);
                 return BadRequest(ModelState);
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<User>> Delete(string id)
-        {
-            try
-            {
-                await _usersService.DeleteUserAsync(id);
-                return Ok();
-            }
-            catch (EntityNotFoundException)
-            {
-                return NotFound();
             }
         }
 
@@ -67,13 +55,13 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet("{id}/profileImageUploadUrl")]
-        public string GetProfileImageUploadUrl(string id)
+        public string GetProfileImageUploadUrl()
         {
-            return _usersService.GetProfileImageUploadUrl(id);
+            return _usersService.GetProfileImageUploadUrl(CurrentIdentity);
         }
 
         [HttpPatch("{id}")]
-        public async Task<ActionResult<User>> Update(string id, [FromBody] UserInputDto body)
+        public async Task<ActionResult<UserDto>> Update(string id, [FromBody] UserInputDto body)
         {
             try
             {
@@ -88,7 +76,7 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpPut("{id}/changePassword")]
-        public async Task<ActionResult<User>> Update(string id, [FromBody] UserPasswordChangeDto body)
+        public async Task<ActionResult<UserDto>> Update(string id, [FromBody] UserPasswordChangeDto body)
         {
             try
             {

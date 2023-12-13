@@ -8,40 +8,42 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.DomainServices
 {
-    public class CustomersService : ICustomersService
+    public class SuppliesService : ISuppliesService
     {
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
 
-        public CustomersService(AppDbContext dbContext, IMapper mapper)
+        public SuppliesService(IMapper mapper, AppDbContext dbContext)
         {
             _dbContext = dbContext;
             _mapper = mapper;
         }
 
-        public async Task<CompanyDto> AddAsync(CompanyInputDto dto)
+        public async Task<SupplyDto> CreateAsync(SupplyInputDto dto)
         {
-            var customer = _mapper.Map<Customer>(dto);
-            _dbContext.Add(customer);
+            var supply = _mapper.Map<Supply>(dto);
+            _dbContext.Add(supply);
             await _dbContext.SaveChangesAsync();
-            return _mapper.Map<CompanyDto>(customer);
+            await _dbContext.Entry(supply).Reference(i => i.Vendor).LoadAsync();
+            return _mapper.Map<SupplyDto>(supply);
         }
 
-        public async Task<CompanyDto?> GetAsync(int id)
+        public async Task<SupplyDto?> GetAsync(int id)
         {
-            Customer? customer = await _dbContext.Customers
+            Supply? supply = await _dbContext.Supplies
                 .AsNoTracking()
+                .Include(i => i.Vendor)
                 .FirstOrDefaultAsync(i => i.Id == id);
-            return _mapper.Map<CompanyDto?>(customer);
+            return _mapper.Map<SupplyDto?>(supply);
         }
 
-        public async Task<IList<CompanyDto>> GetManyAsync(SimpleQueryDto queryDto)
+        public async Task<IList<SupplyDto>> GetManyAsync(SimpleQueryDto queryDto)
         {
             string? searchTerm = queryDto.SearchTerm;
             SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
             bool? displayAll = queryDto.All;
 
-            var query = _dbContext.Customers.AsNoTracking();
+            var query = _dbContext.Supplies.AsNoTracking();
 
             if (searchTerm != null)
             {
@@ -60,22 +62,23 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.IsActive);
             }
 
-            IList<Customer> customers = await query.ToListAsync();
-            return _mapper.Map<IList<CompanyDto>>(customers);
+            IList<Supply> supplies = await query.Include(i => i.Vendor).ToListAsync();
+            return _mapper.Map<IList<SupplyDto>>(supplies);
         }
 
-        public async Task<CompanyDto> UpdateAsync(int id, CompanyInputDto dto)
+        public async Task<SupplyDto> UpdateAsync(int id, SupplyInputDto dto)
         {
-            Customer? customer = await _dbContext.Customers.FindAsync(id);
-            if (customer == null)
+            Supply? supply = await _dbContext.Supplies.Include(i => i.Vendor)
+                                                      .FirstOrDefaultAsync(i => i.Id == id);
+            if (supply == null)
             {
                 throw new EntityNotFoundException();
             }
 
-            _mapper.Map(dto, customer);
+            _mapper.Map(dto, supply);
 
             await _dbContext.SaveChangesAsync();
-            return _mapper.Map<CompanyDto>(customer);
+            return _mapper.Map<SupplyDto>(supply);
         }
     }
 }
