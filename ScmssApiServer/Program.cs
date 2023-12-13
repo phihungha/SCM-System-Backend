@@ -43,6 +43,7 @@ namespace ScmssApiServer
             AddAwsS3(builder, logger);
 
             // Add infrastructure services
+            builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformation>();
             builder.Services.AddSingleton<IImageHostService, ImageHostService>();
 
             // Add domain services
@@ -101,6 +102,18 @@ namespace ScmssApiServer
             app.Run();
         }
 
+        internal static Task GetForbiddenResp(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            return Task.CompletedTask;
+        }
+
+        internal static Task GetUnauthorizaedResp(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            return Task.CompletedTask;
+        }
+
         /// <summary>
         /// Setup and add authentication service.
         /// </summary>
@@ -150,18 +163,6 @@ namespace ScmssApiServer
                     throw;
                 }
             }
-        }
-
-        internal static Task GetForbiddenResp(RedirectContext<CookieAuthenticationOptions> context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            return Task.CompletedTask;
-        }
-
-        internal static Task GetUnauthorizaedResp(RedirectContext<CookieAuthenticationOptions> context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            return Task.CompletedTask;
         }
 
         /// <summary>
