@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Amazon.S3.Model;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
@@ -36,7 +37,7 @@ namespace ScmssApiServer.DomainServices
             if (facility == null)
             {
                 throw new InvalidDomainOperationException(
-                        "User needs to belong to a production facility " +
+                        "User must belong to a production facility " +
                         "to create a purchase requisition."
                     );
             }
@@ -73,10 +74,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-
-            if (!user.Roles.Contains("Director") ||
-                !user.Roles.Contains("Finance") ||
-                !user.Roles.Contains("ProductionManager"))
+            if (user.ProductionFacilityId != null)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -101,10 +99,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-
-            if (!user.Roles.Contains("Director") ||
-                !user.Roles.Contains("Finance") ||
-                !user.Roles.Contains("ProductionManager"))
+            if (user.ProductionFacilityId != null)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -140,13 +135,11 @@ namespace ScmssApiServer.DomainServices
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
 
-            bool isManager = user.Roles.Contains("ProductionManager") ||
-                             user.Roles.Contains("Finance");
-            bool isSameFacility = user.ProductionFacilityId == requisition.ProductionFacilityId;
-            if (!isManager && !isSameFacility)
+            if (user.ProductionFacilityId != null &&
+                user.ProductionFacilityId != requisition.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
-                        "Not authorized to update purchase requisitions of another facility."
+                        "Not authorized to handle purchase requisitions of another facility."
                     );
             }
 
