@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
@@ -12,9 +14,8 @@ namespace ScmssApiServer.Controllers
     {
         private readonly ICustomersService _customersService;
 
-        public CustomersController(ICustomersService customersService,
-                                 IUsersService usersService)
-            : base(usersService)
+        public CustomersController(ICustomersService customersService, UserManager<User> userManager)
+            : base(userManager)
         {
             _customersService = customersService;
         }

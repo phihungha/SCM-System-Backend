@@ -1,5 +1,5 @@
 ﻿using ScmssApiServer.DTOs;
-using System.Security.Claims;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.IDomainServices
 {
@@ -9,11 +9,9 @@ namespace ScmssApiServer.IDomainServices
 
         Task<UserDto> CreateUserAsync(UserCreateDto dto);
 
-        string GetProfileImageUploadUrl(string userId);
+        string GetProfileImageUploadUrl(Identity identity);
 
         Task<UserDto?> GetUserAsync(string id);
-
-        string? GetUserIdFromPrincipal(ClaimsPrincipal principal);
 
         Task<IList<UserDto>> GetUsersAsync();
 

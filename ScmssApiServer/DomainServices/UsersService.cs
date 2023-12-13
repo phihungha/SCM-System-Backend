@@ -7,7 +7,7 @@ using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
-using System.Security.Claims;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -64,9 +64,9 @@ namespace ScmssApiServer.DomainServices
             return await GetUserDtoAsync(user);
         }
 
-        public string GetProfileImageUploadUrl(string userId)
+        public string GetProfileImageUploadUrl(Identity identity)
         {
-            string key = $"user-profile-images/{userId}";
+            string key = $"user-profile-images/{identity.Id}";
             return _imageService.GenerateUploadUrl(key);
         }
 
@@ -82,11 +82,6 @@ namespace ScmssApiServer.DomainServices
             }
 
             return await GetUserDtoAsync(user);
-        }
-
-        public string? GetUserIdFromPrincipal(ClaimsPrincipal principal)
-        {
-            return _userManager.GetUserId(principal);
         }
 
         public async Task<IList<UserDto>> GetUsersAsync()

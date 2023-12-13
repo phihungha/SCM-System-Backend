@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
@@ -11,9 +13,12 @@ namespace ScmssApiServer.Controllers
     [ApiController]
     public class UsersController : CustomControllerBase
     {
-        public UsersController(IUsersService usersService)
-            : base(usersService)
+        private IUsersService _usersService;
+
+        public UsersController(IUsersService usersService, UserManager<User> userManager)
+            : base(userManager)
         {
+            _usersService = usersService;
         }
 
         [HttpPost]
@@ -52,7 +57,7 @@ namespace ScmssApiServer.Controllers
         [HttpGet("{id}/profileImageUploadUrl")]
         public string GetProfileImageUploadUrl()
         {
-            return _usersService.GetProfileImageUploadUrl(CurrentUserId);
+            return _usersService.GetProfileImageUploadUrl(CurrentIdentity);
         }
 
         [HttpPatch("{id}")]

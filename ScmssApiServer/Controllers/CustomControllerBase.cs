@@ -1,22 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ScmssApiServer.IDomainServices;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using ScmssApiServer.Models;
 using ScmssApiServer.Services;
 
 namespace ScmssApiServer.Controllers
 {
     public abstract class CustomControllerBase : ControllerBase
     {
-        protected readonly IUsersService _usersService;
+        protected readonly UserManager<User> _userManager;
 
-        public CustomControllerBase(IUsersService usersService)
+        public CustomControllerBase(UserManager<User> userManager)
         {
-            _usersService = usersService;
+            _userManager = userManager;
         }
 
-        // Auth check ensures a user ID always exists
-        public string CurrentUserId => _usersService.GetUserIdFromPrincipal(User)!;
-
-        public Identity CurrentIdentity => Identity.FromClaims(User, _usersService.GetUserIdFromPrincipal(User)!);
+        public Identity CurrentIdentity => Identity.FromClaims(User, _userManager);
 
         [NonAction]
         public OkObjectResult OkMessage(string message)

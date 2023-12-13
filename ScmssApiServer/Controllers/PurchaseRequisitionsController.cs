@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
@@ -19,8 +21,8 @@ namespace ScmssApiServer.Controllers
         private readonly IPurchaseRequisitionsService _purchaseRequisitionsService;
 
         public PurchaseRequisitionsController(IPurchaseRequisitionsService purchaseRequisitionsService,
-                                              IUsersService usersService)
-            : base(usersService)
+                                              UserManager<User> userManager)
+            : base(userManager)
         {
             _purchaseRequisitionsService = purchaseRequisitionsService;
         }

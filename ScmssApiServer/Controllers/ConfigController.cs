@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
@@ -13,8 +14,8 @@ namespace ScmssApiServer.Controllers
     {
         private readonly IConfigService _configService;
 
-        public ConfigController(IConfigService configService, IUsersService usersService)
-            : base(usersService)
+        public ConfigController(IConfigService configService, UserManager<User> userManager)
+            : base(userManager)
         {
             _configService = configService;
         }

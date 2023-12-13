@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
@@ -18,8 +20,8 @@ namespace ScmssApiServer.Controllers
     {
         private IProductsService _productsService;
 
-        public ProductsController(IProductsService productsService, IUsersService usersService)
-            : base(usersService)
+        public ProductsController(IProductsService productsService, UserManager<User> userManager)
+            : base(userManager)
         {
             _productsService = productsService;
         }

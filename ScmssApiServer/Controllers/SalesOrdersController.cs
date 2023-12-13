@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
@@ -13,8 +15,8 @@ namespace ScmssApiServer.Controllers
         private readonly ISalesOrdersService _salesOrdersService;
 
         public SalesOrdersController(ISalesOrdersService salesOrdersService,
-                                     IUsersService usersService)
-            : base(usersService)
+                                     UserManager<User> userManager)
+            : base(userManager)
         {
             _salesOrdersService = salesOrdersService;
         }

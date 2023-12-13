@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
@@ -13,8 +15,8 @@ namespace ScmssApiServer.Controllers
     {
         private ISuppliesService _suppliesService;
 
-        public SuppliesController(ISuppliesService suppliesService, IUsersService usersService)
-            : base(usersService)
+        public SuppliesController(ISuppliesService suppliesService, UserManager<User> userManager)
+            : base(userManager)
         {
             _suppliesService = suppliesService;
         }
