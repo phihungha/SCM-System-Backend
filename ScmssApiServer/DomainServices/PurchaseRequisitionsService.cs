@@ -190,7 +190,7 @@ namespace ScmssApiServer.DomainServices
                                                PurchaseRequisitionUpdateDto dto,
                                                User user)
         {
-            bool isFinance = user.IsFinance;
+            bool isFinance = user.IsFinanceUser;
             bool isManager = user.Roles.Contains("ProductionManager");
 
             if (!isFinance && !isManager)

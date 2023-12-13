@@ -147,12 +147,6 @@ namespace ScmssApiServer.DomainServices
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
 
-            if (order.PaymentStatus == TransOrderPaymentStatus.Pending)
-            {
-                Config config = await _configService.GetAsync();
-                order.VatRate = config.VatRate;
-            }
-
             if (dto.Status != null)
             {
                 ChangeStatus(order, dto, user);
@@ -165,7 +159,7 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.ToLocation != null)
             {
-                if (!user.IsPurchaseUser)
+                if (!user.IsSalesUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change location.");
                 }
@@ -174,7 +168,7 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.ProductionFacilityId != null)
             {
-                if (!user.IsPurchaseUser)
+                if (!user.IsSalesUser)
                 {
                     throw new UnauthorizedException(
                             "Unauthorized to change production facility."
@@ -190,7 +184,7 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Items != null)
             {
-                if (!user.IsPurchaseUser)
+                if (!user.IsSalesUser)
                 {
                     throw new UnauthorizedException(
                             "Unauthorized to change items."
@@ -199,6 +193,12 @@ namespace ScmssApiServer.DomainServices
 
                 _dbContext.RemoveRange(order.Items);
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
+            }
+
+            if (order.PaymentStatus == TransOrderPaymentStatus.Pending)
+            {
+                Config config = await _configService.GetAsync();
+                order.VatRate = config.VatRate;
             }
 
             await _dbContext.SaveChangesAsync();
@@ -227,7 +227,7 @@ namespace ScmssApiServer.DomainServices
         {
             bool isInventoryStatus = dto.Status == OrderStatusOption.Executing;
             if ((isInventoryStatus && !user.IsInventoryUser) ||
-                (!isInventoryStatus && !user.IsSales))
+                (!isInventoryStatus && !user.IsSalesUser))
             {
                 throw new UnauthorizedException("Unauthorized for this status.");
             }
@@ -272,7 +272,7 @@ namespace ScmssApiServer.DomainServices
 
         private void CompletePayment(SalesOrder order, SalesOrderUpdateDto dto, User user)
         {
-            if (!user.IsFinance)
+            if (!user.IsFinanceUser)
             {
                 throw new UnauthorizedException("Unauthorized to complete payment.");
             }

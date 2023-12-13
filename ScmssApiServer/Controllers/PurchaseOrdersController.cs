@@ -37,22 +37,22 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IList<PurchaseOrderDto>>> Get()
-        {
-            IList<PurchaseOrderDto> items = await _purchaseOrdersService.GetManyAsync();
-            return Ok(items);
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<PurchaseOrderDto>> GetId(int id)
+        public async Task<ActionResult<PurchaseOrderDto>> Get(int id)
         {
-            PurchaseOrderDto? item = await _purchaseOrdersService.GetAsync(id);
+            PurchaseOrderDto? item = await _purchaseOrdersService.GetAsync(id, CurrentUserId);
             if (item == null)
             {
                 return NotFound();
             }
             return Ok(item);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IList<PurchaseOrderDto>>> GetMany()
+        {
+            IList<PurchaseOrderDto> items = await _purchaseOrdersService.GetManyAsync(CurrentUserId);
+            return Ok(items);
         }
 
         [Authorize(Roles = "Finance,PurchaseSpecialist,PurchaseManager")]
