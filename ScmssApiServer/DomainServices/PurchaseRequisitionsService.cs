@@ -1,5 +1,4 @@
-﻿using Amazon.S3.Model;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
@@ -8,6 +7,7 @@ using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
+using ScmssApiServer.Utils;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -143,14 +143,13 @@ namespace ScmssApiServer.DomainServices
                     );
             }
 
-            if (requisition.ApprovalStatus == ApprovalStatus.PendingApproval)
-            {
-                Config config = await _configService.GetAsync();
-                requisition.VatRate = config.VatRate;
-            }
-
             if (dto.IsCanceled ?? false)
             {
+                if (!RolesUtils.IsProductionUser(user))
+                {
+                    throw new UnauthorizedException("Not authorized to cancel.");
+                }
+
                 if (dto.Problem == null)
                 {
                     throw new InvalidDomainOperationException(
@@ -167,10 +166,21 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Items != null)
             {
+                if (!RolesUtils.IsProductionUser(user))
+                {
+                    throw new UnauthorizedException("Not authorized to change items.");
+                }
+
                 _dbContext.RemoveRange(requisition.Items);
                 requisition.AddItems(
-                        await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
+                    await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
                 );
+            }
+
+            if (requisition.ApprovalStatus == ApprovalStatus.PendingApproval)
+            {
+                Config config = await _configService.GetAsync();
+                requisition.VatRate = config.VatRate;
             }
 
             await _dbContext.SaveChangesAsync();

@@ -152,19 +152,9 @@ namespace ScmssApiServer.DomainServices
                     );
             }
 
-            if (!RolesUtils.IsProductionUser(user) && RolesUtils.IsInventoryUser(user))
-            {
-                if (dto.ApprovalStatus != null || dto.Items != null)
-                {
-                    throw new UnauthorizedException(
-                            "Not authorized to handle approval and item changes."
-                        );
-                }
-            }
-
             if (dto.Status != null)
             {
-                HandleStatusChange(order, dto, user);
+                ChangeStatus(order, dto, user);
             }
 
             if (dto.ApprovalStatus != null)
@@ -174,6 +164,11 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Items != null)
             {
+                if (!RolesUtils.IsProductionUser(user))
+                {
+                    throw new UnauthorizedException("Not authorized to change items.");
+                }
+
                 _dbContext.RemoveRange(order.Items);
                 _dbContext.RemoveRange(order.SupplyUsageItems);
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
@@ -202,32 +197,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderEventDto>(orderEvent);
         }
 
-        private void HandleApproval(ProductionOrder order,
-                                    ProductionOrderUpdateDto dto,
-                                    User user)
-        {
-            if (!user.Roles.Contains("ProductionManager"))
-            {
-                throw new UnauthorizedException("Not authorized to handle approval.");
-            }
-
-            if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
-            {
-                order.Approve(user);
-            }
-            else if (dto.ApprovalStatus == ApprovalStatusOption.Rejected)
-            {
-                if (dto.Problem == null)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot reject a production order without a problem."
-                        );
-                }
-                order.Reject(user, dto.Problem);
-            }
-        }
-
-        private void HandleStatusChange(ProductionOrder order,
+        private void ChangeStatus(ProductionOrder order,
                                         ProductionOrderUpdateDto dto,
                                         User user)
         {
@@ -285,6 +255,31 @@ namespace ScmssApiServer.DomainServices
                         throw new UnauthorizedException("Not authorized for this status.");
                     }
                     break;
+            }
+        }
+
+        private void HandleApproval(ProductionOrder order,
+                                    ProductionOrderUpdateDto dto,
+                                    User user)
+        {
+            if (!user.Roles.Contains("ProductionManager"))
+            {
+                throw new UnauthorizedException("Not authorized to handle approval.");
+            }
+
+            if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
+            {
+                order.Approve(user);
+            }
+            else if (dto.ApprovalStatus == ApprovalStatusOption.Rejected)
+            {
+                if (dto.Problem == null)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot reject a production order without a problem."
+                        );
+                }
+                order.Reject(user, dto.Problem);
             }
         }
 
