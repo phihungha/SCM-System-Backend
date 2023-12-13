@@ -88,7 +88,7 @@ namespace ScmssApiServer.DomainServices
         {
             var query = _dbContext.SalesOrders.AsNoTracking();
 
-            if (identity.IsInProductionFacility)
+            if (!identity.IsSalesUser && identity.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
@@ -110,7 +110,7 @@ namespace ScmssApiServer.DomainServices
         {
             var query = _dbContext.SalesOrders.AsNoTracking();
 
-            if (identity.IsInProductionFacility)
+            if (!identity.IsSalesUser && identity.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
@@ -227,10 +227,24 @@ namespace ScmssApiServer.DomainServices
             Identity identity)
         {
             bool isInventoryStatus = dto.Status == OrderStatusOption.Executing;
-            if ((isInventoryStatus && !identity.IsInventoryUser) ||
-                (!isInventoryStatus && !identity.IsSalesUser))
+            if (isInventoryStatus)
             {
-                throw new UnauthorizedException("Unauthorized for this status.");
+                if (!identity.IsInventoryUser)
+                {
+                    throw new UnauthorizedException("Unauthorized for this status.");
+                }
+
+                if (!identity.IsSuperUser && identity.ProductionFacilityId != order.ProductionFacilityId)
+                {
+                    throw new UnauthorizedException("Unauthorized to handle sales orders of another facility.");
+                }
+            }
+            else
+            {
+                if (!identity.IsSalesUser)
+                {
+                    throw new UnauthorizedException("Unauthorized for this status.");
+                }
             }
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;

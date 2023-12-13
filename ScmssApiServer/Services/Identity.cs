@@ -13,6 +13,8 @@ namespace ScmssApiServer.Services
     {
         public required string Id { get; set; }
 
+        public bool IsSuperUser => Roles.Contains("Admin") || Roles.Contains("Director");
+
         public bool IsFinanceUser => Roles.Contains("Finance");
 
         public bool IsInProductionFacility => ProductionFacilityId != null;
