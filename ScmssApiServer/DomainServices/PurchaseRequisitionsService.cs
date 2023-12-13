@@ -32,10 +32,7 @@ namespace ScmssApiServer.DomainServices
             PurchaseRequisitionCreateDto dto,
             Identity identity)
         {
-            User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(i => i.Id == identity.Id);
-            ProductionFacility? facility = user.ProductionFacility;
-            if (facility == null)
+            if (!identity.IsInProductionFacility)
             {
                 throw new InvalidDomainOperationException(
                         "User must belong to a production facility " +
@@ -50,6 +47,10 @@ namespace ScmssApiServer.DomainServices
             }
 
             Config config = await _configService.GetAsync();
+
+            User user = await _userManager.Users.Include(i => i.ProductionFacility)
+                                                .FirstAsync(i => i.Id == identity.Id);
+            ProductionFacility facility = user.ProductionFacility!;
 
             var requisition = new PurchaseRequisition
             {
@@ -154,7 +155,7 @@ namespace ScmssApiServer.DomainServices
                             "Cannot cancel a requisition without a problem."
                         );
                 }
-                requisition.Cancel(identity.Id, dto.Problem);
+                requisition.Cancel(user.Id, dto.Problem);
             }
 
             if (dto.ApprovalStatus != null)
