@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
@@ -8,7 +9,23 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class PurchaseOrder : TransOrder<PurchaseOrderItem, PurchaseOrderEvent>
     {
-        public decimal AdditionalDiscount { get; set; } = 0;
+        private decimal additionalDiscount;
+
+        public decimal AdditionalDiscount
+        {
+            get => additionalDiscount;
+            set
+            {
+                if (value != additionalDiscount &&
+                    PaymentStatus != TransOrderPaymentStatus.Pending)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot set additional discount after payment became due."
+                        );
+                }
+                additionalDiscount = value;
+            }
+        }
 
         /// <summary>
         /// Total discount amount = DiscountSubtotal + AdditionalDiscount
@@ -88,6 +105,13 @@ namespace ScmssApiServer.Models
         /// <param name="discounts">A dict of discount amount keyed by order item ID</param>
         public void EditItemDiscounts(IDictionary<int, decimal> discounts)
         {
+            if (PaymentStatus != TransOrderPaymentStatus.Pending)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot edit item discounts after payment became due."
+                    );
+            }
+
             foreach (var item in Items)
             {
                 if (discounts.ContainsKey(item.ItemId))
