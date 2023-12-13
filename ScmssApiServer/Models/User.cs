@@ -104,17 +104,15 @@ namespace ScmssApiServer.Models
                     "yyyy-MM-dd",
                     System.Globalization.CultureInfo.InvariantCulture)));
 
-            CreateMap<UserInputDto, User>().ForMember(
-                i => i.DateOfBirth,
-                o => o.MapFrom(
-                    i => DateOnly.Parse(i.DateOfBirth)
-                                 .ToDateTime(new TimeOnly(), DateTimeKind.Utc)));
+            CreateMap<UserInputDto, User>().Include<UserCreateDto, User>()
+                .ForMember(i => i.ProductionFacilityId, o => o.AllowNull())
+                .ForMember(
+                    i => i.DateOfBirth,
+                    o => o.MapFrom(
+                        i => DateOnly.Parse(i.DateOfBirth)
+                                     .ToDateTime(new TimeOnly(), DateTimeKind.Utc)));
 
-            CreateMap<UserCreateDto, User>().ForMember(
-                i => i.DateOfBirth,
-                o => o.MapFrom(
-                    i => DateOnly.Parse(i.DateOfBirth)
-                                 .ToDateTime(new TimeOnly(), DateTimeKind.Utc)));
+            CreateMap<UserCreateDto, User>();
         }
     }
 }

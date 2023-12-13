@@ -34,6 +34,8 @@ namespace ScmssApiServer.DTOs
         [Phone]
         public required string PhoneNumber { get; set; }
 
+        public int? ProductionFacilityId { get; set; }
+
         [Required]
         public ICollection<string> Roles { get; set; } = new List<string>();
 

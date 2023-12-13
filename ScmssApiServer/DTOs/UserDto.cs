@@ -15,6 +15,7 @@ namespace ScmssApiServer.DTOs
         public bool IsActive { get; set; }
         public required string Name { get; set; }
         public string? PhoneNumber { get; set; }
+        public int? ProductionFacilityId { get; set; }
         public ICollection<string> Roles { get; set; } = new List<string>();
         public DateTime? UpdateTime { get; set; }
         public string? UserName { get; set; }
