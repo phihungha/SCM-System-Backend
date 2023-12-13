@@ -61,28 +61,6 @@ namespace ScmssApiServer.Models
 
         public bool IsActive { get; set; }
 
-        [NotMapped]
-        public bool IsInProductionFacility => ProductionFacilityId != null;
-
-        [NotMapped]
-        public bool IsFinanceUser => Roles.Contains("Finance");
-
-        [NotMapped]
-        public bool IsInventoryUser => Roles.Contains("InventorySpecialist") ||
-                                       Roles.Contains("InventoryManager");
-
-        [NotMapped]
-        public bool IsProductionUser => Roles.Contains("ProductionManager") ||
-                                        Roles.Contains("ProductionSpecialist");
-
-        [NotMapped]
-        public bool IsPurchaseUser => Roles.Contains("PurchaseManager") ||
-                                      Roles.Contains("PurchaseSpecialist");
-
-        [NotMapped]
-        public bool IsSalesUser => Roles.Contains("SalesManager") ||
-                                   Roles.Contains("SalesSpecialist");
-
         [PersonalData]
         [StringLength(maximumLength: 50, MinimumLength = 5)]
         public required string Name { get; set; }
@@ -90,9 +68,6 @@ namespace ScmssApiServer.Models
         public ProductionFacility? ProductionFacility { get; set; }
 
         public int? ProductionFacilityId { get; set; }
-
-        [NotMapped]
-        public IList<string> Roles { get; set; } = new List<string>();
 
         public DateTime? UpdateTime { get; set; }
     }

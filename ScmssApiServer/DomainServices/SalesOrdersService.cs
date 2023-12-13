@@ -45,7 +45,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, string userId)
+        public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, Identity identity)
         {
             Customer? customer = await _dbContext.Customers.FindAsync(dto.CustomerId);
             if (customer == null)
@@ -53,15 +53,12 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException("Customer not found");
             }
 
-            Config config = await _configService.GetAsync();
-
             var order = new SalesOrder
             {
                 ToLocation = dto.ToLocation ?? customer.DefaultLocation,
-                CustomerId = dto.CustomerId,
+                CustomerId = customer.Id,
                 Customer = customer,
-                CreateUserId = userId,
-                VatRate = config.VatRate,
+                CreateUserId = identity.Id,
             };
 
             if (dto.ProductionFacilityId != null)
@@ -73,23 +70,27 @@ namespace ScmssApiServer.DomainServices
                 order.FromLocation = facility.Location;
             }
 
+            Config config = await _configService.GetAsync();
+            order.VatRate = config.VatRate;
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
+            order.CreateUser = user;
+
             order.AddItems(await MapOrderItemDtosToModels(dto.Items));
-            order.Begin(userId);
+            order.Begin(user.Id);
 
             _dbContext.SalesOrders.Add(order);
             await _dbContext.SaveChangesAsync();
-            await _dbContext.Entry(order).Reference(i => i.CreateUser).LoadAsync();
             return _mapper.Map<SalesOrderDto>(order);
         }
 
-        public async Task<SalesOrderDto?> GetAsync(int id, string userId)
+        public async Task<SalesOrderDto?> GetAsync(int id, Identity identity)
         {
             var query = _dbContext.SalesOrders.AsNoTracking();
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.IsInProductionFacility)
+            if (identity.IsInProductionFacility)
             {
-                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
             SalesOrder? order = await query
@@ -105,14 +106,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SalesOrderDto?>(order);
         }
 
-        public async Task<IList<SalesOrderDto>> GetManyAsync(string userId)
+        public async Task<IList<SalesOrderDto>> GetManyAsync(Identity identity)
         {
             var query = _dbContext.SalesOrders.AsNoTracking();
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.IsInProductionFacility)
+            if (identity.IsInProductionFacility)
             {
-                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
             IList<SalesOrder> orders = await query
@@ -128,7 +128,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<SalesOrderDto> UpdateAsync(
             int id,
             SalesOrderUpdateDto dto,
-            string userId)
+            Identity identity)
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Items)
@@ -145,21 +145,19 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-
             if (dto.Status != null)
             {
-                ChangeStatus(order, dto, user);
+                await ChangeStatusAsync(order, dto, identity);
             }
 
             if (dto.PayAmount != null)
             {
-                CompletePayment(order, dto, user);
+                CompletePayment(order, dto, identity);
             }
 
             if (dto.ToLocation != null)
             {
-                if (!user.IsSalesUser)
+                if (!identity.IsSalesUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change location.");
                 }
@@ -168,7 +166,7 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.ProductionFacilityId != null)
             {
-                if (!user.IsSalesUser)
+                if (!identity.IsSalesUser)
                 {
                     throw new UnauthorizedException(
                             "Unauthorized to change production facility."
@@ -184,7 +182,7 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Items != null)
             {
-                if (!user.IsSalesUser)
+                if (!identity.IsSalesUser)
                 {
                     throw new UnauthorizedException(
                             "Unauthorized to change items."
@@ -223,14 +221,19 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        private void ChangeStatus(SalesOrder order, SalesOrderUpdateDto dto, User user)
+        private async Task ChangeStatusAsync(
+            SalesOrder order,
+            SalesOrderUpdateDto dto,
+            Identity identity)
         {
             bool isInventoryStatus = dto.Status == OrderStatusOption.Executing;
-            if ((isInventoryStatus && !user.IsInventoryUser) ||
-                (!isInventoryStatus && !user.IsSalesUser))
+            if ((isInventoryStatus && !identity.IsInventoryUser) ||
+                (!isInventoryStatus && !identity.IsSalesUser))
             {
                 throw new UnauthorizedException("Unauthorized for this status.");
             }
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
             string userId = user.Id;
 
@@ -270,9 +273,9 @@ namespace ScmssApiServer.DomainServices
             }
         }
 
-        private void CompletePayment(SalesOrder order, SalesOrderUpdateDto dto, User user)
+        private void CompletePayment(SalesOrder order, SalesOrderUpdateDto dto, Identity identity)
         {
-            if (!user.IsFinanceUser)
+            if (!identity.IsFinanceUser)
             {
                 throw new UnauthorizedException("Unauthorized to complete payment.");
             }
