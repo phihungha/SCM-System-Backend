@@ -45,42 +45,42 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<ProductionOrderDto> CreateAsync(
             OrderCreateDto<OrderItemInputDto> dto,
-            string userId)
+            Identity identity)
         {
-            User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(i => i.Id == userId);
-            if (user.ProductionFacility == null)
+            if (!identity.IsInProductionFacility)
             {
                 throw new InvalidDomainOperationException(
                         "User must belong to a production facility " +
                         "to create a production order."
                     );
             }
+            User user = await _userManager.Users.Include(i => i.ProductionFacility)
+                                                .FirstAsync(i => i.Id == identity.Id);
+            ProductionFacility facility = user.ProductionFacility!;
 
             var order = new ProductionOrder
             {
-                ProductionFacilityId = user.ProductionFacility.Id,
-                ProductionFacility = user.ProductionFacility,
-                CreateUserId = userId,
+                ProductionFacilityId = facility.Id,
+                ProductionFacility = facility,
+                CreateUserId = user.Id,
                 CreateUser = user,
             };
 
             order.AddItems(await MapOrderItemDtosToModels(dto.Items));
-            order.Begin(userId);
+            order.Begin(user.Id);
 
             _dbContext.ProductionOrders.Add(order);
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<ProductionOrderDto>(order);
         }
 
-        public async Task<ProductionOrderDto?> GetAsync(int id, string userId)
+        public async Task<ProductionOrderDto?> GetAsync(int id, Identity identity)
         {
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.IsInProductionFacility)
+            if (identity.IsInProductionFacility)
             {
-                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
             ProductionOrder? order = await query
@@ -96,14 +96,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderDto?>(order);
         }
 
-        public async Task<IList<ProductionOrderDto>> GetManyAsync(string userId)
+        public async Task<IList<ProductionOrderDto>> GetManyAsync(Identity identity)
         {
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.IsInProductionFacility)
+            if (identity.IsInProductionFacility)
             {
-                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
             IList<ProductionOrder> orders = await query
@@ -118,7 +117,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<ProductionOrderDto> UpdateAsync(
             int id,
             ProductionOrderUpdateDto dto,
-            string userId)
+            Identity identity)
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Items)
@@ -141,28 +140,28 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            User user = await _userManager.FindFullUserByIdAsync(userId);
-
-            if (user.IsInProductionFacility && user.ProductionFacilityId != order.ProductionFacilityId)
+            if (identity.IsInProductionFacility && identity.ProductionFacilityId != order.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
                         "Unauthorized to handle production orders of another facility."
                     );
             }
 
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
+
             if (dto.Status != null)
             {
-                ChangeStatus(order, dto, user);
+                ChangeStatus(order, dto, identity, user);
             }
 
             if (dto.ApprovalStatus != null)
             {
-                HandleApproval(order, dto, user);
+                HandleApproval(order, dto, identity, user);
             }
 
             if (dto.Items != null)
             {
-                if (!user.IsProductionUser)
+                if (!identity.IsProductionUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change items.");
                 }
@@ -196,14 +195,15 @@ namespace ScmssApiServer.DomainServices
         }
 
         private void ChangeStatus(ProductionOrder order,
-                                        ProductionOrderUpdateDto dto,
-                                        User user)
+                                  ProductionOrderUpdateDto dto,
+                                  Identity identity,
+                                  User user)
         {
             bool isInventoryStatus = dto.Status == OrderStatusOption.Executing ||
                                      dto.Status == OrderStatusOption.Completed ||
                                      dto.Status == OrderStatusOption.Returned;
-            if ((isInventoryStatus && !user.IsInventoryUser) ||
-                (!isInventoryStatus && !user.IsProductionUser))
+            if ((isInventoryStatus && !identity.IsInventoryUser) ||
+                (!isInventoryStatus && !identity.IsProductionUser))
             {
                 throw new UnauthorizedException("Unauthorized for this status.");
             }
@@ -249,9 +249,10 @@ namespace ScmssApiServer.DomainServices
 
         private void HandleApproval(ProductionOrder order,
                                     ProductionOrderUpdateDto dto,
+                                    Identity identity,
                                     User user)
         {
-            if (!user.Roles.Contains("ProductionManager"))
+            if (!identity.Roles.Contains("ProductionManager"))
             {
                 throw new UnauthorizedException("Not authorized to handle approval.");
             }

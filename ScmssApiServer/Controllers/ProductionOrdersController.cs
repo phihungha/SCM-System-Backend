@@ -33,14 +33,14 @@ namespace ScmssApiServer.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductionOrderDto>> Create([FromBody] ProductionOrderCreateDto body)
         {
-            ProductionOrderDto item = await _productionOrdersService.CreateAsync(body, CurrentUserId);
+            ProductionOrderDto item = await _productionOrdersService.CreateAsync(body, CurrentIdentity);
             return Ok(item);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductionOrderDto>> Get(int id)
         {
-            ProductionOrderDto? item = await _productionOrdersService.GetAsync(id, CurrentUserId);
+            ProductionOrderDto? item = await _productionOrdersService.GetAsync(id, CurrentIdentity);
             if (item == null)
             {
                 return NotFound();
@@ -51,7 +51,7 @@ namespace ScmssApiServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IList<ProductionOrderDto>>> GetMany()
         {
-            IList<ProductionOrderDto> items = await _productionOrdersService.GetManyAsync(CurrentUserId);
+            IList<ProductionOrderDto> items = await _productionOrdersService.GetManyAsync(CurrentIdentity);
             return Ok(items);
         }
 
@@ -61,7 +61,7 @@ namespace ScmssApiServer.Controllers
             int id,
             [FromBody] ProductionOrderUpdateDto body)
         {
-            ProductionOrderDto item = await _productionOrdersService.UpdateAsync(id, body, CurrentUserId);
+            ProductionOrderDto item = await _productionOrdersService.UpdateAsync(id, body, CurrentIdentity);
             return Ok(item);
         }
 

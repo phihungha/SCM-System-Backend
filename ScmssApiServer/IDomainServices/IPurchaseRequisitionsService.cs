@@ -5,12 +5,12 @@ namespace ScmssApiServer.IDomainServices
 {
     public interface IPurchaseRequisitionsService
     {
-        Task<PurchaseRequisitionDto> CreateAsync(PurchaseRequisitionCreateDto dto, Identity currentIdentity);
+        Task<PurchaseRequisitionDto> CreateAsync(PurchaseRequisitionCreateDto dto, Identity identity);
 
-        Task<PurchaseRequisitionDto?> GetAsync(int id, Identity currentIdentity);
+        Task<PurchaseRequisitionDto?> GetAsync(int id, Identity identity);
 
-        Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity currentIdentity);
+        Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity identity);
 
-        Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, Identity currentIdentity);
+        Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, Identity identity);
     }
 }
