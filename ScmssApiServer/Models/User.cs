@@ -61,6 +61,25 @@ namespace ScmssApiServer.Models
 
         public bool IsActive { get; set; }
 
+        [NotMapped]
+        public bool IsFinance => Roles.Contains("Finance");
+
+        [NotMapped]
+        public bool IsInventoryUser => Roles.Contains("InventorySpecialist") ||
+                                       Roles.Contains("InventoryManager");
+
+        [NotMapped]
+        public bool IsProductionUser => Roles.Contains("ProductionManager") ||
+                                        Roles.Contains("ProductionSpecialist");
+
+        [NotMapped]
+        public bool IsPurchaseUser => Roles.Contains("PurchaseManager") ||
+                                      Roles.Contains("PurchaseSpecialist");
+
+        [NotMapped]
+        public bool IsSales => Roles.Contains("SalesManager") ||
+                               Roles.Contains("SalesSpecialist");
+
         [PersonalData]
         [StringLength(maximumLength: 50, MinimumLength = 5)]
         public required string Name { get; set; }

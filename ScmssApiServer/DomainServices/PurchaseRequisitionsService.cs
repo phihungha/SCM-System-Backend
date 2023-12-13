@@ -145,7 +145,7 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.IsCanceled ?? false)
             {
-                if (!RolesUtils.IsProductionUser(user))
+                if (!user.IsProductionUser)
                 {
                     throw new UnauthorizedException("Not authorized to cancel.");
                 }
@@ -166,7 +166,7 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Items != null)
             {
-                if (!RolesUtils.IsProductionUser(user))
+                if (!user.IsProductionUser)
                 {
                     throw new UnauthorizedException("Not authorized to change items.");
                 }
@@ -191,7 +191,7 @@ namespace ScmssApiServer.DomainServices
                                                PurchaseRequisitionUpdateDto dto,
                                                User user)
         {
-            bool isFinance = user.Roles.Contains("Finance");
+            bool isFinance = user.IsFinance;
             bool isManager = user.Roles.Contains("ProductionManager");
 
             if (!isFinance && !isManager)

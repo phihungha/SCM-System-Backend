@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -13,12 +15,17 @@ namespace ScmssApiServer.DomainServices
         private readonly IConfigService _configService;
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
 
-        public SalesOrdersService(AppDbContext dbContext, IConfigService configService, IMapper mapper)
+        public SalesOrdersService(IConfigService configService,
+                                  AppDbContext dbContext,
+                                  IMapper mapper,
+                                  UserManager<User> userManager)
         {
             _configService = configService;
             _dbContext = dbContext;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public async Task<TransOrderEventDto> AddManualEventAsync(int orderId,
@@ -75,9 +82,17 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SalesOrderDto>(order);
         }
 
-        public async Task<SalesOrderDto?> GetAsync(int id)
+        public async Task<SalesOrderDto?> GetAsync(int id, string userId)
         {
-            SalesOrder? order = await _dbContext.SalesOrders
+            var query = _dbContext.SalesOrders.AsNoTracking();
+
+            User user = await _userManager.FindFullUserByIdAsync(userId);
+            if (user.ProductionFacilityId != null)
+            {
+                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+            }
+
+            SalesOrder? order = await query
                 .AsNoTracking()
                 .Include(i => i.Items)
                 .ThenInclude(i => i.Product)
@@ -90,9 +105,17 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SalesOrderDto?>(order);
         }
 
-        public async Task<IList<SalesOrderDto>> GetManyAsync()
+        public async Task<IList<SalesOrderDto>> GetManyAsync(string userId)
         {
-            IList<SalesOrder> orders = await _dbContext.SalesOrders
+            var query = _dbContext.SalesOrders.AsNoTracking();
+
+            User user = await _userManager.FindFullUserByIdAsync(userId);
+            if (user.ProductionFacilityId != null)
+            {
+                query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
+            }
+
+            IList<SalesOrder> orders = await query
                 .AsNoTracking()
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
@@ -122,13 +145,42 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
+            User user = await _userManager.FindFullUserByIdAsync(userId);
+
+            if (order.PaymentStatus == TransOrderPaymentStatus.Pending)
+            {
+                Config config = await _configService.GetAsync();
+                order.VatRate = config.VatRate;
+            }
+
+            if (dto.Status != null)
+            {
+                ChangeStatus(order, dto, user);
+            }
+
+            if (dto.PayAmount != null)
+            {
+                CompletePayment(order, dto, user);
+            }
+
             if (dto.ToLocation != null)
             {
+                if (!user.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change location.");
+                }
                 order.ToLocation = dto.ToLocation;
             }
 
             if (dto.ProductionFacilityId != null)
             {
+                if (!user.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException(
+                            "Unauthorized to change production facility."
+                        );
+                }
+
                 int facilityId = (int)dto.ProductionFacilityId;
                 ProductionFacility facility = await GetProductionFacilityAsync(facilityId);
                 order.ProductionFacilityId = facility.Id;
@@ -138,21 +190,49 @@ namespace ScmssApiServer.DomainServices
 
             if (dto.Items != null)
             {
+                if (!user.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException(
+                            "Unauthorized to change items."
+                        );
+                }
+
                 _dbContext.RemoveRange(order.Items);
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             }
 
-            if (dto.PayAmount != null)
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<SalesOrderDto>(order);
+        }
+
+        public async Task<TransOrderEventDto> UpdateEventAsync(int id,
+                                                               int orderId,
+                                                               OrderEventUpdateDto dto)
+        {
+            SalesOrder? order = await _dbContext.SalesOrders
+                .Include(i => i.Events)
+                .FirstOrDefaultAsync(i => i.Id == orderId);
+            if (order == null)
             {
-                order.CompletePayment((decimal)dto.PayAmount);
+                throw new EntityNotFoundException();
             }
 
-            if (order.PaymentStatus == TransOrderPaymentStatus.Pending)
+            SalesOrderEvent orderEvent = order.UpdateEvent(id, dto.Location, dto.Message);
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<TransOrderEventDto>(orderEvent);
+        }
+
+        private void ChangeStatus(SalesOrder order, SalesOrderUpdateDto dto, User user)
+        {
+            bool isInventoryStatus = dto.Status == OrderStatusOption.Executing;
+            if ((isInventoryStatus && !user.IsInventoryUser) ||
+                (!isInventoryStatus && !user.IsSales))
             {
-                Config config = await _configService.GetAsync();
-                order.VatRate = config.VatRate;
+                throw new UnauthorizedException("Unauthorized for this status.");
             }
 
+            string userId = user.Id;
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
@@ -187,34 +267,20 @@ namespace ScmssApiServer.DomainServices
                     order.Return(userId, dto.Problem);
                     break;
             }
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<SalesOrderDto>(order);
         }
 
-        public async Task<TransOrderEventDto> UpdateEventAsync(int id,
-                                                               int orderId,
-                                                               OrderEventUpdateDto dto)
+        private void CompletePayment(SalesOrder order, SalesOrderUpdateDto dto, User user)
         {
-            SalesOrder? order = await _dbContext.SalesOrders
-                .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
-            if (order == null)
+            if (!user.IsFinance)
             {
-                throw new EntityNotFoundException();
+                throw new UnauthorizedException("Unauthorized to complete payment.");
             }
-
-            SalesOrderEvent orderEvent = order.UpdateEvent(id, dto.Location, dto.Message);
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<TransOrderEventDto>(orderEvent);
+            order.CompletePayment((decimal)dto.PayAmount!);
         }
 
         private async Task<ProductionFacility> GetProductionFacilityAsync(int facilityId)
         {
-            ProductionFacility? facility = await _dbContext
-                .ProductionFacilities
-                .FindAsync(facilityId);
+            ProductionFacility? facility = await _dbContext.ProductionFacilities.FindAsync(facilityId);
             if (facility == null)
             {
                 throw new EntityNotFoundException("Production facility not found.");
