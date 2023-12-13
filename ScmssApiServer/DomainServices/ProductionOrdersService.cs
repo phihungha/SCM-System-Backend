@@ -79,7 +79,7 @@ namespace ScmssApiServer.DomainServices
         {
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
-            if (identity.IsInProductionFacility)
+            if (!identity.IsSuperUser && identity.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
@@ -101,7 +101,7 @@ namespace ScmssApiServer.DomainServices
         {
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
-            if (identity.IsInProductionFacility)
+            if (!identity.IsSuperUser && identity.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
@@ -141,7 +141,9 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            if (identity.IsInProductionFacility && identity.ProductionFacilityId != order.ProductionFacilityId)
+            if (!identity.IsSuperUser &&
+                identity.IsInProductionFacility &&
+                identity.ProductionFacilityId != order.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
                         "Unauthorized to handle production orders of another facility."
