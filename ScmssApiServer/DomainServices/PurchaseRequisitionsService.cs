@@ -73,7 +73,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.ProductionFacilityId != null)
+            if (user.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -98,7 +98,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.ProductionFacilityId != null)
+            if (user.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -134,8 +134,7 @@ namespace ScmssApiServer.DomainServices
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
 
-            if (user.ProductionFacilityId != null &&
-                user.ProductionFacilityId != requisition.ProductionFacilityId)
+            if (user.IsInProductionFacility && user.ProductionFacilityId != requisition.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
                         "Unauthorized to handle purchase requisitions of another facility."

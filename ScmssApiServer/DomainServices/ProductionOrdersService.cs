@@ -78,7 +78,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.ProductionFacilityId != null)
+            if (user.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -101,7 +101,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.ProductionFacilityId != null)
+            if (user.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -143,8 +143,7 @@ namespace ScmssApiServer.DomainServices
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
 
-            if (user.ProductionFacilityId != null &&
-                user.ProductionFacilityId != order.ProductionFacilityId)
+            if (user.IsInProductionFacility && user.ProductionFacilityId != order.ProductionFacilityId)
             {
                 throw new UnauthorizedException(
                         "Unauthorized to handle production orders of another facility."

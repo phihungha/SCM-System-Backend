@@ -62,6 +62,9 @@ namespace ScmssApiServer.Models
         public bool IsActive { get; set; }
 
         [NotMapped]
+        public bool IsInProductionFacility => ProductionFacilityId != null;
+
+        [NotMapped]
         public bool IsFinanceUser => Roles.Contains("Finance");
 
         [NotMapped]

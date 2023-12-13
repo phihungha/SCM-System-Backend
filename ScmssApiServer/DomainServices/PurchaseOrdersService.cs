@@ -88,7 +88,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.PurchaseOrders.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.ProductionFacilityId != null)
+            if (user.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
@@ -111,7 +111,7 @@ namespace ScmssApiServer.DomainServices
             var query = _dbContext.PurchaseOrders.AsNoTracking();
 
             User user = await _userManager.FindFullUserByIdAsync(userId);
-            if (user.ProductionFacilityId != null)
+            if (user.IsInProductionFacility)
             {
                 query = query.Where(i => i.ProductionFacilityId == user.ProductionFacilityId);
             }
