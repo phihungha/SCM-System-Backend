@@ -4,7 +4,7 @@ namespace ScmssApiServer.IDomainServices
 {
     public interface IAuthService
     {
-        Task<bool> SignInAsync(AuthSignInDto dto);
+        Task<UserDto?> SignInAsync(AuthSignInDto dto);
 
         Task SignOutAsync();
     }

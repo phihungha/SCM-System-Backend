@@ -4,8 +4,7 @@ using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
-    public class ProductionOrder : Order<ProductionOrderItem, ProductionOrderEvent>,
-                                   IApprovable
+    public class ProductionOrder : Order<ProductionOrderItem, ProductionOrderEvent>
     {
         public ApprovalStatus ApprovalStatus { get; protected set; }
         public User? ApproveProductionManager { get; protected set; }
@@ -107,7 +106,7 @@ namespace ScmssApiServer.Models
             return AddEvent(type, location, message);
         }
 
-        public void Approve(string userId)
+        public void Approve(User user)
         {
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
@@ -116,7 +115,8 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Approved;
-            ApproveProductionManagerId = userId;
+            ApproveProductionManagerId = user.Id;
+            ApproveProductionManager = user;
         }
 
         public override void Begin(string userId)
@@ -156,7 +156,7 @@ namespace ScmssApiServer.Models
             AddEvent(ProductionOrderEventType.Produced);
         }
 
-        public void Reject(string userId, string problem)
+        public void Reject(User user, string problem)
         {
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
@@ -165,7 +165,7 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
-            Cancel(userId, problem);
+            Cancel(user.Id, problem);
         }
 
         public override void Return(string userId, string problem)

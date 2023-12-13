@@ -1,25 +1,32 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles =
+        "Director," +
+        "ProductionPlanner," +
+        "ProductionManager," +
+        "SalesSpecialist," +
+        "SalesManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : CustomControllerBase
     {
         private IProductsService _productsService;
 
-        public ProductsController(IProductsService productsService, IUsersService usersService)
-            : base(usersService)
+        public ProductsController(IProductsService productsService, UserManager<User> userManager)
+            : base(userManager)
         {
             _productsService = productsService;
         }
 
+        [Authorize(Roles = "SalesManager")]
         [HttpPost]
         public async Task<ActionResult<ProductDto>> Create([FromBody] ProductInputDto body)
         {
@@ -45,6 +52,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
+        [Authorize(Roles = "ProductionManager,SalesManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<ProductDto>> Update(int id, [FromBody] ProductInputDto body)
         {

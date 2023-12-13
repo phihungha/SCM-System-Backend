@@ -1,15 +1,16 @@
 ﻿using ScmssApiServer.DTOs;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.IDomainServices
 {
     public interface IPurchaseRequisitionsService
     {
-        Task<PurchaseRequisitionDto> CreateAsync(PurchaseRequisitionCreateDto dto, string userId);
+        Task<PurchaseRequisitionDto> CreateAsync(PurchaseRequisitionCreateDto dto, Identity identity);
 
-        Task<PurchaseRequisitionDto?> GetAsync(int id);
+        Task<PurchaseRequisitionDto?> GetAsync(int id, Identity identity);
 
-        Task<IList<PurchaseRequisitionDto>> GetManyAsync();
+        Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity identity);
 
-        Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, string userId);
+        Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, Identity identity);
     }
 }

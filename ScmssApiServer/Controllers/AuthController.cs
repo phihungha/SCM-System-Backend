@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
@@ -11,20 +13,20 @@ namespace ScmssApiServer.Controllers
     {
         private readonly IAuthService _authService;
 
-        public AuthController(IAuthService authService, IUsersService usersService)
-            : base(usersService)
+        public AuthController(IAuthService authService, UserManager<User> userManager)
+            : base(userManager)
         {
             _authService = authService;
         }
 
         [HttpPost]
         [Route("SignIn")]
-        public async Task<ActionResult> SignIn([FromBody] AuthSignInDto body)
+        public async Task<ActionResult<UserDto>> SignIn([FromBody] AuthSignInDto body)
         {
-            bool result = await _authService.SignInAsync(body);
-            if (result)
+            UserDto? user = await _authService.SignInAsync(body);
+            if (user != null)
             {
-                return OkMessage("Signed in");
+                return Ok(user);
             }
             return Forbid();
         }

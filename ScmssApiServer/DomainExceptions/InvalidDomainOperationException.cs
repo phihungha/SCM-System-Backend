@@ -3,7 +3,7 @@
     public class InvalidDomainOperationException : ApplicationException
     {
         public InvalidDomainOperationException(
-                string? message = "Domain operation is invalid"
+                string? message = "Domain operation is invalid."
             )
             : base(message)
         {

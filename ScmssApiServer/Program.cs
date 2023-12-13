@@ -1,6 +1,7 @@
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace ScmssApiServer
@@ -41,6 +43,7 @@ namespace ScmssApiServer
             AddAwsS3(builder, logger);
 
             // Add infrastructure services
+            builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformation>();
             builder.Services.AddSingleton<IImageHostService, ImageHostService>();
 
             // Add domain services
@@ -75,7 +78,11 @@ namespace ScmssApiServer
 
             var app = builder.Build();
 
-            AppDbSeeder.SeedRootAdminUser(app);
+            using (var scope = app.Services.CreateScope())
+            {
+                AppDbSeeder.SeedRoles(scope, app);
+                AppDbSeeder.SeedRootAdminUser(scope, app);
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -95,6 +102,18 @@ namespace ScmssApiServer
             app.Run();
         }
 
+        internal static Task GetForbiddenResp(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            return Task.CompletedTask;
+        }
+
+        internal static Task GetUnauthorizaedResp(RedirectContext<CookieAuthenticationOptions> context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+            return Task.CompletedTask;
+        }
+
         /// <summary>
         /// Setup and add authentication service.
         /// </summary>
@@ -106,13 +125,18 @@ namespace ScmssApiServer
                         options.User.RequireUniqueEmail = true;
                     }
                 )
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-                        {
-                            options.SlidingExpiration = true;
-                        }
-                    );
+
+            builder.Services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                    {
+                        options.SlidingExpiration = true;
+                        options.Events.OnRedirectToAccessDenied = GetForbiddenResp;
+                        options.Events.OnRedirectToLogin = GetUnauthorizaedResp;
+                    }
+                );
         }
 
         /// <summary>

@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Director,ProductionPlanner,ProductionManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class ProductionFacilitiesController : CustomControllerBase
@@ -14,12 +15,13 @@ namespace ScmssApiServer.Controllers
         private readonly IProductionFacilitiesService _facilitiesService;
 
         public ProductionFacilitiesController(IProductionFacilitiesService facilitiesService,
-                                              IUsersService usersService)
-            : base(usersService)
+                                              UserManager<User> userManager)
+            : base(userManager)
         {
             _facilitiesService = facilitiesService;
         }
 
+        [Authorize(Roles = "ProductionManager")]
         [HttpPost]
         public async Task<ActionResult<ProductionFacilityDto>> Create([FromBody] ProductionFacilityInputDto body)
         {
@@ -45,6 +47,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
+        [Authorize(Roles = "ProductionManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<ProductionFacilityDto>> Update(
             int id,

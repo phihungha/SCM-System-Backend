@@ -1,25 +1,26 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class VendorsController : CustomControllerBase
     {
         private readonly IVendorsService _vendorsService;
 
-        public VendorsController(IVendorsService vendorsService,
-                                 IUsersService usersService)
-            : base(usersService)
+        public VendorsController(IVendorsService vendorsService, UserManager<User> userManager)
+            : base(userManager)
         {
             _vendorsService = vendorsService;
         }
 
+        [Authorize(Roles = "PurchaseManager")]
         [HttpPost]
         public async Task<ActionResult<CompanyDto>> Create([FromBody] CompanyInputDto body)
         {
@@ -45,6 +46,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
+        [Authorize(Roles = "PurchaseManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<CompanyDto>> Update(int id, [FromBody] CompanyInputDto body)
         {

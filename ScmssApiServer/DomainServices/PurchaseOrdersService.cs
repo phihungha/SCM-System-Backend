@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -13,12 +15,17 @@ namespace ScmssApiServer.DomainServices
         private readonly IConfigService _configService;
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
 
-        public PurchaseOrdersService(AppDbContext dbContext, IConfigService configService, IMapper mapper)
+        public PurchaseOrdersService(AppDbContext dbContext,
+                                     IConfigService configService,
+                                     IMapper mapper,
+                                     UserManager<User> userManager)
         {
             _configService = configService;
             _dbContext = dbContext;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public async Task<TransOrderEventDto> AddManualEventAsync(
@@ -39,7 +46,7 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<TransOrderEventDto>(orderEvent);
         }
 
-        public async Task<PurchaseOrderDto> CreateAsync(PurchaseOrderCreateDto dto, string userId)
+        public async Task<PurchaseOrderDto> CreateAsync(PurchaseOrderCreateDto dto, Identity identity)
         {
             PurchaseRequisition? requistion = await _dbContext
                 .PurchaseRequisitions
@@ -52,7 +59,7 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException("Purchase requisition with provided ID not found.");
             }
 
-            PurchaseOrder order = requistion.GeneratePurchaseOrder(userId);
+            PurchaseOrder order = requistion.GeneratePurchaseOrder(identity.Id);
 
             Config config = await _configService.GetAsync();
             order.VatRate = config.VatRate;
@@ -68,7 +75,9 @@ namespace ScmssApiServer.DomainServices
             }
 
             order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
-            order.Begin(userId);
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
+            order.Begin(user.Id);
 
             _dbContext.PurchaseOrders.Add(order);
             await _dbContext.SaveChangesAsync();
@@ -76,9 +85,16 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseOrderDto>(order);
         }
 
-        public async Task<PurchaseOrderDto?> GetAsync(int id)
+        public async Task<PurchaseOrderDto?> GetAsync(int id, Identity identity)
         {
-            PurchaseOrder? orders = await _dbContext.PurchaseOrders
+            var query = _dbContext.PurchaseOrders.AsNoTracking();
+
+            if (identity.IsInProductionFacility)
+            {
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
+            }
+
+            PurchaseOrder? orders = await query
                 .AsNoTracking()
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
                 .Include(i => i.Vendor)
@@ -91,9 +107,16 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseOrderDto?>(orders);
         }
 
-        public async Task<IList<PurchaseOrderDto>> GetManyAsync()
+        public async Task<IList<PurchaseOrderDto>> GetManyAsync(Identity identity)
         {
-            IList<PurchaseOrder> orders = await _dbContext.PurchaseOrders
+            var query = _dbContext.PurchaseOrders.AsNoTracking();
+
+            if (identity.IsInProductionFacility)
+            {
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
+            }
+
+            IList<PurchaseOrder> orders = await query
                 .AsNoTracking()
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
@@ -106,7 +129,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<PurchaseOrderDto> UpdateAsync(
             int id,
             PurchaseOrderUpdateDto dto,
-            string userId)
+            Identity identity)
         {
             PurchaseOrder? order = await _dbContext.PurchaseOrders
                 .Include(i => i.Items)
@@ -124,34 +147,59 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            if (dto.FromLocation != null)
+            if (dto.Status != null)
             {
-                order.FromLocation = dto.FromLocation;
+                await ChangeStatusAsync(order, dto, identity);
             }
 
-            if (dto.AdditionalDiscount != null)
+            if (dto.PayAmount != null)
             {
-                order.AdditionalDiscount = (decimal)dto.AdditionalDiscount;
-            }
-
-            if (dto.Items != null)
-            {
-                order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
+                CompletePayment(order, dto, identity);
             }
 
             if (dto.InvoiceUrl != null)
             {
+                if (!identity.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change invoice URL.");
+                }
                 order.InvoiceUrl = dto.InvoiceUrl;
             }
 
             if (dto.ReceiptUrl != null)
             {
+                if (!identity.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change receipt URL.");
+                }
                 order.ReceiptUrl = dto.ReceiptUrl;
             }
 
-            if (dto.PayAmount != null)
+            if (dto.FromLocation != null)
             {
-                order.CompletePayment((decimal)dto.PayAmount);
+                if (!identity.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change location.");
+                }
+                order.FromLocation = dto.FromLocation;
+            }
+
+            if (dto.AdditionalDiscount != null)
+            {
+                if (!identity.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change additional discount.");
+                }
+                order.AdditionalDiscount = (decimal)dto.AdditionalDiscount;
+            }
+
+            if (dto.Items != null)
+            {
+                if (!identity.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change items.");
+                }
+                order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
             }
 
             if (order.PaymentStatus == TransOrderPaymentStatus.Pending)
@@ -159,6 +207,46 @@ namespace ScmssApiServer.DomainServices
                 Config config = await _configService.GetAsync();
                 order.VatRate = config.VatRate;
             }
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<PurchaseOrderDto>(order);
+        }
+
+        public async Task<TransOrderEventDto> UpdateEventAsync(
+            int id,
+            int orderId,
+            OrderEventUpdateDto dto)
+        {
+            PurchaseOrder? order = await _dbContext.PurchaseOrders
+                .Include(i => i.Events)
+                .FirstOrDefaultAsync(i => i.Id == orderId);
+            if (order == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            PurchaseOrderEvent orderEvent = order.UpdateEvent(id, dto.Location, dto.Message);
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<TransOrderEventDto>(orderEvent);
+        }
+
+        private async Task ChangeStatusAsync(
+            PurchaseOrder order,
+            PurchaseOrderUpdateDto dto,
+            Identity identity)
+        {
+            bool isInventoryStatus = dto.Status == OrderStatusOption.Completed ||
+                                     dto.Status == OrderStatusOption.Returned;
+            if ((isInventoryStatus && !identity.IsInventoryUser) ||
+                (!isInventoryStatus && !identity.IsPurchaseUser))
+            {
+                throw new UnauthorizedException("Unauthorized for this status.");
+            }
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
+
+            string userId = user.Id;
 
             switch (dto.Status)
             {
@@ -194,28 +282,15 @@ namespace ScmssApiServer.DomainServices
                     order.Return(userId, dto.Problem);
                     break;
             }
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<PurchaseOrderDto>(order);
         }
 
-        public async Task<TransOrderEventDto> UpdateEventAsync(
-            int id,
-            int orderId,
-            OrderEventUpdateDto dto)
+        private void CompletePayment(PurchaseOrder order, PurchaseOrderUpdateDto dto, Identity identity)
         {
-            PurchaseOrder? order = await _dbContext.PurchaseOrders
-                .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
-            if (order == null)
+            if (!identity.IsFinanceUser)
             {
-                throw new EntityNotFoundException();
+                throw new UnauthorizedException("Unauthorized to complete payment.");
             }
-
-            PurchaseOrderEvent orderEvent = order.UpdateEvent(id, dto.Location, dto.Message);
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<TransOrderEventDto>(orderEvent);
+            order.CompletePayment((decimal)dto.PayAmount!);
         }
 
         private IDictionary<int, decimal> MapOrderItemDiscountDtosToDict(

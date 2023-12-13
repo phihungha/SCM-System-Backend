@@ -7,7 +7,7 @@ using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
-using System.Security.Claims;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -34,10 +34,11 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            IdentityResult result = await _userManager
-                .ChangePasswordAsync(user,
-                                     dto.CurrentPassword,
-                                     dto.NewPassword);
+            IdentityResult result = await _userManager.ChangePasswordAsync(
+                user,
+                dto.CurrentPassword,
+                dto.NewPassword);
+
             if (!result.Succeeded)
             {
                 throw new IdentityException(result);
@@ -54,36 +55,33 @@ namespace ScmssApiServer.DomainServices
                 throw new IdentityException(result);
             }
 
-            return GetUserDto(user);
-        }
-
-        public async Task DeleteUserAsync(string id)
-        {
-            User? user = await _userManager.FindByIdAsync(id);
-            if (user == null)
+            result = await _userManager.AddToRolesAsync(user, dto.Roles);
+            if (!result.Succeeded)
             {
-                throw new EntityNotFoundException();
+                throw new IdentityException(result);
             }
-            user.IsActive = false;
-            await _userManager.UpdateAsync(user);
+
+            return await GetUserDtoAsync(user);
         }
 
-        public string GetProfileImageUploadUrl(string userId)
+        public string GetProfileImageUploadUrl(Identity identity)
         {
-            string key = $"user-profile-images/{userId}";
+            string key = $"user-profile-images/{identity.Id}";
             return _imageService.GenerateUploadUrl(key);
         }
 
         public async Task<UserDto?> GetUserAsync(string id)
         {
-            User? user = await _userManager.Users.AsNoTracking()
-                                                 .FirstOrDefaultAsync(x => x.Id == id);
-            return _mapper.Map<UserDto?>(user);
-        }
+            User? user = await _userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(i => i.Id == id);
 
-        public string? GetUserIdFromPrincipal(ClaimsPrincipal principal)
-        {
-            return _userManager.GetUserId(principal);
+            if (user == null)
+            {
+                return null;
+            }
+
+            return await GetUserDtoAsync(user);
         }
 
         public async Task<IList<UserDto>> GetUsersAsync()
@@ -108,12 +106,30 @@ namespace ScmssApiServer.DomainServices
                 throw new IdentityException(result);
             }
 
-            return GetUserDto(user);
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+
+            result = await _userManager.RemoveFromRolesAsync(user, roles);
+            if (!result.Succeeded)
+            {
+                throw new IdentityException(result);
+            }
+
+            result = await _userManager.AddToRolesAsync(user, dto.Roles);
+            if (!result.Succeeded)
+            {
+                throw new IdentityException(result);
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Roles = dto.Roles;
+            return userDto;
         }
 
-        private UserDto GetUserDto(User user)
+        private async Task<UserDto> GetUserDtoAsync(User user)
         {
-            return _mapper.Map<UserDto>(user);
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.Roles = await _userManager.GetRolesAsync(user);
+            return userDto;
         }
     }
 }

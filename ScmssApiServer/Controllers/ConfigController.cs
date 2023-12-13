@@ -1,21 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
-using ScmssApiServer.Utilities;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Director,Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class ConfigController : CustomControllerBase
     {
         private readonly IConfigService _configService;
 
-        public ConfigController(IConfigService configService, IUsersService usersService)
-            : base(usersService)
+        public ConfigController(IConfigService configService, UserManager<User> userManager)
+            : base(userManager)
         {
             _configService = configService;
         }
@@ -26,6 +26,7 @@ namespace ScmssApiServer.Controllers
             return await _configService.GetAsync();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch]
         public async Task<ActionResult<Config>> Set(ConfigInputDto body)
         {

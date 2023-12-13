@@ -6,6 +6,7 @@ using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -27,15 +28,14 @@ namespace ScmssApiServer.DomainServices
             _userManager = userManager;
         }
 
-        public async Task<PurchaseRequisitionDto> CreateAsync(PurchaseRequisitionCreateDto dto, string userId)
+        public async Task<PurchaseRequisitionDto> CreateAsync(
+            PurchaseRequisitionCreateDto dto,
+            Identity identity)
         {
-            User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(x => x.Id == userId);
-            ProductionFacility? facility = user.ProductionFacility;
-            if (facility == null)
+            if (!identity.IsInProductionFacility)
             {
                 throw new InvalidDomainOperationException(
-                        "User needs to belong to a production facility " +
+                        "User must belong to a production facility " +
                         "to create a purchase requisition."
                     );
             }
@@ -48,28 +48,39 @@ namespace ScmssApiServer.DomainServices
 
             Config config = await _configService.GetAsync();
 
+            User user = await _userManager.Users.Include(i => i.ProductionFacility)
+                                                .FirstAsync(i => i.Id == identity.Id);
+            ProductionFacility facility = user.ProductionFacility!;
+
             var requisition = new PurchaseRequisition
             {
                 VendorId = vendor.Id,
                 Vendor = vendor,
                 ProductionFacilityId = facility.Id,
                 ProductionFacility = facility,
-                CreateUserId = userId,
+                CreateUserId = user.Id,
                 CreateUser = user,
                 VatRate = config.VatRate,
             };
 
             requisition.AddItems(await MapRequisitionItemDtosToModels(dto.VendorId, dto.Items));
-            requisition.Begin(userId);
+            requisition.Begin(user.Id);
 
             _dbContext.PurchaseRequisitions.Add(requisition);
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
-        public async Task<PurchaseRequisitionDto?> GetAsync(int id)
+        public async Task<PurchaseRequisitionDto?> GetAsync(int id, Identity identity)
         {
-            PurchaseRequisition? requisition = await _dbContext.PurchaseRequisitions
+            var query = _dbContext.PurchaseRequisitions.AsNoTracking();
+
+            if (identity.IsInProductionFacility)
+            {
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
+            }
+
+            PurchaseRequisition? requisition = await query
                 .AsNoTracking()
                 .Include(i => i.Items)
                 .ThenInclude(i => i.Supply)
@@ -84,10 +95,16 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto?>(requisition);
         }
 
-        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync()
+        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity identity)
         {
-            IList<PurchaseRequisition> requisitions = await _dbContext.PurchaseRequisitions
-                .AsNoTracking()
+            var query = _dbContext.PurchaseRequisitions.AsNoTracking();
+
+            if (identity.IsInProductionFacility)
+            {
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
+            }
+
+            IList<PurchaseRequisition> requisitions = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Vendor)
                 .Include(i => i.CreateUser)
@@ -98,7 +115,7 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<PurchaseRequisitionDto> UpdateAsync(int id,
                                                               PurchaseRequisitionUpdateDto dto,
-                                                              string userId)
+                                                              Identity identity)
         {
             PurchaseRequisition? requisition = await _dbContext.PurchaseRequisitions
                 .Include(i => i.Items)
@@ -116,11 +133,46 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
+            if (identity.IsInProductionFacility && identity.ProductionFacilityId != requisition.ProductionFacilityId)
+            {
+                throw new UnauthorizedException(
+                        "Unauthorized to handle purchase requisitions of another facility."
+                    );
+            }
+
+            if (dto.IsCanceled ?? false)
+            {
+                if (!identity.IsProductionUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to cancel.");
+                }
+
+                if (dto.Problem == null)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot cancel a requisition without a problem."
+                        );
+                }
+
+                User user = (await _userManager.FindByIdAsync(identity.Id))!;
+                requisition.Cancel(user.Id, dto.Problem);
+            }
+
+            if (dto.ApprovalStatus != null)
+            {
+                await HandleApprovalAsync(requisition, dto, identity);
+            }
+
             if (dto.Items != null)
             {
+                if (!identity.IsProductionUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change items.");
+                }
+
                 _dbContext.RemoveRange(requisition.Items);
                 requisition.AddItems(
-                        await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
+                    await MapRequisitionItemDtosToModels(requisition.VendorId, dto.Items)
                 );
             }
 
@@ -130,20 +182,36 @@ namespace ScmssApiServer.DomainServices
                 requisition.VatRate = config.VatRate;
             }
 
-            if (dto.IsCanceled ?? false)
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<PurchaseRequisitionDto>(requisition);
+        }
+
+        private async Task HandleApprovalAsync(
+            PurchaseRequisition requisition,
+            PurchaseRequisitionUpdateDto dto,
+            Identity identity)
+        {
+            bool isFinance = identity.IsFinanceUser;
+            bool isManager = identity.Roles.Contains("ProductionManager");
+
+            if (!isFinance && !isManager)
             {
-                if (dto.Problem == null)
-                {
-                    throw new InvalidDomainOperationException(
-                            "Cannot cancel a requisition without a problem."
-                        );
-                }
-                requisition.Cancel(userId, dto.Problem);
+                throw new UnauthorizedException("Not authorized to handle approval.");
             }
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
             if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
             {
-                requisition.Approve(userId);
+                if (isManager)
+                {
+                    requisition.ApproveAsProductionManager(user);
+                }
+
+                if (isFinance)
+                {
+                    requisition.ApproveAsFinance(user);
+                }
             }
             else if (dto.ApprovalStatus == ApprovalStatusOption.Rejected)
             {
@@ -153,11 +221,8 @@ namespace ScmssApiServer.DomainServices
                             "Cannot reject a requisition without a problem."
                         );
                 }
-                requisition.Reject(userId, dto.Problem);
+                requisition.Reject(user.Id, dto.Problem);
             }
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<PurchaseRequisitionDto>(requisition);
         }
 
         private async Task<IList<PurchaseRequisitionItem>> MapRequisitionItemDtosToModels(

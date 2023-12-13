@@ -1,4 +1,5 @@
 ﻿using ScmssApiServer.DTOs;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.IDomainServices
 {
@@ -6,13 +7,13 @@ namespace ScmssApiServer.IDomainServices
     {
         Task<TransOrderEventDto> AddManualEventAsync(int orderId, TransOrderEventCreateDto dto);
 
-        Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, string userId);
+        Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, Identity identity);
 
-        Task<SalesOrderDto?> GetAsync(int id);
+        Task<SalesOrderDto?> GetAsync(int id, Identity identity);
 
-        Task<IList<SalesOrderDto>> GetManyAsync();
+        Task<IList<SalesOrderDto>> GetManyAsync(Identity identity);
 
-        Task<SalesOrderDto> UpdateAsync(int id, SalesOrderUpdateDto dto, string userId);
+        Task<SalesOrderDto> UpdateAsync(int id, SalesOrderUpdateDto dto, Identity identity);
 
         Task<TransOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto);
     }

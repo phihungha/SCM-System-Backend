@@ -1,25 +1,27 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "PurchaseSpecialist,PurchaseManager")]
     [Route("api/[controller]")]
     [ApiController]
     public class SuppliesController : CustomControllerBase
     {
         private ISuppliesService _suppliesService;
 
-        public SuppliesController(ISuppliesService suppliesService, IUsersService usersService)
-            : base(usersService)
+        public SuppliesController(ISuppliesService suppliesService, UserManager<User> userManager)
+            : base(userManager)
         {
             _suppliesService = suppliesService;
         }
 
+        [Authorize(Roles = "PurchaseManager")]
         [HttpPost]
         public async Task<ActionResult<SupplyDto>> Create([FromBody] SupplyInputDto body)
         {
@@ -45,6 +47,7 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
+        [Authorize(Roles = "PurchaseManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<ProductDto>> Update(int id, [FromBody] SupplyInputDto body)
         {

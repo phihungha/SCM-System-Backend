@@ -6,6 +6,7 @@ using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
+using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
@@ -42,38 +43,48 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderEventDto>(orderEvent);
         }
 
-        public async Task<ProductionOrderDto> CreateAsync(OrderCreateDto<OrderItemInputDto> dto, string userId)
+        public async Task<ProductionOrderDto> CreateAsync(
+            OrderCreateDto<OrderItemInputDto> dto,
+            Identity identity)
         {
-            User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(x => x.Id == userId);
-            if (user.ProductionFacility == null)
+            if (!identity.IsInProductionFacility)
             {
                 throw new InvalidDomainOperationException(
-                        "User needs to belong to a production facility " +
+                        "User must belong to a production facility " +
                         "to create a production order."
                     );
             }
 
+            User user = await _userManager.Users.Include(i => i.ProductionFacility)
+                                                .FirstAsync(i => i.Id == identity.Id);
+            ProductionFacility facility = user.ProductionFacility!;
+
             var order = new ProductionOrder
             {
-                ProductionFacilityId = user.ProductionFacility.Id,
-                ProductionFacility = user.ProductionFacility,
-                CreateUserId = userId,
+                ProductionFacilityId = facility.Id,
+                ProductionFacility = facility,
+                CreateUserId = user.Id,
                 CreateUser = user,
             };
 
             order.AddItems(await MapOrderItemDtosToModels(dto.Items));
-            order.Begin(userId);
+            order.Begin(user.Id);
 
             _dbContext.ProductionOrders.Add(order);
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<ProductionOrderDto>(order);
         }
 
-        public async Task<ProductionOrderDto?> GetAsync(int id)
+        public async Task<ProductionOrderDto?> GetAsync(int id, Identity identity)
         {
-            ProductionOrder? order = await _dbContext.ProductionOrders
-                .AsNoTracking()
+            var query = _dbContext.ProductionOrders.AsNoTracking();
+
+            if (identity.IsInProductionFacility)
+            {
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
+            }
+
+            ProductionOrder? order = await query
                 .Include(i => i.Items).ThenInclude(i => i.Product)
                 .Include(i => i.SupplyUsageItems)
                 .ThenInclude(i => i.Supply)
@@ -86,10 +97,16 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderDto?>(order);
         }
 
-        public async Task<IList<ProductionOrderDto>> GetManyAsync()
+        public async Task<IList<ProductionOrderDto>> GetManyAsync(Identity identity)
         {
-            IList<ProductionOrder> orders = await _dbContext.ProductionOrders
-                .AsNoTracking()
+            var query = _dbContext.ProductionOrders.AsNoTracking();
+
+            if (identity.IsInProductionFacility)
+            {
+                query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
+            }
+
+            IList<ProductionOrder> orders = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
@@ -101,7 +118,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<ProductionOrderDto> UpdateAsync(
             int id,
             ProductionOrderUpdateDto dto,
-            string userId)
+            Identity identity)
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Items)
@@ -124,16 +141,80 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
+            if (identity.IsInProductionFacility && identity.ProductionFacilityId != order.ProductionFacilityId)
+            {
+                throw new UnauthorizedException(
+                        "Unauthorized to handle production orders of another facility."
+                    );
+            }
+
+            if (dto.Status != null)
+            {
+                await ChangeStatusAsync(order, dto, identity);
+            }
+
+            if (dto.ApprovalStatus != null)
+            {
+                await HandleApprovalAsync(order, dto, identity);
+            }
+
             if (dto.Items != null)
             {
+                if (!identity.IsProductionUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change items.");
+                }
+
                 _dbContext.RemoveRange(order.Items);
                 _dbContext.RemoveRange(order.SupplyUsageItems);
                 order.AddItems(await MapOrderItemDtosToModels(dto.Items));
             }
 
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<ProductionOrderDto>(order);
+        }
+
+        public async Task<ProductionOrderEventDto> UpdateEventAsync(
+            int id,
+            int orderId,
+            OrderEventUpdateDto dto)
+        {
+            ProductionOrder? order = await _dbContext.ProductionOrders
+                .Include(i => i.Events)
+                .FirstOrDefaultAsync(i => i.Id == orderId);
+            if (order == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            ProductionOrderEvent orderEvent = order.UpdateEvent(id, dto.Message, dto.Location);
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<ProductionOrderEventDto>(orderEvent);
+        }
+
+        private async Task ChangeStatusAsync(
+            ProductionOrder order,
+            ProductionOrderUpdateDto dto,
+            Identity identity)
+        {
+            bool isInventoryStatus = dto.Status == OrderStatusOption.Executing ||
+                                     dto.Status == OrderStatusOption.Completed ||
+                                     dto.Status == OrderStatusOption.Returned;
+            if ((isInventoryStatus && !identity.IsInventoryUser) ||
+                (!isInventoryStatus && !identity.IsProductionUser))
+            {
+                throw new UnauthorizedException("Unauthorized for this status.");
+            }
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
+
+            string userId = user.Id;
+
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
+
                     order.StartExecution();
                     break;
 
@@ -165,45 +246,38 @@ namespace ScmssApiServer.DomainServices
                     order.Return(userId, dto.Problem);
                     break;
             }
-
-            switch (dto.ApprovalStatus)
-            {
-                case ApprovalStatusOption.Approved:
-                    order.Approve(userId);
-                    break;
-
-                case ApprovalStatusOption.Rejected:
-                    if (dto.Problem == null)
-                    {
-                        throw new InvalidDomainOperationException(
-                                "Cannot reject an order without a problem."
-                            );
-                    }
-                    order.Reject(userId, dto.Problem);
-                    break;
-            }
-
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<ProductionOrderDto>(order);
         }
 
-        public async Task<ProductionOrderEventDto> UpdateEventAsync(int id, int orderId, OrderEventUpdateDto dto)
+        private async Task HandleApprovalAsync(
+            ProductionOrder order,
+            ProductionOrderUpdateDto dto,
+            Identity identity)
         {
-            ProductionOrder? order = await _dbContext.ProductionOrders
-                .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
-            if (order == null)
+            if (!identity.Roles.Contains("ProductionManager"))
             {
-                throw new EntityNotFoundException();
+                throw new UnauthorizedException("Not authorized to handle approval.");
             }
 
-            ProductionOrderEvent orderEvent = order.UpdateEvent(id, dto.Message, dto.Location);
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
-            await _dbContext.SaveChangesAsync();
-            return _mapper.Map<ProductionOrderEventDto>(orderEvent);
+            if (dto.ApprovalStatus == ApprovalStatusOption.Approved)
+            {
+                order.Approve(user);
+            }
+            else if (dto.ApprovalStatus == ApprovalStatusOption.Rejected)
+            {
+                if (dto.Problem == null)
+                {
+                    throw new InvalidDomainOperationException(
+                            "Cannot reject a production order without a problem."
+                        );
+                }
+                order.Reject(user, dto.Problem);
+            }
         }
 
-        private async Task<IList<ProductionOrderItem>> MapOrderItemDtosToModels(IEnumerable<OrderItemInputDto> dtos)
+        private async Task<IList<ProductionOrderItem>> MapOrderItemDtosToModels(
+            IEnumerable<OrderItemInputDto> dtos)
         {
             IList<int> productIds = dtos.Select(i => i.ItemId).ToList();
             IDictionary<int, Product> products = await _dbContext

@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
-using ScmssApiServer.Utilities;
+using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Director,Finance,SalesSpecialist,SalesManager,LogisticsSpecialist")]
     [Route("api/[controller]")]
     [ApiController]
     public class SalesOrdersController : CustomControllerBase
@@ -14,12 +15,13 @@ namespace ScmssApiServer.Controllers
         private readonly ISalesOrdersService _salesOrdersService;
 
         public SalesOrdersController(ISalesOrdersService salesOrdersService,
-                                     IUsersService usersService)
-            : base(usersService)
+                                     UserManager<User> userManager)
+            : base(userManager)
         {
             _salesOrdersService = salesOrdersService;
         }
 
+        [Authorize(Roles = "SalesSpecialist,SalesManager,LogisticsSpecialist")]
         [HttpPost("{orderId}/events")]
         public async Task<ActionResult<TransOrderEventDto>> AddManualEvent(
             int orderId,
@@ -29,34 +31,18 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpPatch("{orderId}/events/{id}")]
-        public async Task<ActionResult<TransOrderEventDto>> UpdateEvent(
-            int orderId,
-            int id,
-            [FromBody] OrderEventUpdateDto body)
-        {
-            TransOrderEventDto item = await _salesOrdersService.UpdateEventAsync(id, orderId, body);
-            return Ok(item);
-        }
-
+        [Authorize(Roles = "SalesSpecialist,SalesManager")]
         [HttpPost]
         public async Task<ActionResult<SalesOrderDto>> Create([FromBody] SalesOrderCreateDto body)
         {
-            SalesOrderDto item = await _salesOrdersService.CreateAsync(body, CurrentUserId);
+            SalesOrderDto item = await _salesOrdersService.CreateAsync(body, CurrentIdentity);
             return Ok(item);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IList<SalesOrderDto>>> Get()
-        {
-            IList<SalesOrderDto> items = await _salesOrdersService.GetManyAsync();
-            return Ok(items);
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<SalesOrderDto>> GetId(int id)
+        public async Task<ActionResult<SalesOrderDto>> Get(int id)
         {
-            SalesOrderDto? item = await _salesOrdersService.GetAsync(id);
+            SalesOrderDto? item = await _salesOrdersService.GetAsync(id, CurrentIdentity);
             if (item == null)
             {
                 return NotFound();
@@ -64,12 +50,31 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IList<SalesOrderDto>>> GetMany()
+        {
+            IList<SalesOrderDto> items = await _salesOrdersService.GetManyAsync(CurrentIdentity);
+            return Ok(items);
+        }
+
+        [Authorize(Roles = "Finance,SalesSpecialist,SalesManager")]
         [HttpPatch("{id}")]
         public async Task<ActionResult<SalesOrderDto>> Update(
             int id,
             [FromBody] SalesOrderUpdateDto body)
         {
-            SalesOrderDto item = await _salesOrdersService.UpdateAsync(id, body, CurrentUserId);
+            SalesOrderDto item = await _salesOrdersService.UpdateAsync(id, body, CurrentIdentity);
+            return Ok(item);
+        }
+
+        [Authorize(Roles = "SalesSpecialist,SalesManager,LogisticsSpecialist")]
+        [HttpPatch("{orderId}/events/{id}")]
+        public async Task<ActionResult<TransOrderEventDto>> UpdateEvent(
+            int orderId,
+            int id,
+            [FromBody] OrderEventUpdateDto body)
+        {
+            TransOrderEventDto item = await _salesOrdersService.UpdateEventAsync(id, orderId, body);
             return Ok(item);
         }
     }
