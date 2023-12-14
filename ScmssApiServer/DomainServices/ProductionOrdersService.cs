@@ -323,19 +323,33 @@ namespace ScmssApiServer.DomainServices
                 .ThenInclude(i => i.Supply)
                 .ThenInclude(i => i.WarehouseSupplyItems)
                 .Where(i => productIds.Contains(i.Id))
+                .Where(i => i.IsActive)
                 .ToDictionaryAsync(i => i.Id);
 
-            return dtos.Select(
-                dto => new ProductionOrderItem
+            var orderItems = new List<ProductionOrderItem>();
+
+            foreach (var dto in dtos)
+            {
+                int itemId = dto.ItemId;
+                if (!products.ContainsKey(itemId))
                 {
-                    ItemId = dto.ItemId,
+                    throw new InvalidDomainOperationException($"Product item {itemId} not found.");
+                }
+                Product product = products[itemId];
+
+                orderItems.Add(new ProductionOrderItem
+                {
+                    ItemId = itemId,
                     // This is needed to check stock.
-                    Product = products[dto.ItemId],
-                    Unit = products[dto.ItemId].Unit,
-                    UnitValue = products[dto.ItemId].Price,
-                    UnitCost = products[dto.ItemId].Cost,
+                    Product = product,
+                    Unit = product.Unit,
+                    UnitValue = product.Price,
+                    UnitCost = product.Cost,
                     Quantity = dto.Quantity
-                }).ToList();
+                });
+            }
+
+            return orderItems;
         }
     }
 }

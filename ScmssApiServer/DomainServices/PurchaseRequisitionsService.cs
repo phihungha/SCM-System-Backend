@@ -40,7 +40,8 @@ namespace ScmssApiServer.DomainServices
                     );
             }
 
-            Vendor? vendor = await _dbContext.Vendors.FindAsync(dto.VendorId);
+            Vendor? vendor = await _dbContext.Vendors.Where(i => i.IsActive)
+                                                     .FirstOrDefaultAsync(i => i.Id == dto.VendorId);
             if (vendor == null)
             {
                 throw new EntityNotFoundException("Vendor not found.");
@@ -274,25 +275,33 @@ namespace ScmssApiServer.DomainServices
                 .Supplies
                 .Where(i => i.VendorId == requisitionVendorId)
                 .Where(i => supplyIds.Contains(i.Id))
+                .Where(i => i.IsActive)
                 .ToDictionaryAsync(i => i.Id);
 
-            if (supplies.Count != supplyIds.Count)
+            var orderItems = new List<PurchaseRequisitionItem>();
+
+            foreach (var dto in dtos)
             {
-                throw new InvalidDomainOperationException(
-                            "Cannot add a supply item with different vendor " +
-                            "from the purchase requisition's vendor."
+                int itemId = dto.ItemId;
+                if (!supplies.ContainsKey(itemId))
+                {
+                    throw new InvalidDomainOperationException(
+                            $"Supply item {itemId} not found or belongs to another vendor."
                         );
+                }
+                Supply supply = supplies[itemId];
+
+                orderItems.Add(new PurchaseRequisitionItem
+                {
+                    ItemId = itemId,
+                    Supply = supply,
+                    Unit = supply.Unit,
+                    UnitPrice = supply.Price,
+                    Quantity = dto.Quantity
+                });
             }
 
-            return dtos.Select(
-                i => new PurchaseRequisitionItem
-                {
-                    ItemId = i.ItemId,
-                    Supply = supplies[i.ItemId],
-                    Unit = supplies[i.ItemId].Unit,
-                    UnitPrice = supplies[i.ItemId].Price,
-                    Quantity = i.Quantity
-                }).ToList();
+            return orderItems;
         }
     }
 }

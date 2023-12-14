@@ -47,7 +47,8 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, Identity identity)
         {
-            Customer? customer = await _dbContext.Customers.FindAsync(dto.CustomerId);
+            Customer? customer = await _dbContext.Customers.Where(i => i.IsActive)
+                                                           .FirstOrDefaultAsync(i => i.Id == dto.CustomerId);
             if (customer == null)
             {
                 throw new EntityNotFoundException("Customer not found");
@@ -106,7 +107,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SalesOrderDto?>(order);
         }
 
-        public async Task<IList<SalesOrderDto>> GetManyAsync(TransOrderQueryDto<SalesOrderSearchCriteria> dto, Identity identity)
+        public async Task<IList<SalesOrderDto>> GetManyAsync(
+            TransOrderQueryDto<SalesOrderSearchCriteria> dto,
+            Identity identity)
         {
             SalesOrderSearchCriteria criteria = dto.SearchCriteria;
             string? searchTerm = dto.SearchTerm?.ToLower();
@@ -336,7 +339,8 @@ namespace ScmssApiServer.DomainServices
 
         private async Task<ProductionFacility> GetProductionFacilityAsync(int facilityId)
         {
-            ProductionFacility? facility = await _dbContext.ProductionFacilities.FindAsync(facilityId);
+            ProductionFacility? facility = await _dbContext.ProductionFacilities.Where(i => i.IsActive)
+                                                                                .FirstOrDefaultAsync(i => i.Id == facilityId);
             if (facility == null)
             {
                 throw new EntityNotFoundException("Production facility not found.");
@@ -351,18 +355,32 @@ namespace ScmssApiServer.DomainServices
                 .Products
                 .Include(i => i.WarehouseProductItems)
                 .Where(i => productIds.Contains(i.Id))
+                .Where(i => i.IsActive)
                 .ToDictionaryAsync(i => i.Id);
 
-            return dtos.Select(
-                dto => new SalesOrderItem
+            var orderItems = new List<SalesOrderItem>();
+
+            foreach (var dto in dtos)
+            {
+                int itemId = dto.ItemId;
+                if (!products.ContainsKey(itemId))
                 {
-                    ItemId = dto.ItemId,
+                    throw new InvalidDomainOperationException($"Product item {itemId} not found.");
+                }
+                Product product = products[itemId];
+
+                orderItems.Add(new SalesOrderItem
+                {
+                    ItemId = itemId,
                     // This is needed to check stock.
-                    Product = products[dto.ItemId],
-                    Unit = products[dto.ItemId].Unit,
-                    UnitPrice = products[dto.ItemId].Price,
+                    Product = product,
+                    Unit = product.Unit,
+                    UnitPrice = product.Price,
                     Quantity = dto.Quantity
-                }).ToList();
+                });
+            }
+
+            return orderItems;
         }
     }
 }
