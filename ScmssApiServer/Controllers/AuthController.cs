@@ -36,7 +36,7 @@ namespace ScmssApiServer.Controllers
         public new async Task<ActionResult> SignOut()
         {
             await _authService.SignOutAsync();
-            return OkMessage("Signed out");
+            return OkMessage("Signed out.");
         }
     }
 }
