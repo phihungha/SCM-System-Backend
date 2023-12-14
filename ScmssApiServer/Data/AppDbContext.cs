@@ -445,7 +445,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 1,
                 ProductionFacilityId = 1,
                 Quantity = 13000,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -453,7 +452,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 2,
                 ProductionFacilityId = 1,
                 Quantity = 12500,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -461,7 +459,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 3,
                 ProductionFacilityId = 1,
                 Quantity = 12500,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -469,7 +466,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 4,
                 ProductionFacilityId = 1,
                 Quantity = 12000,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -477,7 +473,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 5,
                 ProductionFacilityId = 1,
                 Quantity = 1800,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -485,7 +480,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 6,
                 ProductionFacilityId = 1,
                 Quantity = 1800,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -493,7 +487,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 1,
                 ProductionFacilityId = 2,
                 Quantity = 12000,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -501,7 +494,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 2,
                 ProductionFacilityId = 2,
                 Quantity = 12000,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -509,7 +501,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 3,
                 ProductionFacilityId = 2,
                 Quantity = 12500,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -517,7 +508,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 4,
                 ProductionFacilityId = 2,
                 Quantity = 11000,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -525,7 +515,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 5,
                 ProductionFacilityId = 2,
                 Quantity = 1500,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseSupplyItem
@@ -533,7 +522,6 @@ namespace ScmssApiServer.Data
                 SupplyId = 6,
                 ProductionFacilityId = 2,
                 Quantity = 1500,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             });
 
@@ -543,7 +531,6 @@ namespace ScmssApiServer.Data
                 ProductId = 1,
                 ProductionFacilityId = 1,
                 Quantity = 400,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseProductItem
@@ -551,7 +538,6 @@ namespace ScmssApiServer.Data
                 ProductId = 2,
                 ProductionFacilityId = 1,
                 Quantity = 300,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseProductItem
@@ -559,7 +545,6 @@ namespace ScmssApiServer.Data
                 ProductId = 1,
                 ProductionFacilityId = 2,
                 Quantity = 700,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             },
             new WarehouseProductItem
@@ -567,7 +552,6 @@ namespace ScmssApiServer.Data
                 ProductId = 2,
                 ProductionFacilityId = 2,
                 Quantity = 600,
-                IsActive = true,
                 CreateTime = DateTime.UtcNow,
             });
 
@@ -575,7 +559,7 @@ namespace ScmssApiServer.Data
         }
 
         /// <summary>
-        /// Set update info on updated solf-deletable or lifecycle entity.
+        /// Set update info on updated ICreateUpdateTime entity.
         /// </summary>
         private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
         {
@@ -586,20 +570,15 @@ namespace ScmssApiServer.Data
                 return;
             }
 
-            if (entry.Entity is ISoftDeletable)
+            if (entry.Entity is ICreateUpdateTime)
             {
-                var entity = (ISoftDeletable)entry.Entity;
-                entity.UpdateTime = DateTime.UtcNow;
-            }
-            else if (entry.Entity is ILifecycle)
-            {
-                var entity = (ILifecycle)entry.Entity;
+                var entity = (ICreateUpdateTime)entry.Entity;
                 entity.UpdateTime = DateTime.UtcNow;
             }
         }
 
         /// <summary>
-        /// Set creation info on new solf-deletable or lifecycle entity.
+        /// Set creation info on new ICreateUpdateTime entity.
         /// </summary>
         private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
         {
@@ -609,14 +588,9 @@ namespace ScmssApiServer.Data
                 return;
             }
 
-            if (entry.Entity is ISoftDeletable)
+            if (entry.Entity is ICreateUpdateTime)
             {
-                var entity = (ISoftDeletable)entry.Entity;
-                entity.CreateTime = DateTime.UtcNow;
-            }
-            else if (entry.Entity is ILifecycle)
-            {
-                var entity = (ILifecycle)entry.Entity;
+                var entity = (ICreateUpdateTime)entry.Entity;
                 entity.CreateTime = DateTime.UtcNow;
             }
         }

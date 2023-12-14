@@ -3,9 +3,8 @@
     /// <summary>
     /// Interface for models that have a lifecycle (begin and end).
     /// </summary>
-    public interface ILifecycle
+    public interface ILifecycle : ICreateUpdateTime
     {
-        DateTime CreateTime { get; set; }
         User CreateUser { get; set; }
         string CreateUserId { get; set; }
         DateTime? EndTime { get; }
@@ -13,7 +12,6 @@
         string? EndUserId { get; }
         bool IsEnded => EndTime != null;
         string? Problem { get; }
-        DateTime? UpdateTime { get; set; }
 
         void Begin(User user);
 

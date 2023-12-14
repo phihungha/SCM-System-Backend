@@ -4,7 +4,7 @@ namespace ScmssApiServer.IDomainServices
 {
     public interface IProductsService
     {
-        Task<ProductDto> CreateAsync(ProductInputDto dto);
+        Task<ProductDto> AddAsync(ProductInputDto dto);
 
         Task<ProductDto?> GetAsync(int id);
 
