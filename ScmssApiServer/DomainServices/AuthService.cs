@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
@@ -32,7 +33,9 @@ namespace ScmssApiServer.DomainServices
                 return null;
             }
 
-            User user = (await _userManager.FindByNameAsync(dto.UserName))!;
+            User user = await _userManager.Users.AsNoTracking()
+                                                .Include(i => i.ProductionFacility)
+                                                .FirstAsync(i => i.UserName == dto.UserName);
             var userDto = _mapper.Map<UserDto>(user);
             userDto.Roles = await _userManager.GetRolesAsync(user);
             return userDto;
