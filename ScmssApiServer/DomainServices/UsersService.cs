@@ -45,7 +45,7 @@ namespace ScmssApiServer.DomainServices
             }
         }
 
-        public async Task<UserDto> CreateUserAsync(UserCreateDto dto)
+        public async Task<UserDto> CreateAsync(UserCreateDto dto)
         {
             var user = _mapper.Map<User>(dto);
 
@@ -70,10 +70,11 @@ namespace ScmssApiServer.DomainServices
             return _imageService.GenerateUploadUrl(key);
         }
 
-        public async Task<UserDto?> GetUserAsync(string id)
+        public async Task<UserDto?> GetAsync(string id)
         {
             User? user = await _userManager.Users
                 .AsNoTracking()
+                .Include(i => i.ProductionFacility)
                 .FirstOrDefaultAsync(i => i.Id == id);
 
             if (user == null)
@@ -84,13 +85,38 @@ namespace ScmssApiServer.DomainServices
             return await GetUserDtoAsync(user);
         }
 
-        public async Task<IList<UserDto>> GetUsersAsync()
+        public async Task<IList<UserDto>> GetManyAsync(SimpleQueryDto dto)
         {
-            IList<User> users = await _userManager.Users.AsNoTracking().ToListAsync();
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            SimpleSearchCriteria? searchCriteria = dto.SearchCriteria;
+            bool? displayAll = dto.All;
+
+            var query = _userManager.Users.AsNoTracking();
+
+            if (searchTerm != null)
+            {
+                if (searchCriteria == SimpleSearchCriteria.Name)
+                {
+                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm));
+                }
+                else
+                {
+                    query = query.Where(i => i.Id == searchTerm);
+                }
+            }
+
+            if (!displayAll ?? true)
+            {
+                query = query.Where(i => i.IsActive);
+            }
+
+            IList<User> users = await query.Include(i => i.ProductionFacility)
+                                           .OrderBy(i => i.Id)
+                                           .ToListAsync();
             return _mapper.Map<IList<UserDto>>(users);
         }
 
-        public async Task<UserDto> UpdateUserAsync(string id, UserInputDto dto)
+        public async Task<UserDto> UpdateAsync(string id, UserInputDto dto)
         {
             User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)

@@ -35,11 +35,11 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionFacilityDto?>(facility);
         }
 
-        public async Task<IList<ProductionFacilityDto>> GetManyAsync(SimpleQueryDto queryDto)
+        public async Task<IList<ProductionFacilityDto>> GetManyAsync(SimpleQueryDto dto)
         {
-            string? searchTerm = queryDto.SearchTerm;
-            SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
-            bool? displayAll = queryDto.All;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            SimpleSearchCriteria? searchCriteria = dto.SearchCriteria;
+            bool? displayAll = dto.All;
 
             var query = _dbContext.ProductionFacilities.AsNoTracking();
 
@@ -47,7 +47,7 @@ namespace ScmssApiServer.DomainServices
             {
                 if (searchCriteria == SimpleSearchCriteria.Name)
                 {
-                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm.ToLower()));
+                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm));
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.IsActive);
             }
 
-            IList<ProductionFacility> facilities = await query.ToListAsync();
+            IList<ProductionFacility> facilities = await query.OrderBy(i => i.Id).ToListAsync();
             return _mapper.Map<IList<ProductionFacilityDto>>(facilities);
         }
 

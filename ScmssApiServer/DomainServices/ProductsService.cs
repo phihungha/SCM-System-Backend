@@ -65,7 +65,7 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.IsActive);
             }
 
-            IList<Product> products = await query.ToListAsync();
+            IList<Product> products = await query.OrderBy(i => i.Id).ToListAsync();
             return _mapper.Map<IList<ProductDto>>(products);
         }
 

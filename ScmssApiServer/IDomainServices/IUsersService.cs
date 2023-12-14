@@ -7,14 +7,14 @@ namespace ScmssApiServer.IDomainServices
     {
         Task ChangePasswordAsync(string id, UserPasswordChangeDto dto);
 
-        Task<UserDto> CreateUserAsync(UserCreateDto dto);
+        Task<UserDto> CreateAsync(UserCreateDto dto);
 
         string GetProfileImageUploadUrl(Identity identity);
 
-        Task<UserDto?> GetUserAsync(string id);
+        Task<UserDto?> GetAsync(string id);
 
-        Task<IList<UserDto>> GetUsersAsync();
+        Task<IList<UserDto>> GetManyAsync(SimpleQueryDto dto);
 
-        Task<UserDto> UpdateUserAsync(string id, UserInputDto dto);
+        Task<UserDto> UpdateAsync(string id, UserInputDto dto);
     }
 }

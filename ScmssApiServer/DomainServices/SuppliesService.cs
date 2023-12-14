@@ -37,11 +37,11 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SupplyDto?>(supply);
         }
 
-        public async Task<IList<SupplyDto>> GetManyAsync(SimpleQueryDto queryDto)
+        public async Task<IList<SupplyDto>> GetManyAsync(SimpleQueryDto dto)
         {
-            string? searchTerm = queryDto.SearchTerm;
-            SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
-            bool? displayAll = queryDto.All;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            SimpleSearchCriteria? searchCriteria = dto.SearchCriteria;
+            bool? displayAll = dto.All;
 
             var query = _dbContext.Supplies.AsNoTracking();
 
@@ -49,7 +49,7 @@ namespace ScmssApiServer.DomainServices
             {
                 if (searchCriteria == SimpleSearchCriteria.Name)
                 {
-                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm.ToLower()));
+                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm));
                 }
                 else
                 {
@@ -62,7 +62,9 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.IsActive);
             }
 
-            IList<Supply> supplies = await query.Include(i => i.Vendor).ToListAsync();
+            IList<Supply> supplies = await query.Include(i => i.Vendor)
+                                                .OrderBy(i => i.Id)
+                                                .ToListAsync();
             return _mapper.Map<IList<SupplyDto>>(supplies);
         }
 
