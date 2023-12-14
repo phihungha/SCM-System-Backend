@@ -3,10 +3,8 @@
     /// <summary>
     /// Interface for models that have soft-delete ability.
     /// </summary>
-    public interface ISoftDeletable
+    public interface ISoftDeletable : ICreateUpdateTime
     {
-        DateTime CreateTime { get; set; }
         bool IsActive { get; set; }
-        DateTime? UpdateTime { get; set; }
     }
 }

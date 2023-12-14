@@ -223,6 +223,48 @@ namespace ScmssApiServer.Data
 
             #endregion ProductionFacility
 
+            SeedData(builder);
+        }
+
+        /// <summary>
+        /// Set update info on updated ICreateUpdateTime entity.
+        /// </summary>
+        private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
+        {
+            EntityEntry entry = e.Entry;
+
+            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
+            {
+                return;
+            }
+
+            if (entry.Entity is ICreateUpdateTime)
+            {
+                var entity = (ICreateUpdateTime)entry.Entity;
+                entity.UpdateTime = DateTime.UtcNow;
+            }
+        }
+
+        /// <summary>
+        /// Set creation info on new ICreateUpdateTime entity.
+        /// </summary>
+        private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
+        {
+            EntityEntry entry = e.Entry;
+            if (e.FromQuery || entry.State != EntityState.Added)
+            {
+                return;
+            }
+
+            if (entry.Entity is ICreateUpdateTime)
+            {
+                var entity = (ICreateUpdateTime)entry.Entity;
+                entity.CreateTime = DateTime.UtcNow;
+            }
+        }
+
+        private void SeedData(ModelBuilder builder)
+        {
             #region Seeding
 
             builder.Entity<Config>().HasData(new Config { Id = 1, VatRate = 0.05 });
@@ -439,186 +481,151 @@ namespace ScmssApiServer.Data
                 new ProductSupplyCostItem { ProductId = 2, SupplyId = 6, Quantity = 1.5 }
             );
 
-            builder.Entity<WarehouseSupplyItem>().HasData(
-            new WarehouseSupplyItem
+            var warehouseSupplyItems = new List<WarehouseSupplyItem>()
             {
-                SupplyId = 1,
-                ProductionFacilityId = 1,
-                Quantity = 13000,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 2,
-                ProductionFacilityId = 1,
-                Quantity = 12500,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 3,
-                ProductionFacilityId = 1,
-                Quantity = 12500,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 4,
-                ProductionFacilityId = 1,
-                Quantity = 12000,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 5,
-                ProductionFacilityId = 1,
-                Quantity = 1800,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 6,
-                ProductionFacilityId = 1,
-                Quantity = 1800,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 1,
-                ProductionFacilityId = 2,
-                Quantity = 12000,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 2,
-                ProductionFacilityId = 2,
-                Quantity = 12000,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 3,
-                ProductionFacilityId = 2,
-                Quantity = 12500,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 4,
-                ProductionFacilityId = 2,
-                Quantity = 11000,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 5,
-                ProductionFacilityId = 2,
-                Quantity = 1500,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                SupplyId = 6,
-                ProductionFacilityId = 2,
-                Quantity = 1500,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            });
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 1,
+                    ProductionFacilityId = 1,
+                    Quantity = 13000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 2,
+                    ProductionFacilityId = 1,
+                    Quantity = 12500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 3,
+                    ProductionFacilityId = 1,
+                    Quantity = 12500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 4,
+                    ProductionFacilityId = 1,
+                    Quantity = 12000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 5,
+                    ProductionFacilityId = 1,
+                    Quantity = 1800,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 6,
+                    ProductionFacilityId = 1,
+                    Quantity = 1800,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 1,
+                    ProductionFacilityId = 2,
+                    Quantity = 12000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 2,
+                    ProductionFacilityId = 2,
+                    Quantity = 12000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 3,
+                    ProductionFacilityId = 2,
+                    Quantity = 12500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 4,
+                    ProductionFacilityId = 2,
+                    Quantity = 11000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 5,
+                    ProductionFacilityId = 2,
+                    Quantity = 1500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    SupplyId = 6,
+                    ProductionFacilityId = 2,
+                    Quantity = 1500,
+                    CreateTime = DateTime.UtcNow,
+                }
+            };
+            builder.Entity<WarehouseSupplyItem>().HasData(warehouseSupplyItems);
 
-            builder.Entity<WarehouseProductItem>().HasData(
-            new WarehouseProductItem
+            IList<WarehouseSupplyItemEvent> warehouseSupplyItemEvents
+                = warehouseSupplyItems.Select(i => new WarehouseSupplyItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = i.Quantity,
+                    Change = i.Quantity,
+                    WarehouseSupplyItemSupplyId = i.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = i.ProductionFacilityId,
+                }).ToList();
+            builder.Entity<WarehouseSupplyItemEvent>().HasData(warehouseSupplyItemEvents);
+
+            var warehouseProductItems = new List<WarehouseProductItem>()
             {
-                ProductId = 1,
-                ProductionFacilityId = 1,
-                Quantity = 400,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseProductItem
-            {
-                ProductId = 2,
-                ProductionFacilityId = 1,
-                Quantity = 300,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseProductItem
-            {
-                ProductId = 1,
-                ProductionFacilityId = 2,
-                Quantity = 700,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseProductItem
-            {
-                ProductId = 2,
-                ProductionFacilityId = 2,
-                Quantity = 600,
-                IsActive = true,
-                CreateTime = DateTime.UtcNow,
-            });
+                new WarehouseProductItem
+                {
+                    ProductId = 1,
+                    ProductionFacilityId = 1,
+                    Quantity = 400,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseProductItem
+                {
+                    ProductId = 2,
+                    ProductionFacilityId = 1,
+                    Quantity = 300,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseProductItem
+                {
+                    ProductId = 1,
+                    ProductionFacilityId = 2,
+                    Quantity = 700,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseProductItem
+                {
+                    ProductId = 2,
+                    ProductionFacilityId = 2,
+                    Quantity = 600,
+                    CreateTime = DateTime.UtcNow,
+                }
+            };
+            builder.Entity<WarehouseProductItem>().HasData(warehouseProductItems);
+
+            IList<WarehouseProductItemEvent> warehouseProductItemEvents
+                = warehouseProductItems.Select(i => new WarehouseProductItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = i.Quantity,
+                    Change = i.Quantity,
+                    WarehouseProductItemProductId = i.ProductId,
+                    WarehouseProductItemProductionFacilityId = i.ProductionFacilityId,
+                }).ToList();
+            builder.Entity<WarehouseProductItemEvent>().HasData(warehouseProductItemEvents);
 
             #endregion Seeding
-        }
-
-        /// <summary>
-        /// Set update info on updated solf-deletable or lifecycle entity.
-        /// </summary>
-        private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
-        {
-            EntityEntry entry = e.Entry;
-
-            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
-            {
-                return;
-            }
-
-            if (entry.Entity is ISoftDeletable)
-            {
-                var entity = (ISoftDeletable)entry.Entity;
-                entity.UpdateTime = DateTime.UtcNow;
-            }
-            else if (entry.Entity is ILifecycle)
-            {
-                var entity = (ILifecycle)entry.Entity;
-                entity.UpdateTime = DateTime.UtcNow;
-            }
-        }
-
-        /// <summary>
-        /// Set creation info on new solf-deletable or lifecycle entity.
-        /// </summary>
-        private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
-        {
-            EntityEntry entry = e.Entry;
-            if (e.FromQuery || entry.State != EntityState.Added)
-            {
-                return;
-            }
-
-            if (entry.Entity is ISoftDeletable)
-            {
-                var entity = (ISoftDeletable)entry.Entity;
-                entity.CreateTime = DateTime.UtcNow;
-            }
-            else if (entry.Entity is ILifecycle)
-            {
-                var entity = (ILifecycle)entry.Entity;
-                entity.CreateTime = DateTime.UtcNow;
-            }
         }
     }
 }

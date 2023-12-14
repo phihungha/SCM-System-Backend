@@ -129,24 +129,24 @@ namespace ScmssApiServer.Models
             return AddEvent(type, location, message);
         }
 
-        public override void Begin(string userId)
+        public override void Begin(User user)
         {
-            base.Begin(userId);
+            base.Begin(user);
             PaymentStatus = TransOrderPaymentStatus.Pending;
             AddEvent(TransOrderEventType.Processing);
         }
 
-        public override void Cancel(string userId, string problem)
+        public override void Cancel(User user, string problem)
         {
-            base.Cancel(userId, problem);
+            base.Cancel(user, problem);
             PaymentStatus = TransOrderPaymentStatus.Canceled;
             TEvent lastEvent = Events.Last();
             AddEvent(TransOrderEventType.Canceled, lastEvent.Location);
         }
 
-        public override void Complete(string userId)
+        public override void Complete(User user)
         {
-            base.Complete(userId);
+            base.Complete(user);
             CreateDuePayment();
             AddEvent(TransOrderEventType.Completed, ToLocation);
         }
@@ -182,9 +182,9 @@ namespace ScmssApiServer.Models
             AddEvent(TransOrderEventType.Delivered, ToLocation);
         }
 
-        public override void Return(string userId, string problem)
+        public override void Return(User user, string problem)
         {
-            base.Return(userId, problem);
+            base.Return(user, problem);
             PaymentStatus = TransOrderPaymentStatus.Canceled;
             AddEvent(TransOrderEventType.Returned, ToLocation);
         }

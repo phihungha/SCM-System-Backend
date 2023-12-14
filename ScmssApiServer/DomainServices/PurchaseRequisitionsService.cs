@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -65,7 +66,7 @@ namespace ScmssApiServer.DomainServices
             };
 
             requisition.AddItems(await MapRequisitionItemDtosToModels(dto.VendorId, dto.Items));
-            requisition.Begin(user.Id);
+            requisition.Begin(user);
 
             _dbContext.PurchaseRequisitions.Add(requisition);
             await _dbContext.SaveChangesAsync();
@@ -196,7 +197,7 @@ namespace ScmssApiServer.DomainServices
                 }
 
                 User user = (await _userManager.FindByIdAsync(identity.Id))!;
-                requisition.Cancel(user.Id, dto.Problem);
+                requisition.Cancel(user, dto.Problem);
             }
 
             if (dto.ApprovalStatus != null)
@@ -262,7 +263,7 @@ namespace ScmssApiServer.DomainServices
                             "Cannot reject a requisition without a problem."
                         );
                 }
-                requisition.Reject(user.Id, dto.Problem);
+                requisition.Reject(user, dto.Problem);
             }
         }
 
@@ -285,8 +286,8 @@ namespace ScmssApiServer.DomainServices
                 int itemId = dto.ItemId;
                 if (!supplies.ContainsKey(itemId))
                 {
-                    throw new InvalidDomainOperationException(
-                            $"Supply item {itemId} not found or belongs to another vendor."
+                    throw new EntityNotFoundException(
+                            $"Supply item with ID {itemId} not found or belongs to another vendor."
                         );
                 }
                 Supply supply = supplies[itemId];

@@ -24,6 +24,59 @@ namespace ScmssApiServer.DomainServices
             var facility = _mapper.Map<ProductionFacility>(dto);
             _dbContext.Add(facility);
             await _dbContext.SaveChangesAsync();
+
+            IList<Supply> supplies = await _dbContext.Supplies.ToListAsync();
+            foreach (Supply supply in supplies)
+            {
+                var warehouseItem = new WarehouseSupplyItem
+                {
+                    SupplyId = supply.Id,
+                    Supply = supply,
+                    ProductionFacilityId = facility.Id,
+                    ProductionFacility = facility,
+                    Quantity = 0,
+                };
+
+                warehouseItem.Events.Add(new WarehouseSupplyItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = 0,
+                    Change = 0,
+                    WarehouseSupplyItem = warehouseItem,
+                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
+                });
+
+                facility.WarehouseSupplyItems.Add(warehouseItem);
+            }
+
+            IList<Product> products = await _dbContext.Products.ToListAsync();
+            foreach (Product product in products)
+            {
+                var warehouseItem = new WarehouseProductItem
+                {
+                    ProductId = product.Id,
+                    Product = product,
+                    ProductionFacilityId = facility.Id,
+                    ProductionFacility = facility,
+                    Quantity = 0,
+                };
+
+                warehouseItem.Events.Add(new WarehouseProductItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = 0,
+                    Change = 0,
+                    WarehouseProductItem = warehouseItem,
+                    WarehouseProductItemProductId = warehouseItem.ProductId,
+                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
+                });
+
+                facility.WarehouseProductItems.Add(warehouseItem);
+            }
+
+            await _dbContext.SaveChangesAsync();
+
             return _mapper.Map<ProductionFacilityDto>(facility);
         }
 

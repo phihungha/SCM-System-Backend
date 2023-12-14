@@ -27,6 +27,12 @@ namespace ScmssApiServer.Models
 
         public decimal TotalValue { get; protected set; }
 
+        public ICollection<WarehouseProductItemEvent> WarehouseProductItemEvents { get; protected set; }
+            = new List<WarehouseProductItemEvent>();
+
+        public ICollection<WarehouseSupplyItemEvent> WarehouseSupplyItemEvents { get; protected set; }
+            = new List<WarehouseSupplyItemEvent>();
+
         public override void AddItems(ICollection<ProductionOrderItem> items)
         {
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
@@ -119,23 +125,23 @@ namespace ScmssApiServer.Models
             ApproveProductionManager = user;
         }
 
-        public override void Begin(string userId)
+        public override void Begin(User user)
         {
-            base.Begin(userId);
+            base.Begin(user);
             ApprovalStatus = ApprovalStatus.PendingApproval;
             AddEvent(ProductionOrderEventType.PendingApproval);
         }
 
-        public override void Cancel(string userId, string problem)
+        public override void Cancel(User user, string problem)
         {
-            base.Cancel(userId, problem);
+            base.Cancel(user, problem);
             ProductionOrderEvent lastEvent = Events.Last();
             AddEvent(ProductionOrderEventType.Canceled, lastEvent.Location);
         }
 
-        public override void Complete(string userId)
+        public override void Complete(User user)
         {
-            base.Complete(userId);
+            base.Complete(user);
             AddEvent(ProductionOrderEventType.Completed);
 
             foreach (ProductionOrderItem item in Items)
@@ -144,6 +150,19 @@ namespace ScmssApiServer.Models
                         i => i.ProductionFacilityId == ProductionFacilityId
                     );
                 warehouseItem.Quantity += item.Quantity;
+
+                var warehouseEvent = new WarehouseProductItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = warehouseItem.Quantity,
+                    Change = item.Quantity,
+                    ProductionOrder = this,
+                    ProductionOrderId = Id,
+                    WarehouseProductItem = warehouseItem,
+                    WarehouseProductItemProductId = warehouseItem.ProductId,
+                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
+                };
+                warehouseItem.Events.Add(warehouseEvent);
             }
         }
 
@@ -165,12 +184,12 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
-            Cancel(user.Id, problem);
+            Cancel(user, problem);
         }
 
-        public override void Return(string userId, string problem)
+        public override void Return(User user, string problem)
         {
-            base.Return(userId, problem);
+            base.Return(user, problem);
             AddEvent(ProductionOrderEventType.Unaccepted);
         }
 
@@ -192,6 +211,19 @@ namespace ScmssApiServer.Models
                     i => i.ProductionFacilityId == ProductionFacilityId
                 );
                 warehouseItem.Quantity -= item.Quantity;
+
+                var warehouseEvent = new WarehouseSupplyItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = warehouseItem.Quantity,
+                    Change = -item.Quantity,
+                    ProductionOrder = this,
+                    ProductionOrderId = Id,
+                    WarehouseSupplyItem = warehouseItem,
+                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
+                };
+                warehouseItem.Events.Add(warehouseEvent);
             }
         }
 

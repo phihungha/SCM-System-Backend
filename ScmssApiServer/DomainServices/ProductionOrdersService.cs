@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -68,7 +69,7 @@ namespace ScmssApiServer.DomainServices
             };
 
             order.AddItems(await MapOrderItemDtosToModels(dto.Items));
-            order.Begin(user.Id);
+            order.Begin(user);
 
             _dbContext.ProductionOrders.Add(order);
             await _dbContext.SaveChangesAsync();
@@ -246,8 +247,6 @@ namespace ScmssApiServer.DomainServices
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
-            string userId = user.Id;
-
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
@@ -260,7 +259,7 @@ namespace ScmssApiServer.DomainServices
                     break;
 
                 case OrderStatusOption.Completed:
-                    order.Complete(userId);
+                    order.Complete(user);
                     break;
 
                 case OrderStatusOption.Canceled:
@@ -270,7 +269,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot cancel an order without a problem."
                             );
                     }
-                    order.Cancel(userId, dto.Problem);
+                    order.Cancel(user, dto.Problem);
                     break;
 
                 case OrderStatusOption.Returned:
@@ -280,7 +279,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot return an order without a problem."
                             );
                     }
-                    order.Return(userId, dto.Problem);
+                    order.Return(user, dto.Problem);
                     break;
             }
         }
@@ -333,7 +332,7 @@ namespace ScmssApiServer.DomainServices
                 int itemId = dto.ItemId;
                 if (!products.ContainsKey(itemId))
                 {
-                    throw new InvalidDomainOperationException($"Product item {itemId} not found.");
+                    throw new EntityNotFoundException($"Product item with ID {itemId} not found.");
                 }
                 Product product = products[itemId];
 

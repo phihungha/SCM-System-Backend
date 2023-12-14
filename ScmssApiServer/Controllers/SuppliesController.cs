@@ -25,7 +25,7 @@ namespace ScmssApiServer.Controllers
         [HttpPost]
         public async Task<ActionResult<SupplyDto>> Create([FromBody] SupplyInputDto body)
         {
-            SupplyDto item = await _suppliesService.CreateAsync(body);
+            SupplyDto item = await _suppliesService.AddAsync(body);
             return Ok(item);
         }
 

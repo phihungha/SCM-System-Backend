@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ScmssApiServer.DomainExceptions;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.Models;
 using System.Security.Claims;
 
@@ -40,7 +41,7 @@ namespace ScmssApiServer.Services
             string? id = userManager.GetUserId(principal);
             if (id == null)
             {
-                throw new UnauthorizedException("Cannot get current identity from anonymous user.");
+                throw new UnauthenticatedException("Invalid claims.");
             }
 
             IList<string> roles = principal.Claims.Where(i => i.Type == ClaimTypes.Role)
