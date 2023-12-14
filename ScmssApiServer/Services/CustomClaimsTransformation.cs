@@ -21,16 +21,20 @@ namespace ScmssApiServer.Services
 
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            ClaimsPrincipal newPrincipal = principal.Clone();
-            var newIdentity = (ClaimsIdentity)newPrincipal.Identity!;
-
-            string userId = _userManager.GetUserId(newPrincipal)!;
-            User user = (await _userManager.FindByIdAsync(userId))!;
+            string userId = _userManager.GetUserId(principal)!;
+            User? user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return principal;
+            }
 
             if (user.ProductionFacilityId == null)
             {
                 return principal;
             }
+
+            ClaimsPrincipal newPrincipal = principal.Clone();
+            var newIdentity = (ClaimsIdentity)newPrincipal.Identity!;
 
             var facilityId = (int)user.ProductionFacilityId;
             var facilityClaim = new Claim(FacilityClaimType, facilityId.ToString());
