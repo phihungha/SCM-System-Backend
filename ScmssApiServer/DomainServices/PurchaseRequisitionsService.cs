@@ -287,7 +287,7 @@ namespace ScmssApiServer.DomainServices
                 if (!supplies.ContainsKey(itemId))
                 {
                     throw new EntityNotFoundException(
-                            $"Supply item {itemId} not found or belongs to another vendor."
+                            $"Supply item with ID {itemId} not found or belongs to another vendor."
                         );
                 }
                 Supply supply = supplies[itemId];

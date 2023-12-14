@@ -363,7 +363,7 @@ namespace ScmssApiServer.DomainServices
                 int itemId = dto.ItemId;
                 if (!products.ContainsKey(itemId))
                 {
-                    throw new EntityNotFoundException($"Product item {itemId} not found.");
+                    throw new EntityNotFoundException($"Product item with ID {itemId} not found.");
                 }
                 Product product = products[itemId];
 

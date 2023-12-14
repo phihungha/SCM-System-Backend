@@ -98,7 +98,7 @@ namespace ScmssApiServer.Models
         {
             if (Status != OrderStatus.WaitingAcceptance)
             {
-                throw new InvalidOperationException(
+                throw new InvalidDomainOperationException(
                         "Cannot return the order if it isn't waiting acceptance."
                     );
             }
