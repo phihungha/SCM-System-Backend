@@ -223,6 +223,48 @@ namespace ScmssApiServer.Data
 
             #endregion ProductionFacility
 
+            SeedData(builder);
+        }
+
+        /// <summary>
+        /// Set update info on updated ICreateUpdateTime entity.
+        /// </summary>
+        private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
+        {
+            EntityEntry entry = e.Entry;
+
+            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
+            {
+                return;
+            }
+
+            if (entry.Entity is ICreateUpdateTime)
+            {
+                var entity = (ICreateUpdateTime)entry.Entity;
+                entity.UpdateTime = DateTime.UtcNow;
+            }
+        }
+
+        /// <summary>
+        /// Set creation info on new ICreateUpdateTime entity.
+        /// </summary>
+        private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
+        {
+            EntityEntry entry = e.Entry;
+            if (e.FromQuery || entry.State != EntityState.Added)
+            {
+                return;
+            }
+
+            if (entry.Entity is ICreateUpdateTime)
+            {
+                var entity = (ICreateUpdateTime)entry.Entity;
+                entity.CreateTime = DateTime.UtcNow;
+            }
+        }
+
+        private void SeedData(ModelBuilder builder)
+        {
             #region Seeding
 
             builder.Entity<Config>().HasData(new Config { Id = 1, VatRate = 0.05 });
@@ -443,7 +485,6 @@ namespace ScmssApiServer.Data
             {
                 new WarehouseSupplyItem
                 {
-                    Id = 1,
                     SupplyId = 1,
                     ProductionFacilityId = 1,
                     Quantity = 13000,
@@ -451,7 +492,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 2,
                     SupplyId = 2,
                     ProductionFacilityId = 1,
                     Quantity = 12500,
@@ -459,7 +499,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 3,
                     SupplyId = 3,
                     ProductionFacilityId = 1,
                     Quantity = 12500,
@@ -467,7 +506,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 4,
                     SupplyId = 4,
                     ProductionFacilityId = 1,
                     Quantity = 12000,
@@ -475,7 +513,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 5,
                     SupplyId = 5,
                     ProductionFacilityId = 1,
                     Quantity = 1800,
@@ -483,7 +520,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 6,
                     SupplyId = 6,
                     ProductionFacilityId = 1,
                     Quantity = 1800,
@@ -491,7 +527,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 7,
                     SupplyId = 1,
                     ProductionFacilityId = 2,
                     Quantity = 12000,
@@ -499,7 +534,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 8,
                     SupplyId = 2,
                     ProductionFacilityId = 2,
                     Quantity = 12000,
@@ -507,7 +541,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 9,
                     SupplyId = 3,
                     ProductionFacilityId = 2,
                     Quantity = 12500,
@@ -515,7 +548,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 10,
                     SupplyId = 4,
                     ProductionFacilityId = 2,
                     Quantity = 11000,
@@ -523,7 +555,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 11,
                     SupplyId = 5,
                     ProductionFacilityId = 2,
                     Quantity = 1500,
@@ -531,7 +562,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseSupplyItem
                 {
-                    Id = 12,
                     SupplyId = 6,
                     ProductionFacilityId = 2,
                     Quantity = 1500,
@@ -546,7 +576,8 @@ namespace ScmssApiServer.Data
                     Time = DateTime.UtcNow,
                     Quantity = i.Quantity,
                     Change = i.Quantity,
-                    WarehouseSupplyItemId = i.Id,
+                    WarehouseSupplyItemSupplyId = i.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = i.ProductionFacilityId,
                 }).ToList();
             builder.Entity<WarehouseSupplyItemEvent>().HasData(warehouseSupplyItemEvents);
 
@@ -554,7 +585,6 @@ namespace ScmssApiServer.Data
             {
                 new WarehouseProductItem
                 {
-                    Id = 1,
                     ProductId = 1,
                     ProductionFacilityId = 1,
                     Quantity = 400,
@@ -562,7 +592,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseProductItem
                 {
-                    Id = 2,
                     ProductId = 2,
                     ProductionFacilityId = 1,
                     Quantity = 300,
@@ -570,7 +599,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseProductItem
                 {
-                    Id = 3,
                     ProductId = 1,
                     ProductionFacilityId = 2,
                     Quantity = 700,
@@ -578,7 +606,6 @@ namespace ScmssApiServer.Data
                 },
                 new WarehouseProductItem
                 {
-                    Id = 4,
                     ProductId = 2,
                     ProductionFacilityId = 2,
                     Quantity = 600,
@@ -588,53 +615,17 @@ namespace ScmssApiServer.Data
             builder.Entity<WarehouseProductItem>().HasData(warehouseProductItems);
 
             IList<WarehouseProductItemEvent> warehouseProductItemEvents
-                = warehouseSupplyItems.Select(i => new WarehouseProductItemEvent
+                = warehouseProductItems.Select(i => new WarehouseProductItemEvent
                 {
                     Time = DateTime.UtcNow,
                     Quantity = i.Quantity,
                     Change = i.Quantity,
-                    WarehouseProductItemId = i.Id,
+                    WarehouseProductItemProductId = i.ProductId,
+                    WarehouseProductItemProductionFacilityId = i.ProductionFacilityId,
                 }).ToList();
             builder.Entity<WarehouseProductItemEvent>().HasData(warehouseProductItemEvents);
 
             #endregion Seeding
-        }
-
-        /// <summary>
-        /// Set update info on updated ICreateUpdateTime entity.
-        /// </summary>
-        private void ChangeTracker_StateChanged(object? sender, EntityStateChangedEventArgs e)
-        {
-            EntityEntry entry = e.Entry;
-
-            if (e.NewState != EntityState.Modified && e.NewState != EntityState.Deleted)
-            {
-                return;
-            }
-
-            if (entry.Entity is ICreateUpdateTime)
-            {
-                var entity = (ICreateUpdateTime)entry.Entity;
-                entity.UpdateTime = DateTime.UtcNow;
-            }
-        }
-
-        /// <summary>
-        /// Set creation info on new ICreateUpdateTime entity.
-        /// </summary>
-        private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
-        {
-            EntityEntry entry = e.Entry;
-            if (e.FromQuery || entry.State != EntityState.Added)
-            {
-                return;
-            }
-
-            if (entry.Entity is ICreateUpdateTime)
-            {
-                var entity = (ICreateUpdateTime)entry.Entity;
-                entity.CreateTime = DateTime.UtcNow;
-            }
         }
     }
 }

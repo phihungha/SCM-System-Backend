@@ -1,5 +1,10 @@
-﻿namespace ScmssApiServer.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace ScmssApiServer.Models
 {
+    [PrimaryKey(nameof(WarehouseProductItemProductId),
+                nameof(WarehouseProductItemProductionFacilityId),
+                nameof(Time))]
     public class WarehouseProductItemEvent : WarehouseItemEvent
     {
         public ProductionOrder? ProductionOrder { get; set; }
@@ -7,6 +12,7 @@
         public SalesOrder? SalesOrder { get; set; }
         public int? SalesOrderId { get; set; }
         public WarehouseProductItem WarehouseProductItem { get; set; } = null!;
-        public int WarehouseProductItemId { get; set; }
+        public int WarehouseProductItemProductId { get; set; }
+        public int WarehouseProductItemProductionFacilityId { get; set; }
     }
 }

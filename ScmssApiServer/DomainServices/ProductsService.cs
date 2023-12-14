@@ -46,6 +46,8 @@ namespace ScmssApiServer.DomainServices
                     Quantity = 0,
                     Change = 0,
                     WarehouseProductItem = warehouseItem,
+                    WarehouseProductItemProductId = warehouseItem.ProductId,
+                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
                 });
 
                 facility.WarehouseProductItems.Add(warehouseItem);

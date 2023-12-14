@@ -159,7 +159,8 @@ namespace ScmssApiServer.Models
                     ProductionOrder = this,
                     ProductionOrderId = Id,
                     WarehouseProductItem = warehouseItem,
-                    WarehouseProductItemId = warehouseItem.Id,
+                    WarehouseProductItemProductId = warehouseItem.ProductId,
+                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
                 };
                 warehouseItem.Events.Add(warehouseEvent);
             }
@@ -219,7 +220,8 @@ namespace ScmssApiServer.Models
                     ProductionOrder = this,
                     ProductionOrderId = Id,
                     WarehouseSupplyItem = warehouseItem,
-                    WarehouseSupplyItemId = warehouseItem.Id,
+                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
                 };
                 warehouseItem.Events.Add(warehouseEvent);
             }

@@ -112,7 +112,8 @@ namespace ScmssApiServer.Models
                     PurchaseOrder = this,
                     PurchaseOrderId = Id,
                     WarehouseSupplyItem = warehouseItem,
-                    WarehouseSupplyItemId = warehouseItem.Id,
+                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
                 };
                 warehouseItem.Events.Add(warehouseEvent);
             }

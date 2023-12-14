@@ -43,6 +43,8 @@ namespace ScmssApiServer.DomainServices
                     Quantity = 0,
                     Change = 0,
                     WarehouseSupplyItem = warehouseItem,
+                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
                 });
 
                 facility.WarehouseSupplyItems.Add(warehouseItem);
@@ -66,6 +68,8 @@ namespace ScmssApiServer.DomainServices
                     Quantity = 0,
                     Change = 0,
                     WarehouseProductItem = warehouseItem,
+                    WarehouseProductItemProductId = warehouseItem.ProductId,
+                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
                 });
 
                 facility.WarehouseProductItems.Add(warehouseItem);

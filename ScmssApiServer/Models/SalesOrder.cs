@@ -107,7 +107,8 @@ namespace ScmssApiServer.Models
                     SalesOrder = this,
                     SalesOrderId = Id,
                     WarehouseProductItem = warehouseItem,
-                    WarehouseProductItemId = warehouseItem.Id,
+                    WarehouseProductItemProductId = warehouseItem.ProductId,
+                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
                 };
                 warehouseItem.Events.Add(warehouseEvent);
             }
