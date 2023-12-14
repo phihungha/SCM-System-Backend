@@ -18,30 +18,31 @@ namespace ScmssApiServer.Models
         public string? Problem { get; protected set; }
         public DateTime? UpdateTime { get; set; }
 
-        public virtual void Begin(string userId)
+        public virtual void Begin(User user)
         {
             if (IsCreated)
             {
                 throw new InvalidDomainOperationException("Cannot begin an already created item.");
             }
-            CreateUserId = userId;
+            CreateUser = user;
+            CreateUserId = user.Id;
         }
 
-        public virtual void End(string userId)
+        public virtual void End(User user)
         {
             if (IsEnded)
             {
                 throw new InvalidDomainOperationException("The item is already ended.");
             }
             EndTime = DateTime.UtcNow;
-            EndUserId = userId;
-            CreateUserId = userId;
+            EndUser = user;
+            EndUserId = user.Id;
         }
 
-        public void EndWithProblem(string userId, string problem)
+        public void EndWithProblem(User user, string problem)
         {
             Problem = problem;
-            End(userId);
+            End(user);
         }
     }
 }

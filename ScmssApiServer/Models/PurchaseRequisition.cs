@@ -68,14 +68,14 @@ namespace ScmssApiServer.Models
             Approve();
         }
 
-        public override void Begin(string userId)
+        public override void Begin(User user)
         {
-            base.Begin(userId);
+            base.Begin(user);
             Status = PurchaseRequisitionStatus.Processing;
             ApprovalStatus = ApprovalStatus.PendingApproval;
         }
 
-        public void Cancel(string userId, string problem)
+        public void Cancel(User user, string problem)
         {
             if (IsEnded)
             {
@@ -84,10 +84,10 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = PurchaseRequisitionStatus.Canceled;
-            EndWithProblem(userId, problem);
+            EndWithProblem(user, problem);
         }
 
-        public void Complete(string userId)
+        public void Complete(User user)
         {
             if (Status != PurchaseRequisitionStatus.Purchasing)
             {
@@ -96,7 +96,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = PurchaseRequisitionStatus.Completed;
-            End(userId);
+            End(user);
         }
 
         public void Delay(string problem)
@@ -155,7 +155,7 @@ namespace ScmssApiServer.Models
             return order;
         }
 
-        public virtual void Reject(string userId, string problem)
+        public virtual void Reject(User user, string problem)
         {
             if (ApprovalStatus != ApprovalStatus.PendingApproval)
             {
@@ -164,7 +164,7 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
-            Cancel(userId, problem);
+            Cancel(user, problem);
         }
 
         protected virtual void Approve()

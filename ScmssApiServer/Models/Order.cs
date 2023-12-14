@@ -52,13 +52,13 @@ namespace ScmssApiServer.Models
             Items = items;
         }
 
-        public override void Begin(string userId)
+        public override void Begin(User user)
         {
-            base.Begin(userId);
+            base.Begin(user);
             Status = OrderStatus.Processing;
         }
 
-        public virtual void Cancel(string userId, string problem)
+        public virtual void Cancel(User user, string problem)
         {
             if (IsExecutionFinished)
             {
@@ -67,10 +67,10 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = OrderStatus.Canceled;
-            EndWithProblem(userId, problem);
+            EndWithProblem(user, problem);
         }
 
-        public virtual void Complete(string userId)
+        public virtual void Complete(User user)
         {
             if (Status != OrderStatus.WaitingAcceptance)
             {
@@ -79,7 +79,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = OrderStatus.Completed;
-            End(userId);
+            End(user);
         }
 
         public virtual void FinishExecution()
@@ -94,7 +94,7 @@ namespace ScmssApiServer.Models
             ExecutionFinishTime = DateTime.UtcNow;
         }
 
-        public virtual void Return(string userId, string problem)
+        public virtual void Return(User user, string problem)
         {
             if (Status != OrderStatus.WaitingAcceptance)
             {
@@ -103,7 +103,7 @@ namespace ScmssApiServer.Models
                     );
             }
             Status = OrderStatus.Returned;
-            EndWithProblem(userId, problem);
+            EndWithProblem(user, problem);
         }
 
         public virtual void StartExecution()

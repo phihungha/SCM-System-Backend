@@ -119,23 +119,23 @@ namespace ScmssApiServer.Models
             ApproveProductionManager = user;
         }
 
-        public override void Begin(string userId)
+        public override void Begin(User user)
         {
-            base.Begin(userId);
+            base.Begin(user);
             ApprovalStatus = ApprovalStatus.PendingApproval;
             AddEvent(ProductionOrderEventType.PendingApproval);
         }
 
-        public override void Cancel(string userId, string problem)
+        public override void Cancel(User user, string problem)
         {
-            base.Cancel(userId, problem);
+            base.Cancel(user, problem);
             ProductionOrderEvent lastEvent = Events.Last();
             AddEvent(ProductionOrderEventType.Canceled, lastEvent.Location);
         }
 
-        public override void Complete(string userId)
+        public override void Complete(User user)
         {
-            base.Complete(userId);
+            base.Complete(user);
             AddEvent(ProductionOrderEventType.Completed);
 
             foreach (ProductionOrderItem item in Items)
@@ -165,12 +165,12 @@ namespace ScmssApiServer.Models
                     );
             }
             ApprovalStatus = ApprovalStatus.Rejected;
-            Cancel(user.Id, problem);
+            Cancel(user, problem);
         }
 
-        public override void Return(string userId, string problem)
+        public override void Return(User user, string problem)
         {
-            base.Return(userId, problem);
+            base.Return(user, problem);
             AddEvent(ProductionOrderEventType.Unaccepted);
         }
 

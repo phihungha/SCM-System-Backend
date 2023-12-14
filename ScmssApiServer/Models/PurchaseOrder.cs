@@ -78,15 +78,15 @@ namespace ScmssApiServer.Models
         public Vendor Vendor { get; set; } = null!;
         public int VendorId { get; set; }
 
-        public override void Cancel(string userId, string problem)
+        public override void Cancel(User user, string problem)
         {
-            base.Cancel(userId, problem);
+            base.Cancel(user, problem);
             PurchaseRequisition.Delay(problem);
         }
 
-        public override void Complete(string userId)
+        public override void Complete(User user)
         {
-            base.Complete(userId);
+            base.Complete(user);
 
             foreach (PurchaseOrderItem item in Items)
             {
@@ -96,7 +96,7 @@ namespace ScmssApiServer.Models
                 warehouseItem.Quantity += item.Quantity;
             }
 
-            PurchaseRequisition.Complete(userId);
+            PurchaseRequisition.Complete(user);
         }
 
         /// <summary>
@@ -122,9 +122,9 @@ namespace ScmssApiServer.Models
             DiscountSubtotal = Items.Sum(i => i.Discount);
         }
 
-        public override void Return(string userId, string problem)
+        public override void Return(User user, string problem)
         {
-            base.Return(userId, problem);
+            base.Return(user, problem);
             PurchaseRequisition.Delay(problem);
         }
     }

@@ -77,7 +77,7 @@ namespace ScmssApiServer.DomainServices
             order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
-            order.Begin(user.Id);
+            order.Begin(user);
 
             _dbContext.PurchaseOrders.Add(order);
             await _dbContext.SaveChangesAsync();
@@ -313,7 +313,7 @@ namespace ScmssApiServer.DomainServices
                     break;
 
                 case OrderStatusOption.Completed:
-                    order.Complete(userId);
+                    order.Complete(user);
                     break;
 
                 case OrderStatusOption.Canceled:
@@ -323,7 +323,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot cancel an order without a problem."
                             );
                     }
-                    order.Cancel(userId, dto.Problem);
+                    order.Cancel(user, dto.Problem);
                     break;
 
                 case OrderStatusOption.Returned:
@@ -333,7 +333,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot return an order without a problem."
                             );
                     }
-                    order.Return(userId, dto.Problem);
+                    order.Return(user, dto.Problem);
                     break;
             }
         }

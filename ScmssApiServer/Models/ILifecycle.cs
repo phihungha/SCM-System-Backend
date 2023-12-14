@@ -15,10 +15,10 @@
         string? Problem { get; }
         DateTime? UpdateTime { get; set; }
 
-        void Begin(string userId);
+        void Begin(User user);
 
-        void End(string userId);
+        void End(User user);
 
-        void EndWithProblem(string userId, string problem);
+        void EndWithProblem(User user, string problem);
     }
 }

@@ -65,7 +65,7 @@ namespace ScmssApiServer.DomainServices
             };
 
             requisition.AddItems(await MapRequisitionItemDtosToModels(dto.VendorId, dto.Items));
-            requisition.Begin(user.Id);
+            requisition.Begin(user);
 
             _dbContext.PurchaseRequisitions.Add(requisition);
             await _dbContext.SaveChangesAsync();
@@ -196,7 +196,7 @@ namespace ScmssApiServer.DomainServices
                 }
 
                 User user = (await _userManager.FindByIdAsync(identity.Id))!;
-                requisition.Cancel(user.Id, dto.Problem);
+                requisition.Cancel(user, dto.Problem);
             }
 
             if (dto.ApprovalStatus != null)
@@ -262,7 +262,7 @@ namespace ScmssApiServer.DomainServices
                             "Cannot reject a requisition without a problem."
                         );
                 }
-                requisition.Reject(user.Id, dto.Problem);
+                requisition.Reject(user, dto.Problem);
             }
         }
 
