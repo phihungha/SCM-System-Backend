@@ -8,6 +8,7 @@ namespace ScmssApiServer.DTOs
         public int ItemId { get; set; }
 
         [Required]
+        [Range(double.Epsilon, double.MaxValue)]
         public double Quantity { get; set; }
     }
 }
