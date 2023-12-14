@@ -150,6 +150,18 @@ namespace ScmssApiServer.Models
                         i => i.ProductionFacilityId == ProductionFacilityId
                     );
                 warehouseItem.Quantity += item.Quantity;
+
+                var warehouseEvent = new WarehouseProductItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = warehouseItem.Quantity,
+                    Change = item.Quantity,
+                    ProductionOrder = this,
+                    ProductionOrderId = Id,
+                    WarehouseProductItem = warehouseItem,
+                    WarehouseProductItemId = warehouseItem.Id,
+                };
+                warehouseItem.Events.Add(warehouseEvent);
             }
         }
 
@@ -198,6 +210,18 @@ namespace ScmssApiServer.Models
                     i => i.ProductionFacilityId == ProductionFacilityId
                 );
                 warehouseItem.Quantity -= item.Quantity;
+
+                var warehouseEvent = new WarehouseSupplyItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = warehouseItem.Quantity,
+                    Change = -item.Quantity,
+                    ProductionOrder = this,
+                    ProductionOrderId = Id,
+                    WarehouseSupplyItem = warehouseItem,
+                    WarehouseSupplyItemId = warehouseItem.Id,
+                };
+                warehouseItem.Events.Add(warehouseEvent);
             }
         }
 

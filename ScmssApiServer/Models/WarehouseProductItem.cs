@@ -4,8 +4,8 @@ namespace ScmssApiServer.Models
 {
     public class WarehouseProductItem : WarehouseItem
     {
-        public ICollection<WarehouseProductItem> Events { get; set; }
-            = new List<WarehouseProductItem>();
+        public ICollection<WarehouseProductItemEvent> Events { get; set; }
+            = new List<WarehouseProductItemEvent>();
 
         public Product Product { get; set; } = null!;
         public int ProductId { get; set; }

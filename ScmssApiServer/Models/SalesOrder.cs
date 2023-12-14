@@ -98,6 +98,18 @@ namespace ScmssApiServer.Models
                         i => i.ProductionFacilityId == ProductionFacilityId
                     );
                 warehouseItem.Quantity -= item.Quantity;
+
+                var warehouseEvent = new WarehouseProductItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = warehouseItem.Quantity,
+                    Change = -item.Quantity,
+                    SalesOrder = this,
+                    SalesOrderId = Id,
+                    WarehouseProductItem = warehouseItem,
+                    WarehouseProductItemId = warehouseItem.Id,
+                };
+                warehouseItem.Events.Add(warehouseEvent);
             }
         }
 
