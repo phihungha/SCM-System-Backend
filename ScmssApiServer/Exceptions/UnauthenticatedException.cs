@@ -1,4 +1,4 @@
-﻿namespace ScmssApiServer.DomainExceptions
+﻿namespace ScmssApiServer.Exceptions
 {
     public class UnauthenticatedException : ApplicationException
     {

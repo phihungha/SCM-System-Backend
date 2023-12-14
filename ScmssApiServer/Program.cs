@@ -67,11 +67,12 @@ namespace ScmssApiServer
                                   .WithOrigins("http://localhost:3000"))
             );
 
-            builder.Services.AddControllers().AddJsonOptions(
+            builder.Services.AddControllers(
+                    o => o.Filters.Add<CustomExceptionFilter>())
+                .AddJsonOptions(
                     o => o.JsonSerializerOptions
                           .Converters
-                          .Add(new JsonStringEnumConverter())
-                );
+                          .Add(new JsonStringEnumConverter()));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -89,6 +90,11 @@ namespace ScmssApiServer
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            }
+
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/error");
             }
 
             app.UseHttpsRedirection();

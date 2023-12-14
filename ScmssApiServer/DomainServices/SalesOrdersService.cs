@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -364,7 +365,7 @@ namespace ScmssApiServer.DomainServices
                 int itemId = dto.ItemId;
                 if (!products.ContainsKey(itemId))
                 {
-                    throw new InvalidDomainOperationException($"Product item {itemId} not found.");
+                    throw new EntityNotFoundException($"Product item {itemId} not found.");
                 }
                 Product product = products[itemId];
 
