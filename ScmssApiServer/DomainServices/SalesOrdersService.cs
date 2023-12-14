@@ -74,10 +74,9 @@ namespace ScmssApiServer.DomainServices
             Config config = await _configService.GetAsync();
             order.VatRate = config.VatRate;
 
-            User user = (await _userManager.FindByIdAsync(identity.Id))!;
-            order.CreateUser = user;
-
             order.AddItems(await MapOrderItemDtosToModels(dto.Items));
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
             order.Begin(user);
 
             _dbContext.SalesOrders.Add(order);
