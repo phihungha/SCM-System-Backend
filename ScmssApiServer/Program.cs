@@ -80,8 +80,8 @@ namespace ScmssApiServer
 
             using (var scope = app.Services.CreateScope())
             {
-                AppDbSeeder.SeedRoles(scope, app);
-                AppDbSeeder.SeedRootAdminUser(scope, app);
+                AppUserSeeder.SeedRoles(scope, app);
+                AppUserSeeder.SeedRootAdminUser(scope, app);
             }
 
             // Configure the HTTP request pipeline.

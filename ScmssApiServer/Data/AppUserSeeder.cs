@@ -4,7 +4,7 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Data
 {
-    public static class AppDbSeeder
+    public static class AppUserSeeder
     {
         public static readonly string[] Roles =
         {
