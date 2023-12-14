@@ -26,7 +26,7 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                UserDto item = await _usersService.CreateUserAsync(body);
+                UserDto item = await _usersService.CreateAsync(body);
                 return Ok(item);
             }
             catch (IdentityException ex)
@@ -36,22 +36,22 @@ namespace ScmssApiServer.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IList<UserDto>>> Get()
-        {
-            IList<UserDto> items = await _usersService.GetUsersAsync();
-            return Ok(items);
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDto>> GetId(string id)
+        public async Task<ActionResult<UserDto>> Get(string id)
         {
-            UserDto? item = await _usersService.GetUserAsync(id);
+            UserDto? item = await _usersService.GetAsync(id);
             if (item == null)
             {
                 return NotFound();
             }
             return Ok(item);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IList<UserDto>>> GetMany([FromQuery] SimpleQueryDto query)
+        {
+            IList<UserDto> items = await _usersService.GetManyAsync(query);
+            return Ok(items);
         }
 
         [HttpGet("{id}/profileImageUploadUrl")]
@@ -65,7 +65,7 @@ namespace ScmssApiServer.Controllers
         {
             try
             {
-                UserDto item = await _usersService.UpdateUserAsync(id, body);
+                UserDto item = await _usersService.UpdateAsync(id, body);
                 return Ok(item);
             }
             catch (IdentityException ex)

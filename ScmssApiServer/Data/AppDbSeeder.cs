@@ -93,6 +93,7 @@ namespace ScmssApiServer.Data
                 Name = name,
                 Gender = Gender.Male,
                 ProductionFacilityId = 1,
+                IsActive = true,
                 DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
                 Description = description,
             };

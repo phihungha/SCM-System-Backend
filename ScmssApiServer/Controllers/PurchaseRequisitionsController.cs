@@ -47,9 +47,9 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IList<PurchaseRequisitionDto>>> GetMany()
+        public async Task<ActionResult<IList<PurchaseRequisitionDto>>> GetMany([FromQuery] PurchaseRequisitionQueryDto query)
         {
-            IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync(CurrentIdentity);
+            IList<PurchaseRequisitionDto> items = await _purchaseRequisitionsService.GetManyAsync(query, CurrentIdentity);
             return Ok(items);
         }
 

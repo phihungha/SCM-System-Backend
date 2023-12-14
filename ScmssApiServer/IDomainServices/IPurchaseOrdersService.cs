@@ -11,7 +11,9 @@ namespace ScmssApiServer.IDomainServices
 
         Task<PurchaseOrderDto?> GetAsync(int id, Identity identity);
 
-        Task<IList<PurchaseOrderDto>> GetManyAsync(Identity identity);
+        Task<IList<PurchaseOrderDto>> GetManyAsync(
+            TransOrderQueryDto<PurchaseOrderSearchCriteria> dto,
+            Identity identity);
 
         Task<PurchaseOrderDto> UpdateAsync(int id, PurchaseOrderUpdateDto dto, Identity identity);
 

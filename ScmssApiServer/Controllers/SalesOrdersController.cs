@@ -51,9 +51,10 @@ namespace ScmssApiServer.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IList<SalesOrderDto>>> GetMany()
+        public async Task<ActionResult<IList<SalesOrderDto>>> GetMany(
+            [FromQuery] TransOrderQueryDto<SalesOrderSearchCriteria> query)
         {
-            IList<SalesOrderDto> items = await _salesOrdersService.GetManyAsync(CurrentIdentity);
+            IList<SalesOrderDto> items = await _salesOrdersService.GetManyAsync(query, CurrentIdentity);
             return Ok(items);
         }
 

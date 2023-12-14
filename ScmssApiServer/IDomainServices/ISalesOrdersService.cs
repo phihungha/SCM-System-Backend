@@ -11,7 +11,9 @@ namespace ScmssApiServer.IDomainServices
 
         Task<SalesOrderDto?> GetAsync(int id, Identity identity);
 
-        Task<IList<SalesOrderDto>> GetManyAsync(Identity identity);
+        Task<IList<SalesOrderDto>> GetManyAsync(
+            TransOrderQueryDto<SalesOrderSearchCriteria> dto,
+            Identity identity);
 
         Task<SalesOrderDto> UpdateAsync(int id, SalesOrderUpdateDto dto, Identity identity);
 
