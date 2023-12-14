@@ -7,6 +7,10 @@ namespace ScmssApiServer.Models
         public int SupplyId { get; set; }
         public Supply Supply { get; set; } = null!;
 
+
+        public ICollection<WarehouseSupplyItemEvent> Events { get; set; }
+            = new List<WarehouseSupplyItemEvent>();
+
         [NotMapped]
         public override string Unit => Supply.Unit;
 

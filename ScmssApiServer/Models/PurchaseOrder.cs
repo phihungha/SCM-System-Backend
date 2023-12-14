@@ -53,10 +53,15 @@ namespace ScmssApiServer.Models
         }
 
         public ProductionFacility ProductionFacility { get; set; } = null!;
+
         public int ProductionFacilityId { get; set; }
+
         public PurchaseRequisition PurchaseRequisition { get; set; } = null!;
+
         public int? PurchaseRequisitionId { get; set; }
+
         public Uri? ReceiptUrl { get; set; }
+
         public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
 
         /// <summary>
@@ -76,7 +81,11 @@ namespace ScmssApiServer.Models
         }
 
         public Vendor Vendor { get; set; } = null!;
+
         public int VendorId { get; set; }
+
+        public ICollection<WarehouseSupplyItemEvent> WarehouseSupplyItemEvents { get; protected set; }
+            = new List<WarehouseSupplyItemEvent>();
 
         public override void Cancel(User user, string problem)
         {

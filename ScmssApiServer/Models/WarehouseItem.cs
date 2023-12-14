@@ -5,6 +5,7 @@ namespace ScmssApiServer.Models
     public abstract class WarehouseItem : ICreateUpdateTime
     {
         public DateTime CreateTime { get; set; }
+        public int Id { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
         public double Quantity { get; set; }

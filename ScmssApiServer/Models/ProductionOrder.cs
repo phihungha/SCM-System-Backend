@@ -27,6 +27,12 @@ namespace ScmssApiServer.Models
 
         public decimal TotalValue { get; protected set; }
 
+        public ICollection<WarehouseProductItemEvent> WarehouseProductItemEvents { get; protected set; }
+            = new List<WarehouseProductItemEvent>();
+
+        public ICollection<WarehouseSupplyItemEvent> WarehouseSupplyItemEvents { get; protected set; }
+            = new List<WarehouseSupplyItemEvent>();
+
         public override void AddItems(ICollection<ProductionOrderItem> items)
         {
             if (ApprovalStatus != ApprovalStatus.PendingApproval)

@@ -12,7 +12,7 @@ using ScmssApiServer.Data;
 namespace ScmssApiServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231214135350_Initial")]
+    [Migration("20231214152053_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -230,7 +230,7 @@ namespace ScmssApiServer.Migrations
                         {
                             Id = 1,
                             ContactPerson = "Hoa Thi Mai",
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(838),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(8918),
                             DefaultLocation = "156 Nguyen Van Luong, Bien Hoa, Dong nai",
                             Description = "Flower garden.",
                             Email = "watarichanno@gmail.com",
@@ -242,7 +242,7 @@ namespace ScmssApiServer.Migrations
                         {
                             Id = 2,
                             ContactPerson = "Ha Phi Hung",
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(843),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(8922),
                             DefaultLocation = "436 Vo Van Kiet, District 1, HCM City",
                             Description = "Plant shop.",
                             Email = "haphihung55@gmail.com",
@@ -303,7 +303,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 1,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1076),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9122),
                             Description = "MSPB: 04513\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 8%\nEffective Potassium (K2Ohh): 8%\nSulfur (S): 13%\nHumidity: 2%\nSuitable for all crops.",
                             ExpirationMonth = 48,
                             IsActive = true,
@@ -316,7 +316,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 2,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1080),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9126),
                             Description = "MSPB: 04519\nProtein total (Nts): 16%\nEffective Phosphate (P2O5hh): 7%\nEffective Potassium (K2Ohh): 18%\nSulfur (S): 12%\nBo (B): 217ppm\nZinc (Zn): 400ppm\nHumidity: 2%\nSuitable for coffee, fruit, rubber, vegetable, rice crops.",
                             ExpirationMonth = 48,
                             IsActive = true,
@@ -455,7 +455,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 1,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(882),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(8953),
                             Description = "Primary production facility",
                             Email = "godau@cool-fertilizer.com.vn",
                             IsActive = true,
@@ -466,7 +466,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 2,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(885),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(8956),
                             Description = "Secondary production facility",
                             Email = "longan@cool-fertilizer.com.vn",
                             IsActive = true,
@@ -1092,7 +1092,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 1,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(968),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9028),
                             Description = "CO(NH2)2 for nitrogen.",
                             ExpirationMonth = 12,
                             IsActive = true,
@@ -1104,7 +1104,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 2,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(973),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9032),
                             Description = "P2O5 for phosphorous.",
                             ExpirationMonth = 12,
                             IsActive = true,
@@ -1116,7 +1116,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 3,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1022),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9035),
                             Description = "KCl for potassium.",
                             ExpirationMonth = 12,
                             IsActive = true,
@@ -1128,7 +1128,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 4,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1025),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9080),
                             Description = "(NH4)2SO4 for trace sulfur.",
                             ExpirationMonth = 12,
                             IsActive = true,
@@ -1140,7 +1140,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 5,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1029),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9084),
                             Description = "H3BO3 for trace boron.",
                             ExpirationMonth = 12,
                             IsActive = true,
@@ -1152,7 +1152,7 @@ namespace ScmssApiServer.Migrations
                         new
                         {
                             Id = 6,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1036),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9087),
                             Description = "ZnSO4 for trace zinc.",
                             ExpirationMonth = 12,
                             IsActive = true,
@@ -1313,7 +1313,7 @@ namespace ScmssApiServer.Migrations
                         {
                             Id = 1,
                             ContactPerson = "Ha Long Anh",
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(923),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(8989),
                             DefaultLocation = "Phu My Industrial Park, Phu My, Phu My, Ba Ria - Vung Tau",
                             Description = "Main vendor for major ingredients.",
                             Email = "customer@pvfcco.com.vn",
@@ -1325,7 +1325,7 @@ namespace ScmssApiServer.Migrations
                         {
                             Id = 2,
                             ContactPerson = "Nguyen Thanh Long",
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(926),
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(8992),
                             DefaultLocation = "Binh Duong Industrial Park, An Binh, Di An, Binh Duong",
                             Description = "Main vendor for trace ingredients.",
                             Email = "order@vinachem.com.vn",
@@ -1337,76 +1337,127 @@ namespace ScmssApiServer.Migrations
 
             modelBuilder.Entity("ScmssApiServer.Models.WarehouseProductItem", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
                     b.Property<int>("ProductionFacilityId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
 
                     b.Property<DateTime?>("UpdateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("ProductId", "ProductionFacilityId");
+                    b.Property<int?>("WarehouseProductItemId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("ProductionFacilityId");
+
+                    b.HasIndex("WarehouseProductItemId");
 
                     b.ToTable("WarehouseProductItem");
 
                     b.HasData(
                         new
                         {
+                            Id = 1,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9232),
                             ProductId = 1,
                             ProductionFacilityId = 1,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1200),
                             Quantity = 400.0
                         },
                         new
                         {
+                            Id = 2,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9234),
                             ProductId = 2,
                             ProductionFacilityId = 1,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1201),
                             Quantity = 300.0
                         },
                         new
                         {
+                            Id = 3,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9235),
                             ProductId = 1,
                             ProductionFacilityId = 2,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1203),
                             Quantity = 700.0
                         },
                         new
                         {
+                            Id = 4,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9241),
                             ProductId = 2,
                             ProductionFacilityId = 2,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1208),
                             Quantity = 600.0
                         });
                 });
 
-            modelBuilder.Entity("ScmssApiServer.Models.WarehouseSupplyItem", b =>
+            modelBuilder.Entity("ScmssApiServer.Models.WarehouseProductItemEvent", b =>
                 {
-                    b.Property<int>("ProductionFacilityId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SupplyId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreateTime")
+                    b.Property<DateTime>("Time")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Change")
+                        .HasColumnType("double precision");
+
+                    b.Property<int?>("ProductionOrderId")
+                        .HasColumnType("integer");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("double precision");
 
+                    b.Property<int?>("SalesOrderId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Time");
+
+                    b.HasIndex("ProductionOrderId");
+
+                    b.HasIndex("SalesOrderId");
+
+                    b.ToTable("WarehouseProductItemEvent");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.WarehouseSupplyItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ProductionFacilityId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("SupplyId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("UpdateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("ProductionFacilityId", "SupplyId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductionFacilityId");
 
                     b.HasIndex("SupplyId");
 
@@ -1415,88 +1466,131 @@ namespace ScmssApiServer.Migrations
                     b.HasData(
                         new
                         {
+                            Id = 1,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9194),
                             ProductionFacilityId = 1,
-                            SupplyId = 1,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1161),
-                            Quantity = 13000.0
+                            Quantity = 13000.0,
+                            SupplyId = 1
                         },
                         new
                         {
+                            Id = 2,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9197),
                             ProductionFacilityId = 1,
-                            SupplyId = 2,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1163),
-                            Quantity = 12500.0
+                            Quantity = 12500.0,
+                            SupplyId = 2
                         },
                         new
                         {
+                            Id = 3,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9198),
                             ProductionFacilityId = 1,
-                            SupplyId = 3,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1165),
-                            Quantity = 12500.0
+                            Quantity = 12500.0,
+                            SupplyId = 3
                         },
                         new
                         {
+                            Id = 4,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9200),
                             ProductionFacilityId = 1,
-                            SupplyId = 4,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1166),
-                            Quantity = 12000.0
+                            Quantity = 12000.0,
+                            SupplyId = 4
                         },
                         new
                         {
+                            Id = 5,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9201),
                             ProductionFacilityId = 1,
-                            SupplyId = 5,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1167),
-                            Quantity = 1800.0
+                            Quantity = 1800.0,
+                            SupplyId = 5
                         },
                         new
                         {
+                            Id = 6,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9203),
                             ProductionFacilityId = 1,
-                            SupplyId = 6,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1168),
-                            Quantity = 1800.0
+                            Quantity = 1800.0,
+                            SupplyId = 6
                         },
                         new
                         {
+                            Id = 7,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9204),
                             ProductionFacilityId = 2,
-                            SupplyId = 1,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1169),
-                            Quantity = 12000.0
+                            Quantity = 12000.0,
+                            SupplyId = 1
                         },
                         new
                         {
+                            Id = 8,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9205),
                             ProductionFacilityId = 2,
-                            SupplyId = 2,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1171),
-                            Quantity = 12000.0
+                            Quantity = 12000.0,
+                            SupplyId = 2
                         },
                         new
                         {
+                            Id = 9,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9207),
                             ProductionFacilityId = 2,
-                            SupplyId = 3,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1172),
-                            Quantity = 12500.0
+                            Quantity = 12500.0,
+                            SupplyId = 3
                         },
                         new
                         {
+                            Id = 10,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9208),
                             ProductionFacilityId = 2,
-                            SupplyId = 4,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1173),
-                            Quantity = 11000.0
+                            Quantity = 11000.0,
+                            SupplyId = 4
                         },
                         new
                         {
+                            Id = 11,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9209),
                             ProductionFacilityId = 2,
-                            SupplyId = 5,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1174),
-                            Quantity = 1500.0
+                            Quantity = 1500.0,
+                            SupplyId = 5
                         },
                         new
                         {
+                            Id = 12,
+                            CreateTime = new DateTime(2023, 12, 14, 15, 20, 53, 308, DateTimeKind.Utc).AddTicks(9211),
                             ProductionFacilityId = 2,
-                            SupplyId = 6,
-                            CreateTime = new DateTime(2023, 12, 14, 13, 53, 50, 578, DateTimeKind.Utc).AddTicks(1175),
-                            Quantity = 1500.0
+                            Quantity = 1500.0,
+                            SupplyId = 6
                         });
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.WarehouseSupplyItemEvent", b =>
+                {
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Change")
+                        .HasColumnType("double precision");
+
+                    b.Property<int?>("ProductionOrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PurchaseOrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision");
+
+                    b.Property<int?>("WarehouseSupplyItemId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Time");
+
+                    b.HasIndex("ProductionOrderId");
+
+                    b.HasIndex("PurchaseOrderId");
+
+                    b.HasIndex("WarehouseSupplyItemId");
+
+                    b.ToTable("WarehouseSupplyItemEvent");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1877,9 +1971,28 @@ namespace ScmssApiServer.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ScmssApiServer.Models.WarehouseProductItem", null)
+                        .WithMany("Events")
+                        .HasForeignKey("WarehouseProductItemId");
+
                     b.Navigation("Product");
 
                     b.Navigation("ProductionFacility");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.WarehouseProductItemEvent", b =>
+                {
+                    b.HasOne("ScmssApiServer.Models.ProductionOrder", "ProductionOrder")
+                        .WithMany("WarehouseProductItemEvents")
+                        .HasForeignKey("ProductionOrderId");
+
+                    b.HasOne("ScmssApiServer.Models.SalesOrder", "SalesOrder")
+                        .WithMany("WarehouseProductItemEvents")
+                        .HasForeignKey("SalesOrderId");
+
+                    b.Navigation("ProductionOrder");
+
+                    b.Navigation("SalesOrder");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.WarehouseSupplyItem", b =>
@@ -1899,6 +2012,25 @@ namespace ScmssApiServer.Migrations
                     b.Navigation("ProductionFacility");
 
                     b.Navigation("Supply");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.WarehouseSupplyItemEvent", b =>
+                {
+                    b.HasOne("ScmssApiServer.Models.ProductionOrder", "ProductionOrder")
+                        .WithMany("WarehouseSupplyItemEvents")
+                        .HasForeignKey("ProductionOrderId");
+
+                    b.HasOne("ScmssApiServer.Models.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("WarehouseSupplyItemEvents")
+                        .HasForeignKey("PurchaseOrderId");
+
+                    b.HasOne("ScmssApiServer.Models.WarehouseSupplyItem", null)
+                        .WithMany("Events")
+                        .HasForeignKey("WarehouseSupplyItemId");
+
+                    b.Navigation("ProductionOrder");
+
+                    b.Navigation("PurchaseOrder");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.Customer", b =>
@@ -1935,6 +2067,10 @@ namespace ScmssApiServer.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("SupplyUsageItems");
+
+                    b.Navigation("WarehouseProductItemEvents");
+
+                    b.Navigation("WarehouseSupplyItemEvents");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseOrder", b =>
@@ -1942,6 +2078,8 @@ namespace ScmssApiServer.Migrations
                     b.Navigation("Events");
 
                     b.Navigation("Items");
+
+                    b.Navigation("WarehouseSupplyItemEvents");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.PurchaseRequisition", b =>
@@ -1956,6 +2094,8 @@ namespace ScmssApiServer.Migrations
                     b.Navigation("Events");
 
                     b.Navigation("Items");
+
+                    b.Navigation("WarehouseProductItemEvents");
                 });
 
             modelBuilder.Entity("ScmssApiServer.Models.Supply", b =>
@@ -2003,6 +2143,16 @@ namespace ScmssApiServer.Migrations
                     b.Navigation("PurchaseRequisitions");
 
                     b.Navigation("Supplies");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.WarehouseProductItem", b =>
+                {
+                    b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("ScmssApiServer.Models.WarehouseSupplyItem", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

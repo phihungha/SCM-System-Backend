@@ -4,8 +4,11 @@ namespace ScmssApiServer.Models
 {
     public class WarehouseProductItem : WarehouseItem
     {
-        public int ProductId { get; set; }
+        public ICollection<WarehouseProductItem> Events { get; set; }
+            = new List<WarehouseProductItem>();
+
         public Product Product { get; set; } = null!;
+        public int ProductId { get; set; }
 
         [NotMapped]
         public override string Unit => Product.Unit;

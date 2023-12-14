@@ -65,7 +65,10 @@ namespace ScmssApiServer.Models
             }
         }
 
-        public ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Product> Products { get; protected set; } = new List<Product>();
+
+        public ICollection<WarehouseProductItemEvent> WarehouseProductItemEvents { get; protected set; }
+                                    = new List<WarehouseProductItemEvent>();
 
         public override void AddItems(ICollection<SalesOrderItem> items)
         {
