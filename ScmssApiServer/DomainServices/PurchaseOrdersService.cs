@@ -293,7 +293,7 @@ namespace ScmssApiServer.DomainServices
             }
             else
             {
-                if (!identity.IsSalesUser)
+                if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized for this status.");
                 }

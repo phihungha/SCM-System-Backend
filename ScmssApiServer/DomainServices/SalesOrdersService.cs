@@ -290,8 +290,6 @@ namespace ScmssApiServer.DomainServices
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
-            string userId = user.Id;
-
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
