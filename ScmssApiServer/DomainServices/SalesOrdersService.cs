@@ -106,8 +106,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SalesOrderDto?>(order);
         }
 
-        public async Task<IList<SalesOrderDto>> GetManyAsync(Identity identity)
+        public async Task<IList<SalesOrderDto>> GetManyAsync(TransOrderQueryDto<SalesOrderSearchCriteria> dto, Identity identity)
         {
+            SalesOrderSearchCriteria criteria = dto.SearchCriteria;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            ICollection<OrderStatus>? statuses = dto.Status;
+            ICollection<TransOrderPaymentStatus>? paymentStatuses = dto.PaymentStatus;
+
             var query = _dbContext.SalesOrders.AsNoTracking();
 
             if (!identity.IsSalesUser && identity.IsInProductionFacility)
@@ -115,12 +120,45 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
+            if (statuses != null)
+            {
+                query = query.Where(i => statuses.Contains(i.Status));
+            }
+
+            if (paymentStatuses != null)
+            {
+                query = query.Where(i => paymentStatuses.Contains(i.PaymentStatus));
+            }
+
+            if (searchTerm != null)
+            {
+                switch (criteria)
+                {
+                    case SalesOrderSearchCriteria.CreateUserName:
+                        query = query.Where(i => i.CreateUser.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case SalesOrderSearchCriteria.CustomerName:
+                        query = query.Where(i => i.Customer.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case SalesOrderSearchCriteria.ProductionFacilityName:
+                        query = query.Where(i => i.ProductionFacility != null &&
+                                                 i.ProductionFacility.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    default:
+                        query = query.Where(i => i.Id == int.Parse(searchTerm));
+                        break;
+                }
+            }
+
             IList<SalesOrder> orders = await query
-                .AsNoTracking()
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
                 .ToListAsync();
             return _mapper.Map<IList<SalesOrderDto>>(orders);
         }

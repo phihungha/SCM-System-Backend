@@ -97,8 +97,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderDto?>(order);
         }
 
-        public async Task<IList<ProductionOrderDto>> GetManyAsync(Identity identity)
+        public async Task<IList<ProductionOrderDto>> GetManyAsync(ProductionOrderQueryDto dto, Identity identity)
         {
+            ProductionOrderSearchCriteria criteria = dto.SearchCriteria;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            ICollection<OrderStatus>? statuses = dto.Status;
+            ICollection<ApprovalStatus>? approvalStatuses = dto.ApprovalStatus;
+
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
             if (!identity.IsSuperUser && identity.IsInProductionFacility)
@@ -106,11 +111,41 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
+            if (statuses != null)
+            {
+                query = query.Where(i => statuses.Contains(i.Status));
+            }
+
+            if (approvalStatuses != null)
+            {
+                query = query.Where(i => approvalStatuses.Contains(i.ApprovalStatus));
+            }
+
+            if (searchTerm != null)
+            {
+                switch (criteria)
+                {
+                    case ProductionOrderSearchCriteria.CreateUserName:
+                        query = query.Where(i => i.CreateUser.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case ProductionOrderSearchCriteria.ProductionFacilityName:
+                        query = query.Where(i => i.ProductionFacility != null &&
+                                                 i.ProductionFacility.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    default:
+                        query = query.Where(i => i.Id == int.Parse(searchTerm));
+                        break;
+                }
+            }
+
             IList<ProductionOrder> orders = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
                 .ToListAsync();
             return _mapper.Map<IList<ProductionOrderDto>>(orders);
         }

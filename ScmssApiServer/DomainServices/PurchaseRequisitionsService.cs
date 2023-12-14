@@ -81,7 +81,6 @@ namespace ScmssApiServer.DomainServices
             }
 
             PurchaseRequisition? requisition = await query
-                .AsNoTracking()
                 .Include(i => i.Items)
                 .ThenInclude(i => i.Supply)
                 .Include(i => i.Vendor)
@@ -95,8 +94,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto?>(requisition);
         }
 
-        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity identity)
+        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(PurchaseRequisitionQueryDto dto, Identity identity)
         {
+            PurchaseRequisitionSearchCriteria? criteria = dto.SearchCriteria;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            ICollection<PurchaseRequisitionStatus>? statuses = dto.Status;
+            ICollection<ApprovalStatus>? approvalStatuses = dto.ApprovalStatus;
+
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
             if (!identity.IsSuperUser && identity.IsInProductionFacility)
@@ -104,11 +108,45 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
+            if (statuses != null)
+            {
+                query = query.Where(i => statuses.Contains(i.Status));
+            }
+
+            if (approvalStatuses != null)
+            {
+                query = query.Where(i => approvalStatuses.Contains(i.ApprovalStatus));
+            }
+
+            if (searchTerm != null)
+            {
+                switch (criteria)
+                {
+                    case PurchaseRequisitionSearchCriteria.CreateUserName:
+                        query = query.Where(i => i.CreateUser.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case PurchaseRequisitionSearchCriteria.VendorName:
+                        query = query.Where(i => i.Vendor.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case PurchaseRequisitionSearchCriteria.ProductionFacilityName:
+                        query = query.Where(i => i.ProductionFacility != null &&
+                                                 i.ProductionFacility.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    default:
+                        query = query.Where(i => i.Id == int.Parse(searchTerm));
+                        break;
+                }
+            }
+
             IList<PurchaseRequisition> requisitions = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Vendor)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
                 .ToListAsync();
             return _mapper.Map<IList<PurchaseRequisitionDto>>(requisitions);
         }

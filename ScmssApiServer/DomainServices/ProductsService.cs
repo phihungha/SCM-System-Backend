@@ -40,11 +40,11 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductDto?>(product);
         }
 
-        public async Task<IList<ProductDto>> GetManyAsync(SimpleQueryDto queryDto)
+        public async Task<IList<ProductDto>> GetManyAsync(SimpleQueryDto dto)
         {
-            string? searchTerm = queryDto.SearchTerm;
-            SimpleSearchCriteria? searchCriteria = queryDto.SearchCriteria;
-            bool? displayAll = queryDto.All;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            SimpleSearchCriteria? searchCriteria = dto.SearchCriteria;
+            bool? displayAll = dto.All;
 
             var query = _dbContext.Products.AsNoTracking();
 
@@ -52,7 +52,7 @@ namespace ScmssApiServer.DomainServices
             {
                 if (searchCriteria == SimpleSearchCriteria.Name)
                 {
-                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm.ToLower()));
+                    query = query.Where(i => i.Name.ToLower().Contains(searchTerm));
                 }
                 else
                 {

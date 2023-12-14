@@ -9,7 +9,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<PurchaseRequisitionDto?> GetAsync(int id, Identity identity);
 
-        Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity identity);
+        Task<IList<PurchaseRequisitionDto>> GetManyAsync(PurchaseRequisitionQueryDto dto, Identity identity);
 
         Task<PurchaseRequisitionDto> UpdateAsync(int id, PurchaseRequisitionUpdateDto dto, Identity identity);
     }
