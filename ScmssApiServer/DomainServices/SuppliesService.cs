@@ -36,6 +36,15 @@ namespace ScmssApiServer.DomainServices
                     ProductionFacility = facility,
                     Quantity = 0,
                 };
+
+                warehouseItem.Events.Add(new WarehouseSupplyItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = 0,
+                    Change = 0,
+                    WarehouseSupplyItem = warehouseItem,
+                });
+
                 facility.WarehouseSupplyItems.Add(warehouseItem);
             }
             await _dbContext.SaveChangesAsync();

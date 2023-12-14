@@ -439,137 +439,163 @@ namespace ScmssApiServer.Data
                 new ProductSupplyCostItem { ProductId = 2, SupplyId = 6, Quantity = 1.5 }
             );
 
-            builder.Entity<WarehouseSupplyItem>().HasData(
-            new WarehouseSupplyItem
+            var warehouseSupplyItems = new List<WarehouseSupplyItem>()
             {
-                Id = 1,
-                SupplyId = 1,
-                ProductionFacilityId = 1,
-                Quantity = 13000,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 2,
-                SupplyId = 2,
-                ProductionFacilityId = 1,
-                Quantity = 12500,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 3,
-                SupplyId = 3,
-                ProductionFacilityId = 1,
-                Quantity = 12500,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 4,
-                SupplyId = 4,
-                ProductionFacilityId = 1,
-                Quantity = 12000,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 5,
-                SupplyId = 5,
-                ProductionFacilityId = 1,
-                Quantity = 1800,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 6,
-                SupplyId = 6,
-                ProductionFacilityId = 1,
-                Quantity = 1800,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 7,
-                SupplyId = 1,
-                ProductionFacilityId = 2,
-                Quantity = 12000,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 8,
-                SupplyId = 2,
-                ProductionFacilityId = 2,
-                Quantity = 12000,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 9,
-                SupplyId = 3,
-                ProductionFacilityId = 2,
-                Quantity = 12500,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 10,
-                SupplyId = 4,
-                ProductionFacilityId = 2,
-                Quantity = 11000,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 11,
-                SupplyId = 5,
-                ProductionFacilityId = 2,
-                Quantity = 1500,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseSupplyItem
-            {
-                Id = 12,
-                SupplyId = 6,
-                ProductionFacilityId = 2,
-                Quantity = 1500,
-                CreateTime = DateTime.UtcNow,
-            });
+                new WarehouseSupplyItem
+                {
+                    Id = 1,
+                    SupplyId = 1,
+                    ProductionFacilityId = 1,
+                    Quantity = 13000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 2,
+                    SupplyId = 2,
+                    ProductionFacilityId = 1,
+                    Quantity = 12500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 3,
+                    SupplyId = 3,
+                    ProductionFacilityId = 1,
+                    Quantity = 12500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 4,
+                    SupplyId = 4,
+                    ProductionFacilityId = 1,
+                    Quantity = 12000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 5,
+                    SupplyId = 5,
+                    ProductionFacilityId = 1,
+                    Quantity = 1800,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 6,
+                    SupplyId = 6,
+                    ProductionFacilityId = 1,
+                    Quantity = 1800,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 7,
+                    SupplyId = 1,
+                    ProductionFacilityId = 2,
+                    Quantity = 12000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 8,
+                    SupplyId = 2,
+                    ProductionFacilityId = 2,
+                    Quantity = 12000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 9,
+                    SupplyId = 3,
+                    ProductionFacilityId = 2,
+                    Quantity = 12500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 10,
+                    SupplyId = 4,
+                    ProductionFacilityId = 2,
+                    Quantity = 11000,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 11,
+                    SupplyId = 5,
+                    ProductionFacilityId = 2,
+                    Quantity = 1500,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseSupplyItem
+                {
+                    Id = 12,
+                    SupplyId = 6,
+                    ProductionFacilityId = 2,
+                    Quantity = 1500,
+                    CreateTime = DateTime.UtcNow,
+                }
+            };
+            builder.Entity<WarehouseSupplyItem>().HasData(warehouseSupplyItems);
 
-            builder.Entity<WarehouseProductItem>().HasData(
-            new WarehouseProductItem
+            IList<WarehouseSupplyItemEvent> warehouseSupplyItemEvents
+                = warehouseSupplyItems.Select(i => new WarehouseSupplyItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = i.Quantity,
+                    Change = i.Quantity,
+                    WarehouseSupplyItemId = i.Id,
+                }).ToList();
+            builder.Entity<WarehouseSupplyItemEvent>().HasData(warehouseSupplyItemEvents);
+
+            var warehouseProductItems = new List<WarehouseProductItem>()
             {
-                Id = 1,
-                ProductId = 1,
-                ProductionFacilityId = 1,
-                Quantity = 400,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseProductItem
-            {
-                Id = 2,
-                ProductId = 2,
-                ProductionFacilityId = 1,
-                Quantity = 300,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseProductItem
-            {
-                Id = 3,
-                ProductId = 1,
-                ProductionFacilityId = 2,
-                Quantity = 700,
-                CreateTime = DateTime.UtcNow,
-            },
-            new WarehouseProductItem
-            {
-                Id = 4,
-                ProductId = 2,
-                ProductionFacilityId = 2,
-                Quantity = 600,
-                CreateTime = DateTime.UtcNow,
-            });
+                new WarehouseProductItem
+                {
+                    Id = 1,
+                    ProductId = 1,
+                    ProductionFacilityId = 1,
+                    Quantity = 400,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseProductItem
+                {
+                    Id = 2,
+                    ProductId = 2,
+                    ProductionFacilityId = 1,
+                    Quantity = 300,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseProductItem
+                {
+                    Id = 3,
+                    ProductId = 1,
+                    ProductionFacilityId = 2,
+                    Quantity = 700,
+                    CreateTime = DateTime.UtcNow,
+                },
+                new WarehouseProductItem
+                {
+                    Id = 4,
+                    ProductId = 2,
+                    ProductionFacilityId = 2,
+                    Quantity = 600,
+                    CreateTime = DateTime.UtcNow,
+                }
+            };
+            builder.Entity<WarehouseProductItem>().HasData(warehouseProductItems);
+
+            IList<WarehouseProductItemEvent> warehouseProductItemEvents
+                = warehouseSupplyItems.Select(i => new WarehouseProductItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = i.Quantity,
+                    Change = i.Quantity,
+                    WarehouseProductItemId = i.Id,
+                }).ToList();
+            builder.Entity<WarehouseProductItemEvent>().HasData(warehouseProductItemEvents);
 
             #endregion Seeding
         }
