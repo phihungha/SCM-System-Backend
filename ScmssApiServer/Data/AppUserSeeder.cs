@@ -56,11 +56,11 @@ namespace ScmssApiServer.Data
             ILogger logger = app.Logger;
             IConfiguration configuration = app.Configuration;
 
-            var userName = configuration.GetValue<string>("InitialRootAdminUser:UserName");
-            var name = configuration.GetValue<string>("InitialRootAdminUser:Name");
-            var email = configuration.GetValue<string>("InitialRootAdminUser:Email");
-            var password = configuration.GetValue<string>("InitialRootAdminUser:Password");
-            var description = configuration.GetValue<string>("InitialRootAdminUser:Description");
+            var userName = configuration.GetValue<string>("RootAdminUser:UserName");
+            var name = configuration.GetValue<string>("RootAdminUser:Name");
+            var email = configuration.GetValue<string>("RootAdminUser:Email");
+            var password = configuration.GetValue<string>("RootAdminUser:Password");
+            var description = configuration.GetValue<string>("RootAdminUser:Description");
             if (userName == null
                 || name == null
                 || email == null

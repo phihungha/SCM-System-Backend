@@ -70,12 +70,16 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IVendorsService, VendorsService>();
 
-            builder.Services.AddCors(o => o.AddPolicy(
-                name: CorsPolicyName,
-                builder => builder.WithHeaders(HeaderNames.ContentType)
-                                  .AllowCredentials()
-                                  .WithOrigins("http://localhost:3000"))
-            );
+            string? clientUrl = builder.Configuration.GetValue<string>("Cors:ClientUrl");
+            if (clientUrl != null)
+            {
+                builder.Services.AddCors(o => o.AddPolicy(
+                    name: CorsPolicyName,
+                    builder => builder.WithHeaders(HeaderNames.ContentType)
+                                      .AllowCredentials()
+                                      .WithOrigins(clientUrl))
+                );
+            }
 
             builder.Services.AddControllers()
                 .AddProblemDetailsConventions()
