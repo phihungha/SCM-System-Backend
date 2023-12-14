@@ -11,7 +11,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<ProductionOrderDto?> GetAsync(int id, Identity identity);
 
-        Task<IList<ProductionOrderDto>> GetManyAsync(Identity identity);
+        Task<IList<ProductionOrderDto>> GetManyAsync(ProductionOrderQueryDto dto, Identity identity);
 
         Task<ProductionOrderDto> UpdateAsync(int id, ProductionOrderUpdateDto dto, Identity identity);
 

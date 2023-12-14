@@ -4,7 +4,7 @@ namespace ScmssApiServer.IDomainServices
 {
     public interface ISuppliesService
     {
-        Task<SupplyDto> CreateAsync(SupplyInputDto dto);
+        Task<SupplyDto> AddAsync(SupplyInputDto dto);
 
         Task<SupplyDto?> GetAsync(int id);
 

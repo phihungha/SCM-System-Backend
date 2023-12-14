@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -40,7 +41,8 @@ namespace ScmssApiServer.DomainServices
                     );
             }
 
-            Vendor? vendor = await _dbContext.Vendors.FindAsync(dto.VendorId);
+            Vendor? vendor = await _dbContext.Vendors.Where(i => i.IsActive)
+                                                     .FirstOrDefaultAsync(i => i.Id == dto.VendorId);
             if (vendor == null)
             {
                 throw new EntityNotFoundException("Vendor not found.");
@@ -64,7 +66,7 @@ namespace ScmssApiServer.DomainServices
             };
 
             requisition.AddItems(await MapRequisitionItemDtosToModels(dto.VendorId, dto.Items));
-            requisition.Begin(user.Id);
+            requisition.Begin(user);
 
             _dbContext.PurchaseRequisitions.Add(requisition);
             await _dbContext.SaveChangesAsync();
@@ -81,7 +83,6 @@ namespace ScmssApiServer.DomainServices
             }
 
             PurchaseRequisition? requisition = await query
-                .AsNoTracking()
                 .Include(i => i.Items)
                 .ThenInclude(i => i.Supply)
                 .Include(i => i.Vendor)
@@ -95,8 +96,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseRequisitionDto?>(requisition);
         }
 
-        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(Identity identity)
+        public async Task<IList<PurchaseRequisitionDto>> GetManyAsync(PurchaseRequisitionQueryDto dto, Identity identity)
         {
+            PurchaseRequisitionSearchCriteria? criteria = dto.SearchCriteria;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            ICollection<PurchaseRequisitionStatus>? statuses = dto.Status;
+            ICollection<ApprovalStatus>? approvalStatuses = dto.ApprovalStatus;
+
             var query = _dbContext.PurchaseRequisitions.AsNoTracking();
 
             if (!identity.IsSuperUser && identity.IsInProductionFacility)
@@ -104,11 +110,45 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
+            if (statuses != null)
+            {
+                query = query.Where(i => statuses.Contains(i.Status));
+            }
+
+            if (approvalStatuses != null)
+            {
+                query = query.Where(i => approvalStatuses.Contains(i.ApprovalStatus));
+            }
+
+            if (searchTerm != null)
+            {
+                switch (criteria)
+                {
+                    case PurchaseRequisitionSearchCriteria.CreateUserName:
+                        query = query.Where(i => i.CreateUser.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case PurchaseRequisitionSearchCriteria.VendorName:
+                        query = query.Where(i => i.Vendor.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case PurchaseRequisitionSearchCriteria.ProductionFacilityName:
+                        query = query.Where(i => i.ProductionFacility != null &&
+                                                 i.ProductionFacility.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    default:
+                        query = query.Where(i => i.Id == int.Parse(searchTerm));
+                        break;
+                }
+            }
+
             IList<PurchaseRequisition> requisitions = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Vendor)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
                 .ToListAsync();
             return _mapper.Map<IList<PurchaseRequisitionDto>>(requisitions);
         }
@@ -157,7 +197,7 @@ namespace ScmssApiServer.DomainServices
                 }
 
                 User user = (await _userManager.FindByIdAsync(identity.Id))!;
-                requisition.Cancel(user.Id, dto.Problem);
+                requisition.Cancel(user, dto.Problem);
             }
 
             if (dto.ApprovalStatus != null)
@@ -223,7 +263,7 @@ namespace ScmssApiServer.DomainServices
                             "Cannot reject a requisition without a problem."
                         );
                 }
-                requisition.Reject(user.Id, dto.Problem);
+                requisition.Reject(user, dto.Problem);
             }
         }
 
@@ -236,25 +276,33 @@ namespace ScmssApiServer.DomainServices
                 .Supplies
                 .Where(i => i.VendorId == requisitionVendorId)
                 .Where(i => supplyIds.Contains(i.Id))
+                .Where(i => i.IsActive)
                 .ToDictionaryAsync(i => i.Id);
 
-            if (supplies.Count != supplyIds.Count)
+            var orderItems = new List<PurchaseRequisitionItem>();
+
+            foreach (var dto in dtos)
             {
-                throw new InvalidDomainOperationException(
-                            "Cannot add a supply item with different vendor " +
-                            "from the purchase requisition's vendor."
+                int itemId = dto.ItemId;
+                if (!supplies.ContainsKey(itemId))
+                {
+                    throw new EntityNotFoundException(
+                            $"Supply item with ID {itemId} not found or belongs to another vendor."
                         );
+                }
+                Supply supply = supplies[itemId];
+
+                orderItems.Add(new PurchaseRequisitionItem
+                {
+                    ItemId = itemId,
+                    Supply = supply,
+                    Unit = supply.Unit,
+                    UnitPrice = supply.Price,
+                    Quantity = dto.Quantity
+                });
             }
 
-            return dtos.Select(
-                i => new PurchaseRequisitionItem
-                {
-                    ItemId = i.ItemId,
-                    Supply = supplies[i.ItemId],
-                    Unit = supplies[i.ItemId].Unit,
-                    UnitPrice = supplies[i.ItemId].Price,
-                    Quantity = i.Quantity
-                }).ToList();
+            return orderItems;
         }
     }
 }

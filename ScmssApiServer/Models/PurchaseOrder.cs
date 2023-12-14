@@ -53,10 +53,15 @@ namespace ScmssApiServer.Models
         }
 
         public ProductionFacility ProductionFacility { get; set; } = null!;
+
         public int ProductionFacilityId { get; set; }
+
         public PurchaseRequisition PurchaseRequisition { get; set; } = null!;
+
         public int? PurchaseRequisitionId { get; set; }
+
         public Uri? ReceiptUrl { get; set; }
+
         public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
 
         /// <summary>
@@ -76,17 +81,21 @@ namespace ScmssApiServer.Models
         }
 
         public Vendor Vendor { get; set; } = null!;
+
         public int VendorId { get; set; }
 
-        public override void Cancel(string userId, string problem)
+        public ICollection<WarehouseSupplyItemEvent> WarehouseSupplyItemEvents { get; protected set; }
+            = new List<WarehouseSupplyItemEvent>();
+
+        public override void Cancel(User user, string problem)
         {
-            base.Cancel(userId, problem);
+            base.Cancel(user, problem);
             PurchaseRequisition.Delay(problem);
         }
 
-        public override void Complete(string userId)
+        public override void Complete(User user)
         {
-            base.Complete(userId);
+            base.Complete(user);
 
             foreach (PurchaseOrderItem item in Items)
             {
@@ -94,9 +103,22 @@ namespace ScmssApiServer.Models
                         i => i.ProductionFacilityId == ProductionFacilityId
                     );
                 warehouseItem.Quantity += item.Quantity;
+
+                var warehouseEvent = new WarehouseSupplyItemEvent
+                {
+                    Time = DateTime.UtcNow,
+                    Quantity = warehouseItem.Quantity,
+                    Change = item.Quantity,
+                    PurchaseOrder = this,
+                    PurchaseOrderId = Id,
+                    WarehouseSupplyItem = warehouseItem,
+                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
+                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
+                };
+                warehouseItem.Events.Add(warehouseEvent);
             }
 
-            PurchaseRequisition.Complete(userId);
+            PurchaseRequisition.Complete(user);
         }
 
         /// <summary>
@@ -122,9 +144,9 @@ namespace ScmssApiServer.Models
             DiscountSubtotal = Items.Sum(i => i.Discount);
         }
 
-        public override void Return(string userId, string problem)
+        public override void Return(User user, string problem)
         {
-            base.Return(userId, problem);
+            base.Return(user, problem);
             PurchaseRequisition.Delay(problem);
         }
     }

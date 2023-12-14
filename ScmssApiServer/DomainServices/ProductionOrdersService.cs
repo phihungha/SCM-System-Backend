@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -68,7 +69,7 @@ namespace ScmssApiServer.DomainServices
             };
 
             order.AddItems(await MapOrderItemDtosToModels(dto.Items));
-            order.Begin(user.Id);
+            order.Begin(user);
 
             _dbContext.ProductionOrders.Add(order);
             await _dbContext.SaveChangesAsync();
@@ -97,8 +98,13 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductionOrderDto?>(order);
         }
 
-        public async Task<IList<ProductionOrderDto>> GetManyAsync(Identity identity)
+        public async Task<IList<ProductionOrderDto>> GetManyAsync(ProductionOrderQueryDto dto, Identity identity)
         {
+            ProductionOrderSearchCriteria criteria = dto.SearchCriteria;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            ICollection<OrderStatus>? statuses = dto.Status;
+            ICollection<ApprovalStatus>? approvalStatuses = dto.ApprovalStatus;
+
             var query = _dbContext.ProductionOrders.AsNoTracking();
 
             if (!identity.IsSuperUser && identity.IsInProductionFacility)
@@ -106,11 +112,41 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
+            if (statuses != null)
+            {
+                query = query.Where(i => statuses.Contains(i.Status));
+            }
+
+            if (approvalStatuses != null)
+            {
+                query = query.Where(i => approvalStatuses.Contains(i.ApprovalStatus));
+            }
+
+            if (searchTerm != null)
+            {
+                switch (criteria)
+                {
+                    case ProductionOrderSearchCriteria.CreateUserName:
+                        query = query.Where(i => i.CreateUser.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case ProductionOrderSearchCriteria.ProductionFacilityName:
+                        query = query.Where(i => i.ProductionFacility != null &&
+                                                 i.ProductionFacility.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    default:
+                        query = query.Where(i => i.Id == int.Parse(searchTerm));
+                        break;
+                }
+            }
+
             IList<ProductionOrder> orders = await query
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
                 .ToListAsync();
             return _mapper.Map<IList<ProductionOrderDto>>(orders);
         }
@@ -211,8 +247,6 @@ namespace ScmssApiServer.DomainServices
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
-            string userId = user.Id;
-
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
@@ -225,7 +259,7 @@ namespace ScmssApiServer.DomainServices
                     break;
 
                 case OrderStatusOption.Completed:
-                    order.Complete(userId);
+                    order.Complete(user);
                     break;
 
                 case OrderStatusOption.Canceled:
@@ -235,7 +269,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot cancel an order without a problem."
                             );
                     }
-                    order.Cancel(userId, dto.Problem);
+                    order.Cancel(user, dto.Problem);
                     break;
 
                 case OrderStatusOption.Returned:
@@ -245,7 +279,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot return an order without a problem."
                             );
                     }
-                    order.Return(userId, dto.Problem);
+                    order.Return(user, dto.Problem);
                     break;
             }
         }
@@ -288,19 +322,33 @@ namespace ScmssApiServer.DomainServices
                 .ThenInclude(i => i.Supply)
                 .ThenInclude(i => i.WarehouseSupplyItems)
                 .Where(i => productIds.Contains(i.Id))
+                .Where(i => i.IsActive)
                 .ToDictionaryAsync(i => i.Id);
 
-            return dtos.Select(
-                dto => new ProductionOrderItem
+            var orderItems = new List<ProductionOrderItem>();
+
+            foreach (var dto in dtos)
+            {
+                int itemId = dto.ItemId;
+                if (!products.ContainsKey(itemId))
                 {
-                    ItemId = dto.ItemId,
+                    throw new EntityNotFoundException($"Product item with ID {itemId} not found.");
+                }
+                Product product = products[itemId];
+
+                orderItems.Add(new ProductionOrderItem
+                {
+                    ItemId = itemId,
                     // This is needed to check stock.
-                    Product = products[dto.ItemId],
-                    Unit = products[dto.ItemId].Unit,
-                    UnitValue = products[dto.ItemId].Price,
-                    UnitCost = products[dto.ItemId].Cost,
+                    Product = product,
+                    Unit = product.Unit,
+                    UnitValue = product.Price,
+                    UnitCost = product.Cost,
                     Quantity = dto.Quantity
-                }).ToList();
+                });
+            }
+
+            return orderItems;
         }
     }
 }

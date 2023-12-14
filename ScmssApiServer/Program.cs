@@ -1,19 +1,21 @@
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
+using Hellang.Middleware.ProblemDetails;
+using Hellang.Middleware.ProblemDetails.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using ScmssApiServer.Data;
+using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DomainServices;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
-using System.Net;
 using System.Text.Json.Serialization;
 
 namespace ScmssApiServer
@@ -39,10 +41,18 @@ namespace ScmssApiServer
                     o => o.UseNpgsql(dbConnectionString)
                 );
 
+            // Add infrastructure services
             AddAuthentication(builder);
             AddAwsS3(builder, logger);
+            builder.Services.AddProblemDetails(o =>
+            {
+                o.IncludeExceptionDetails = (ctx, ex) => builder.Environment.IsDevelopment();
+                o.MapToStatusCode<EntityNotFoundException>(StatusCodes.Status404NotFound);
+                o.MapToStatusCode<InvalidDomainOperationException>(StatusCodes.Status400BadRequest);
+                o.MapToStatusCode<UnauthorizedException>(StatusCodes.Status403Forbidden);
+                o.MapToStatusCode<UnauthenticatedException>(StatusCodes.Status401Unauthorized);
+            });
 
-            // Add infrastructure services
             builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformation>();
             builder.Services.AddSingleton<IImageHostService, ImageHostService>();
 
@@ -60,18 +70,23 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IVendorsService, VendorsService>();
 
-            builder.Services.AddCors(o => o.AddPolicy(
-                name: CorsPolicyName,
-                builder => builder.WithHeaders(HeaderNames.ContentType)
-                                  .AllowCredentials()
-                                  .WithOrigins("http://localhost:3000"))
-            );
+            string? clientUrl = builder.Configuration.GetValue<string>("Cors:ClientUrl");
+            if (clientUrl != null)
+            {
+                builder.Services.AddCors(o => o.AddPolicy(
+                    name: CorsPolicyName,
+                    builder => builder.WithHeaders(HeaderNames.ContentType)
+                                      .AllowCredentials()
+                                      .WithOrigins(clientUrl))
+                );
+            }
 
-            builder.Services.AddControllers().AddJsonOptions(
+            builder.Services.AddControllers()
+                .AddProblemDetailsConventions()
+                .AddJsonOptions(
                     o => o.JsonSerializerOptions
                           .Converters
-                          .Add(new JsonStringEnumConverter())
-                );
+                          .Add(new JsonStringEnumConverter()));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -80,8 +95,8 @@ namespace ScmssApiServer
 
             using (var scope = app.Services.CreateScope())
             {
-                AppDbSeeder.SeedRoles(scope, app);
-                AppDbSeeder.SeedRootAdminUser(scope, app);
+                AppUserSeeder.SeedRoles(scope, app);
+                AppUserSeeder.SeedRootAdminUser(scope, app);
             }
 
             // Configure the HTTP request pipeline.
@@ -90,6 +105,13 @@ namespace ScmssApiServer
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/error");
+            }
+
+            app.UseProblemDetails();
 
             app.UseHttpsRedirection();
 
@@ -100,18 +122,6 @@ namespace ScmssApiServer
             app.MapControllers();
 
             app.Run();
-        }
-
-        internal static Task GetForbiddenResp(RedirectContext<CookieAuthenticationOptions> context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            return Task.CompletedTask;
-        }
-
-        internal static Task GetUnauthorizaedResp(RedirectContext<CookieAuthenticationOptions> context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -133,8 +143,6 @@ namespace ScmssApiServer
                 .AddCookie(options =>
                     {
                         options.SlidingExpiration = true;
-                        options.Events.OnRedirectToAccessDenied = GetForbiddenResp;
-                        options.Events.OnRedirectToLogin = GetUnauthorizaedResp;
                     }
                 );
         }

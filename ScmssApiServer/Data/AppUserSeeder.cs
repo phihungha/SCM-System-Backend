@@ -4,7 +4,7 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Data
 {
-    public static class AppDbSeeder
+    public static class AppUserSeeder
     {
         public static readonly string[] Roles =
         {
@@ -56,11 +56,11 @@ namespace ScmssApiServer.Data
             ILogger logger = app.Logger;
             IConfiguration configuration = app.Configuration;
 
-            var userName = configuration.GetValue<string>("InitialRootAdminUser:UserName");
-            var name = configuration.GetValue<string>("InitialRootAdminUser:Name");
-            var email = configuration.GetValue<string>("InitialRootAdminUser:Email");
-            var password = configuration.GetValue<string>("InitialRootAdminUser:Password");
-            var description = configuration.GetValue<string>("InitialRootAdminUser:Description");
+            var userName = configuration.GetValue<string>("RootAdminUser:UserName");
+            var name = configuration.GetValue<string>("RootAdminUser:Name");
+            var email = configuration.GetValue<string>("RootAdminUser:Email");
+            var password = configuration.GetValue<string>("RootAdminUser:Password");
+            var description = configuration.GetValue<string>("RootAdminUser:Description");
             if (userName == null
                 || name == null
                 || email == null
@@ -93,6 +93,7 @@ namespace ScmssApiServer.Data
                 Name = name,
                 Gender = Gender.Male,
                 ProductionFacilityId = 1,
+                IsActive = true,
                 DateOfBirth = new DateTime(1970, 1, 1).ToUniversalTime(),
                 Description = description,
             };

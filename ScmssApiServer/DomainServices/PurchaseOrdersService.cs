@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -77,7 +78,7 @@ namespace ScmssApiServer.DomainServices
             order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
-            order.Begin(user.Id);
+            order.Begin(user);
 
             _dbContext.PurchaseOrders.Add(order);
             await _dbContext.SaveChangesAsync();
@@ -107,8 +108,15 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseOrderDto?>(orders);
         }
 
-        public async Task<IList<PurchaseOrderDto>> GetManyAsync(Identity identity)
+        public async Task<IList<PurchaseOrderDto>> GetManyAsync(
+            TransOrderQueryDto<PurchaseOrderSearchCriteria> dto,
+            Identity identity)
         {
+            PurchaseOrderSearchCriteria criteria = dto.SearchCriteria;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            ICollection<OrderStatus>? statuses = dto.Status;
+            ICollection<TransOrderPaymentStatus>? paymentStatuses = dto.PaymentStatus;
+
             var query = _dbContext.PurchaseOrders.AsNoTracking();
 
             if (!identity.IsPurchaseUser && identity.IsInProductionFacility)
@@ -116,12 +124,45 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
+            if (statuses != null)
+            {
+                query = query.Where(i => statuses.Contains(i.Status));
+            }
+
+            if (paymentStatuses != null)
+            {
+                query = query.Where(i => paymentStatuses.Contains(i.PaymentStatus));
+            }
+
+            if (searchTerm != null)
+            {
+                switch (criteria)
+                {
+                    case PurchaseOrderSearchCriteria.CreateUserName:
+                        query = query.Where(i => i.CreateUser.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case PurchaseOrderSearchCriteria.VendorName:
+                        query = query.Where(i => i.Vendor.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case PurchaseOrderSearchCriteria.ProductionFacilityName:
+                        query = query.Where(i => i.ProductionFacility != null &&
+                                                 i.ProductionFacility.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    default:
+                        query = query.Where(i => i.Id == int.Parse(searchTerm));
+                        break;
+                }
+            }
+
             IList<PurchaseOrder> orders = await query
-                .AsNoTracking()
                 .Include(i => i.Vendor)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
                 .ToListAsync();
             return _mapper.Map<IList<PurchaseOrderDto>>(orders);
         }
@@ -252,7 +293,7 @@ namespace ScmssApiServer.DomainServices
             }
             else
             {
-                if (!identity.IsSalesUser)
+                if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized for this status.");
                 }
@@ -273,7 +314,7 @@ namespace ScmssApiServer.DomainServices
                     break;
 
                 case OrderStatusOption.Completed:
-                    order.Complete(userId);
+                    order.Complete(user);
                     break;
 
                 case OrderStatusOption.Canceled:
@@ -283,7 +324,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot cancel an order without a problem."
                             );
                     }
-                    order.Cancel(userId, dto.Problem);
+                    order.Cancel(user, dto.Problem);
                     break;
 
                 case OrderStatusOption.Returned:
@@ -293,7 +334,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot return an order without a problem."
                             );
                     }
-                    order.Return(userId, dto.Problem);
+                    order.Return(user, dto.Problem);
                     break;
             }
         }

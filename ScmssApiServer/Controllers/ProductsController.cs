@@ -30,7 +30,7 @@ namespace ScmssApiServer.Controllers
         [HttpPost]
         public async Task<ActionResult<ProductDto>> Create([FromBody] ProductInputDto body)
         {
-            ProductDto item = await _productsService.CreateAsync(body);
+            ProductDto item = await _productsService.AddAsync(body);
             return Ok(item);
         }
 

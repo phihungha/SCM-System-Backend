@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -47,7 +48,8 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, Identity identity)
         {
-            Customer? customer = await _dbContext.Customers.FindAsync(dto.CustomerId);
+            Customer? customer = await _dbContext.Customers.Where(i => i.IsActive)
+                                                           .FirstOrDefaultAsync(i => i.Id == dto.CustomerId);
             if (customer == null)
             {
                 throw new EntityNotFoundException("Customer not found");
@@ -73,11 +75,10 @@ namespace ScmssApiServer.DomainServices
             Config config = await _configService.GetAsync();
             order.VatRate = config.VatRate;
 
-            User user = (await _userManager.FindByIdAsync(identity.Id))!;
-            order.CreateUser = user;
-
             order.AddItems(await MapOrderItemDtosToModels(dto.Items));
-            order.Begin(user.Id);
+
+            User user = (await _userManager.FindByIdAsync(identity.Id))!;
+            order.Begin(user);
 
             _dbContext.SalesOrders.Add(order);
             await _dbContext.SaveChangesAsync();
@@ -106,8 +107,15 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SalesOrderDto?>(order);
         }
 
-        public async Task<IList<SalesOrderDto>> GetManyAsync(Identity identity)
+        public async Task<IList<SalesOrderDto>> GetManyAsync(
+            TransOrderQueryDto<SalesOrderSearchCriteria> dto,
+            Identity identity)
         {
+            SalesOrderSearchCriteria criteria = dto.SearchCriteria;
+            string? searchTerm = dto.SearchTerm?.ToLower();
+            ICollection<OrderStatus>? statuses = dto.Status;
+            ICollection<TransOrderPaymentStatus>? paymentStatuses = dto.PaymentStatus;
+
             var query = _dbContext.SalesOrders.AsNoTracking();
 
             if (!identity.IsSalesUser && identity.IsInProductionFacility)
@@ -115,12 +123,45 @@ namespace ScmssApiServer.DomainServices
                 query = query.Where(i => i.ProductionFacilityId == identity.ProductionFacilityId);
             }
 
+            if (statuses != null)
+            {
+                query = query.Where(i => statuses.Contains(i.Status));
+            }
+
+            if (paymentStatuses != null)
+            {
+                query = query.Where(i => paymentStatuses.Contains(i.PaymentStatus));
+            }
+
+            if (searchTerm != null)
+            {
+                switch (criteria)
+                {
+                    case SalesOrderSearchCriteria.CreateUserName:
+                        query = query.Where(i => i.CreateUser.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case SalesOrderSearchCriteria.CustomerName:
+                        query = query.Where(i => i.Customer.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    case SalesOrderSearchCriteria.ProductionFacilityName:
+                        query = query.Where(i => i.ProductionFacility != null &&
+                                                 i.ProductionFacility.Name.ToLower().Contains(searchTerm));
+                        break;
+
+                    default:
+                        query = query.Where(i => i.Id == int.Parse(searchTerm));
+                        break;
+                }
+            }
+
             IList<SalesOrder> orders = await query
-                .AsNoTracking()
                 .Include(i => i.Customer)
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
                 .ToListAsync();
             return _mapper.Map<IList<SalesOrderDto>>(orders);
         }
@@ -249,8 +290,6 @@ namespace ScmssApiServer.DomainServices
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
 
-            string userId = user.Id;
-
             switch (dto.Status)
             {
                 case OrderStatusOption.Executing:
@@ -262,7 +301,7 @@ namespace ScmssApiServer.DomainServices
                     break;
 
                 case OrderStatusOption.Completed:
-                    order.Complete(userId);
+                    order.Complete(user);
                     break;
 
                 case OrderStatusOption.Canceled:
@@ -272,7 +311,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot cancel an order without a problem."
                             );
                     }
-                    order.Cancel(userId, dto.Problem);
+                    order.Cancel(user, dto.Problem);
                     break;
 
                 case OrderStatusOption.Returned:
@@ -282,7 +321,7 @@ namespace ScmssApiServer.DomainServices
                                 "Cannot return an order without a problem."
                             );
                     }
-                    order.Return(userId, dto.Problem);
+                    order.Return(user, dto.Problem);
                     break;
             }
         }
@@ -298,7 +337,8 @@ namespace ScmssApiServer.DomainServices
 
         private async Task<ProductionFacility> GetProductionFacilityAsync(int facilityId)
         {
-            ProductionFacility? facility = await _dbContext.ProductionFacilities.FindAsync(facilityId);
+            ProductionFacility? facility = await _dbContext.ProductionFacilities.Where(i => i.IsActive)
+                                                                                .FirstOrDefaultAsync(i => i.Id == facilityId);
             if (facility == null)
             {
                 throw new EntityNotFoundException("Production facility not found.");
@@ -313,18 +353,32 @@ namespace ScmssApiServer.DomainServices
                 .Products
                 .Include(i => i.WarehouseProductItems)
                 .Where(i => productIds.Contains(i.Id))
+                .Where(i => i.IsActive)
                 .ToDictionaryAsync(i => i.Id);
 
-            return dtos.Select(
-                dto => new SalesOrderItem
+            var orderItems = new List<SalesOrderItem>();
+
+            foreach (var dto in dtos)
+            {
+                int itemId = dto.ItemId;
+                if (!products.ContainsKey(itemId))
                 {
-                    ItemId = dto.ItemId,
+                    throw new EntityNotFoundException($"Product item with ID {itemId} not found.");
+                }
+                Product product = products[itemId];
+
+                orderItems.Add(new SalesOrderItem
+                {
+                    ItemId = itemId,
                     // This is needed to check stock.
-                    Product = products[dto.ItemId],
-                    Unit = products[dto.ItemId].Unit,
-                    UnitPrice = products[dto.ItemId].Price,
+                    Product = product,
+                    Unit = product.Unit,
+                    UnitPrice = product.Price,
                     Quantity = dto.Quantity
-                }).ToList();
+                });
+            }
+
+            return orderItems;
         }
     }
 }

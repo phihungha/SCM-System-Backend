@@ -2,12 +2,15 @@
 
 namespace ScmssApiServer.Models
 {
-    public abstract class WarehouseItem : ISoftDeletable
+    public abstract class WarehouseItem : ICreateUpdateTime
     {
-        public int ProductionFacilityId { get; set; }
+        public DateTime CreateTime { get; set; }
         public ProductionFacility ProductionFacility { get; set; } = null!;
-
+        public int ProductionFacilityId { get; set; }
         public double Quantity { get; set; }
+
+        [NotMapped]
+        public decimal TotalValue => UnitValue * (decimal)Quantity;
 
         [NotMapped]
         public abstract string Unit { get; }
@@ -15,11 +18,6 @@ namespace ScmssApiServer.Models
         [NotMapped]
         public abstract decimal UnitValue { get; }
 
-        [NotMapped]
-        public decimal TotalValue => UnitValue * (decimal)Quantity;
-
-        public bool IsActive { get; set; }
-        public DateTime CreateTime { get; set; }
         public DateTime? UpdateTime { get; set; }
     }
 }
