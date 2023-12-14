@@ -72,6 +72,21 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
+            if (!dto.IsActive)
+            {
+                IList<string> activeUsers = await _dbContext.Users
+                    .Where(i => i.IsActive)
+                    .Where(i => i.ProductionFacilityId == id)
+                    .Select(i => i.Name)
+                    .ToListAsync();
+                if (activeUsers.Count > 0)
+                {
+                    throw new InvalidDomainOperationException(
+                            $"There are still active users in this facility: {string.Join(',', activeUsers)}"
+                        );
+                }
+            }
+
             _mapper.Map(dto, facility);
 
             await _dbContext.SaveChangesAsync();

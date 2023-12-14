@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
@@ -13,14 +14,17 @@ namespace ScmssApiServer.DomainServices
 {
     public class UsersService : IUsersService
     {
+        private readonly AppDbContext _dbContext;
         private readonly IImageHostService _imageService;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
 
-        public UsersService(UserManager<User> userManager,
+        public UsersService(AppDbContext dbContext,
                             IMapper mapper,
-                            IImageHostService imageService)
+                            IImageHostService imageService,
+                            UserManager<User> userManager)
         {
+            _dbContext = dbContext;
             _mapper = mapper;
             _imageService = imageService;
             _userManager = userManager;
@@ -47,6 +51,18 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<UserDto> CreateAsync(UserCreateDto dto)
         {
+            if (dto.ProductionFacilityId != null)
+            {
+                bool isFacilityActive = (await _dbContext.ProductionFacilities
+                    .Where(i => i.Id == dto.ProductionFacilityId)
+                    .Where(i => i.IsActive)
+                    .CountAsync()) > 0;
+                if (!isFacilityActive)
+                {
+                    throw new InvalidDomainOperationException("Production facility not found.");
+                }
+            }
+
             var user = _mapper.Map<User>(dto);
 
             IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
@@ -62,12 +78,6 @@ namespace ScmssApiServer.DomainServices
             }
 
             return await GetUserDtoAsync(user);
-        }
-
-        public string GetProfileImageUploadUrl(Identity identity)
-        {
-            string key = $"user-profile-images/{identity.Id}";
-            return _imageService.GenerateUploadUrl(key);
         }
 
         public async Task<UserDto?> GetAsync(string id)
@@ -116,8 +126,26 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<UserDto>>(users);
         }
 
+        public string GetProfileImageUploadUrl(Identity identity)
+        {
+            string key = $"user-profile-images/{identity.Id}";
+            return _imageService.GenerateUploadUrl(key);
+        }
+
         public async Task<UserDto> UpdateAsync(string id, UserInputDto dto)
         {
+            if (dto.ProductionFacilityId != null)
+            {
+                bool isFacilityActive = (await _dbContext.ProductionFacilities
+                    .Where(i => i.Id == dto.ProductionFacilityId)
+                    .Where(i => i.IsActive)
+                    .CountAsync()) > 0;
+                if (!isFacilityActive)
+                {
+                    throw new InvalidDomainOperationException("Production facility not found.");
+                }
+            }
+
             User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
             {
