@@ -1,12 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using AutoMapper;
+using ScmssApiServer.DTOs;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.Models
 {
-    public class WarehouseProductItem : WarehouseItem
+    public class WarehouseProductItem : WarehouseItem<WarehouseProductItemEvent>
     {
-        public ICollection<WarehouseProductItemEvent> Events { get; set; }
-            = new List<WarehouseProductItemEvent>();
-
         public Product Product { get; set; } = null!;
         public int ProductId { get; set; }
 
@@ -15,5 +14,13 @@ namespace ScmssApiServer.Models
 
         [NotMapped]
         public override decimal UnitValue => Product.Price;
+    }
+
+    public class WarehouseProductItemMP : Profile
+    {
+        public WarehouseProductItemMP()
+        {
+            CreateMap<WarehouseProductItem, WarehouseProductItemDto>();
+        }
     }
 }

@@ -1,9 +1,7 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public interface ISoftDeletableDto
+    public interface ISoftDeletableDto : ICreateUpdateTimeDto
     {
-        DateTime CreateTime { get; set; }
         bool IsActive { get; set; }
-        DateTime? UpdateTime { get; set; }
     }
 }
