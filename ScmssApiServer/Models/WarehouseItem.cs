@@ -6,6 +6,10 @@ namespace ScmssApiServer.Models
     {
         public DateTime CreateTime { get; set; }
         public ICollection<T> Events { get; set; } = new List<T>();
+
+        [NotMapped]
+        public abstract bool IsActive { get; }
+
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
         public double Quantity { get; set; }

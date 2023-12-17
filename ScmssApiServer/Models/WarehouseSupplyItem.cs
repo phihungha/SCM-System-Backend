@@ -6,6 +6,9 @@ namespace ScmssApiServer.Models
 {
     public class WarehouseSupplyItem : WarehouseItem<WarehouseSupplyItemEvent>
     {
+        [NotMapped]
+        public override bool IsActive => Supply.IsActive;
+
         public Supply Supply { get; set; } = null!;
         public int SupplyId { get; set; }
 
