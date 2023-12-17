@@ -236,7 +236,7 @@ namespace ScmssApiServer.DomainServices
                 {
                     throw new UnauthorizedException("Unauthorized to change invoice.");
                 }
-                order.HasInvoice = (bool)dto.HasReceipt;
+                order.HasReceipt = (bool)dto.HasReceipt;
             }
 
             if (dto.AdditionalDiscount != null)

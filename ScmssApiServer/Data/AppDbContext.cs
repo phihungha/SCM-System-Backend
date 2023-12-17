@@ -353,6 +353,7 @@ namespace ScmssApiServer.Data
                 Id = 1,
                 VendorId = 1,
                 Name = "PVFCCo Urea",
+                HasImage = true,
                 ExpirationMonth = 12,
                 Unit = "Kg",
                 Price = 5000,
@@ -426,6 +427,7 @@ namespace ScmssApiServer.Data
             {
                 Id = 1,
                 Name = "NPK 16-8-8+13S",
+                HasImage = true,
                 NetWeight = 50,
                 ExpirationMonth = 48,
                 Unit = "Item(s)",
