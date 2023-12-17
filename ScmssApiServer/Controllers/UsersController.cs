@@ -54,10 +54,11 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
-        [HttpGet("{id}/profileImageUploadUrl")]
-        public string GetProfileImageUploadUrl()
+        [HttpGet("{id}/ProfileImageUploadUrl")]
+        public ActionResult<string> GetProfileImageUploadUrl(string id)
         {
-            return _usersService.GetProfileImageUploadUrl(CurrentIdentity);
+            string url = _usersService.GenerateProfileImageUploadUrl(id);
+            return Ok(new { Url = url });
         }
 
         [HttpPatch("{id}")]

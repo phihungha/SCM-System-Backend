@@ -4,6 +4,7 @@ using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 
 namespace ScmssApiServer.DomainServices
@@ -11,11 +12,15 @@ namespace ScmssApiServer.DomainServices
     public class ProductsService : IProductsService
     {
         private readonly AppDbContext _dbContext;
+        private readonly IFileHostService _fileHostService;
         private readonly IMapper _mapper;
 
-        public ProductsService(IMapper mapper, AppDbContext dbContext)
+        public ProductsService(IFileHostService fileHostService,
+                               AppDbContext dbContext,
+                               IMapper mapper)
         {
             _dbContext = dbContext;
+            _fileHostService = fileHostService;
             _mapper = mapper;
         }
 
@@ -55,6 +60,11 @@ namespace ScmssApiServer.DomainServices
             await _dbContext.SaveChangesAsync();
 
             return _mapper.Map<ProductDto>(product);
+        }
+
+        public string GenerateImageUploadUrl(int id)
+        {
+            return _fileHostService.GenerateUploadUrl(Product.ImageFolderKey, id);
         }
 
         public async Task<ProductDto?> GetAsync(int id)

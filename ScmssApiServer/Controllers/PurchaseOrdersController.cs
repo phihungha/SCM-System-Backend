@@ -50,12 +50,26 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [HttpGet("{id}/InvoiceUploadUrl")]
+        public ActionResult<string> GetInvoiceUploadUrl(int id)
+        {
+            string url = _purchaseOrdersService.GenerateInvoiceUploadUrl(id);
+            return Ok(new { Url = url });
+        }
+
         [HttpGet]
         public async Task<ActionResult<IList<PurchaseOrderDto>>> GetMany(
             [FromQuery] TransOrderQueryDto<PurchaseOrderSearchCriteria> query)
         {
             IList<PurchaseOrderDto> items = await _purchaseOrdersService.GetManyAsync(query, CurrentIdentity);
             return Ok(items);
+        }
+
+        [HttpGet("{id}/ReceiptUploadUrl")]
+        public ActionResult<string> GetReceiptUploadUrl(int id)
+        {
+            string url = _purchaseOrdersService.GenerateReceiptUploadUrl(id);
+            return Ok(new { Url = url });
         }
 
         [Authorize(Roles = "Finance,PurchaseSpecialist,PurchaseManager")]

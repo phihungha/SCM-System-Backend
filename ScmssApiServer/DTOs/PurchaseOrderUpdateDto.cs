@@ -4,7 +4,7 @@
     {
         public decimal? AdditionalDiscount { get; set; }
         public string? FromLocation { get; set; }
-        public Uri? InvoiceUrl { get; set; }
-        public Uri? ReceiptUrl { get; set; }
+        public bool? HasInvoice { get; set; }
+        public bool? HasReceipt { get; set; }
     }
 }

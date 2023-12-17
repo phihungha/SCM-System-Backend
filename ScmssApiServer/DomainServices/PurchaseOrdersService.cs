@@ -6,6 +6,7 @@ using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
 
@@ -15,16 +16,19 @@ namespace ScmssApiServer.DomainServices
     {
         private readonly IConfigService _configService;
         private readonly AppDbContext _dbContext;
+        private readonly IFileHostService _fileHostService;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
 
-        public PurchaseOrdersService(AppDbContext dbContext,
-                                     IConfigService configService,
+        public PurchaseOrdersService(IConfigService configService,
+                                     AppDbContext dbContext,
+                                     IFileHostService fileHostService,
                                      IMapper mapper,
                                      UserManager<User> userManager)
         {
             _configService = configService;
             _dbContext = dbContext;
+            _fileHostService = fileHostService;
             _mapper = mapper;
             _userManager = userManager;
         }
@@ -84,6 +88,16 @@ namespace ScmssApiServer.DomainServices
             await _dbContext.SaveChangesAsync();
             await _dbContext.Entry(order).Reference(i => i.CreateUser).LoadAsync();
             return _mapper.Map<PurchaseOrderDto>(order);
+        }
+
+        public string GenerateInvoiceUploadUrl(int id)
+        {
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.InvoiceFolderKey, id);
+        }
+
+        public string GenerateReceiptUploadUrl(int id)
+        {
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.ReceiptFolderKey, id);
         }
 
         public async Task<PurchaseOrderDto?> GetAsync(int id, Identity identity)
@@ -198,24 +212,6 @@ namespace ScmssApiServer.DomainServices
                 CompletePayment(order, dto, identity);
             }
 
-            if (dto.InvoiceUrl != null)
-            {
-                if (!identity.IsPurchaseUser)
-                {
-                    throw new UnauthorizedException("Unauthorized to change invoice URL.");
-                }
-                order.InvoiceUrl = dto.InvoiceUrl;
-            }
-
-            if (dto.ReceiptUrl != null)
-            {
-                if (!identity.IsPurchaseUser)
-                {
-                    throw new UnauthorizedException("Unauthorized to change receipt URL.");
-                }
-                order.ReceiptUrl = dto.ReceiptUrl;
-            }
-
             if (dto.FromLocation != null)
             {
                 if (!identity.IsPurchaseUser)
@@ -223,6 +219,24 @@ namespace ScmssApiServer.DomainServices
                     throw new UnauthorizedException("Unauthorized to change location.");
                 }
                 order.FromLocation = dto.FromLocation;
+            }
+
+            if (dto.HasInvoice != null)
+            {
+                if (!identity.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change invoice.");
+                }
+                order.HasInvoice = (bool)dto.HasInvoice;
+            }
+
+            if (dto.HasReceipt != null)
+            {
+                if (!identity.IsPurchaseUser)
+                {
+                    throw new UnauthorizedException("Unauthorized to change invoice.");
+                }
+                order.HasInvoice = (bool)dto.HasReceipt;
             }
 
             if (dto.AdditionalDiscount != null)

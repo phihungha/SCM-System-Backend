@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Services;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScmssApiServer.Models
 {
@@ -9,6 +11,9 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class PurchaseOrder : TransOrder<PurchaseOrderItem, PurchaseOrderEvent>
     {
+        public const string InvoiceFolderKey = "purchase-invoices";
+        public const string ReceiptFolderKey = "purchase-receipts";
+
         private decimal additionalDiscount;
 
         public decimal AdditionalDiscount
@@ -41,7 +46,10 @@ namespace ScmssApiServer.Models
         /// </summary>
         public decimal DiscountSubtotal { get; set; }
 
-        public Uri? InvoiceUrl { get; set; }
+        public bool HasInvoice { get; set; }
+
+        [NotMapped]
+        public Uri? InvoiceUrl => HasInvoice ? FileHostService.GetUri(InvoiceFolderKey, Id) : null;
 
         /// <summary>
         /// Subtotal after discount.
@@ -53,14 +61,14 @@ namespace ScmssApiServer.Models
         }
 
         public ProductionFacility ProductionFacility { get; set; } = null!;
-
         public int ProductionFacilityId { get; set; }
-
         public PurchaseRequisition PurchaseRequisition { get; set; } = null!;
-
         public int? PurchaseRequisitionId { get; set; }
 
-        public Uri? ReceiptUrl { get; set; }
+        public bool HasReceipt { get; set; }
+
+        [NotMapped]
+        public Uri? ReceiptUrl => HasReceipt ? FileHostService.GetUri(ReceiptFolderKey, Id) : null;
 
         public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
 

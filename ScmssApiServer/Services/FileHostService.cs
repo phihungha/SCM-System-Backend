@@ -5,14 +5,15 @@ using ScmssApiServer.IServices;
 
 namespace ScmssApiServer.Services
 {
-    public class ImageHostService : IImageHostService
+    public class FileHostService : IFileHostService
     {
-        private int _expiresInHours;
-        private string _bucketName;
+        public const string BaseUrl = "https://scmss.s3.ap-southeast-1.amazonaws.com/public";
 
+        private string _bucketName;
+        private int _expiresInHours;
         private IAmazonS3 _s3Client;
 
-        public ImageHostService(IConfiguration configuration, IAmazonS3 s3Client)
+        public FileHostService(IConfiguration configuration, IAmazonS3 s3Client)
         {
             _s3Client = s3Client;
 
@@ -30,9 +31,18 @@ namespace ScmssApiServer.Services
             }
         }
 
-        public string GenerateUploadUrl(string key)
+        public static Uri GetUri(string folderKey, string key) => new Uri($"{BaseUrl}/{folderKey}/{key}");
+
+        public static Uri GetUri(string folderKey, int key) => new Uri($"{BaseUrl}/{folderKey}/{key}");
+
+        public string GenerateUploadUrl(string folderKey, string key)
         {
-            return GeneratePresignedUrl(key, HttpVerb.PUT);
+            return GeneratePresignedUrl($"public/{folderKey}/{key}", HttpVerb.PUT);
+        }
+
+        public string GenerateUploadUrl(string folderKey, int key)
+        {
+            return GeneratePresignedUrl($"public/{folderKey}/{key}", HttpVerb.PUT);
         }
 
         private string GeneratePresignedUrl(string key, HttpVerb verb)

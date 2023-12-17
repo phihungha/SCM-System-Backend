@@ -5,6 +5,10 @@ namespace ScmssApiServer.Models
 {
     public class Supply : Goods
     {
+        public const string ImageFolderKey = "supply-images";
+
+        public override string ImageFolderKeyInstance => ImageFolderKey;
+
         public ICollection<ProductSupplyCostItem> ProductionCostItems { get; set; }
             = new List<ProductSupplyCostItem>();
 
