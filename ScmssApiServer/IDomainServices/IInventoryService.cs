@@ -28,9 +28,9 @@ namespace ScmssApiServer.IDomainServices
         public Task<WarehouseSupplyItemDto?> GetSupply(int facilityId, int id, Identity identity);
 
         public Task<IList<WarehouseProductItemDto>> UpdateProducts(
-            int facilityId, WarehouseUpdateDto<WarehouseProductItemInputDto> dto, Identity identity);
+            int facilityId, WarehouseUpdateDto dto, Identity identity);
 
         public Task<IList<WarehouseSupplyItemDto>> UpdateSupplies(
-            int facilityId, WarehouseUpdateDto<WarehouseSupplyItemInputDto> dto, Identity identity);
+            int facilityId, WarehouseUpdateDto dto, Identity identity);
     }
 }

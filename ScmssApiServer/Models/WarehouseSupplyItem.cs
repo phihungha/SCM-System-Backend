@@ -17,6 +17,59 @@ namespace ScmssApiServer.Models
 
         [NotMapped]
         public override decimal UnitValue => Supply.Price;
+
+        public WarehouseSupplyItemEvent AddProductionIssueEvent(double orderQuantity, ProductionOrder order)
+        {
+            Quantity -= orderQuantity;
+            var warehouseEvent = new WarehouseSupplyItemEvent
+            {
+                Time = DateTime.UtcNow,
+                Quantity = Quantity,
+                Change = -orderQuantity,
+                ProductionOrder = order,
+                ProductionOrderId = order.Id,
+                WarehouseSupplyItem = this,
+                WarehouseSupplyItemSupplyId = SupplyId,
+                WarehouseSupplyItemProductionFacilityId = ProductionFacilityId,
+            };
+            Events.Add(warehouseEvent);
+            return warehouseEvent;
+        }
+
+        public WarehouseSupplyItemEvent AddPurchaseReceiveEvent(double orderQuantity, PurchaseOrder order)
+        {
+            Quantity += orderQuantity;
+            var warehouseEvent = new WarehouseSupplyItemEvent
+            {
+                Time = DateTime.UtcNow,
+                Quantity = Quantity,
+                Change = orderQuantity,
+                PurchaseOrder = order,
+                PurchaseOrderId = order.Id,
+                WarehouseSupplyItem = this,
+                WarehouseSupplyItemSupplyId = SupplyId,
+                WarehouseSupplyItemProductionFacilityId = ProductionFacilityId,
+            };
+            Events.Add(warehouseEvent);
+            return warehouseEvent;
+        }
+
+        public WarehouseSupplyItemEvent SetQuantityManually(double newQuantity)
+        {
+            double change = newQuantity - Quantity;
+            Quantity = newQuantity;
+            var warehouseEvent = new WarehouseSupplyItemEvent
+            {
+                Time = DateTime.UtcNow,
+                Quantity = Quantity,
+                Change = change,
+                WarehouseSupplyItem = this,
+                WarehouseSupplyItemSupplyId = SupplyId,
+                WarehouseSupplyItemProductionFacilityId = ProductionFacilityId,
+            };
+            Events.Add(warehouseEvent);
+            return warehouseEvent;
+        }
     }
 
     public class WarehouseSupplyItemMP : Profile

@@ -121,7 +121,7 @@ namespace ScmssApiServer.DomainServices
 
             if (!displayAll ?? true)
             {
-                query = query.Where(i => i.IsActive);
+                query = query.Where(i => i.Product.IsActive);
             }
 
             IList<WarehouseProductItem> items = await query.OrderBy(i => i.ProductId).ToListAsync();
@@ -211,7 +211,7 @@ namespace ScmssApiServer.DomainServices
 
             if (!displayAll ?? true)
             {
-                query = query.Where(i => i.IsActive);
+                query = query.Where(i => i.Supply.IsActive);
             }
 
             IList<WarehouseSupplyItem> items = await query.OrderBy(i => i.SupplyId).ToListAsync();
@@ -232,14 +232,49 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<WarehouseSupplyItemDto?>(item);
         }
 
-        public Task<IList<WarehouseProductItemDto>> UpdateProducts(int facilityId, WarehouseUpdateDto<WarehouseProductItemInputDto> dto, Identity identity)
+        public async Task<IList<WarehouseProductItemDto>> UpdateProducts(
+            int facilityId, WarehouseUpdateDto dto, Identity identity)
         {
-            throw new NotImplementedException();
+            IsAuthorizedOrThrow(identity, facilityId);
+
+            IList<int> itemIds = dto.Items.Select(i => i.Id).ToList();
+            IDictionary<int, WarehouseProductItem> items = await _dbContext.WarehouseProductItems
+                .Include(i => i.Product)
+                .Include(i => i.Events)
+                .Where(i => i.ProductionFacilityId == facilityId)
+                .Where(i => itemIds.Contains(i.ProductId))
+                .ToDictionaryAsync(i => i.ProductId);
+
+            foreach (WarehouseItemInputDto input in dto.Items)
+            {
+                WarehouseProductItem item = items[input.Id];
+                item.SetQuantityManually(input.Quantity);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<IList<WarehouseProductItemDto>>(items.Values);
         }
 
-        public Task<IList<WarehouseSupplyItemDto>> UpdateSupplies(int facilityId, WarehouseUpdateDto<WarehouseSupplyItemInputDto> dto, Identity identity)
+        public async Task<IList<WarehouseSupplyItemDto>> UpdateSupplies(
+            int facilityId, WarehouseUpdateDto dto, Identity identity)
         {
-            throw new NotImplementedException();
+            IsAuthorizedOrThrow(identity, facilityId);
+
+            IList<int> itemIds = dto.Items.Select(i => i.Id).ToList();
+            IDictionary<int, WarehouseSupplyItem> items = await _dbContext.WarehouseSupplyItems
+                .Include(i => i.Supply)
+                .Where(i => i.ProductionFacilityId == facilityId)
+                .Where(i => itemIds.Contains(i.SupplyId))
+                .ToDictionaryAsync(i => i.SupplyId);
+
+            foreach (WarehouseItemInputDto input in dto.Items)
+            {
+                WarehouseSupplyItem item = items[input.Id];
+                item.SetQuantityManually(input.Quantity);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return _mapper.Map<IList<WarehouseSupplyItemDto>>(items.Values);
         }
 
         private void IsAuthorizedOrThrow(Identity identity, int facilityId)

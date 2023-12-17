@@ -89,5 +89,22 @@ namespace ScmssApiServer.Controllers
             }
             return Ok(dto);
         }
+
+        [HttpPatch("{facilityId}/Products")]
+        public async Task<ActionResult<IList<WarehouseProductItemDto>>> UpdateProducts(
+            int facilityId, [FromBody] WarehouseUpdateDto body)
+        {
+            IList<WarehouseProductItemDto> items = await _inventoryService.UpdateProducts(facilityId, body, CurrentIdentity);
+            return Ok(items);
+        }
+
+        [HttpPatch("{facilityId}/Supplies")]
+        public async Task<ActionResult<IList<WarehouseSupplyItemDto>>> UpdateSupplies(
+            int facilityId, [FromBody] WarehouseUpdateDto body)
+        {
+            IList<WarehouseSupplyItemDto> items = await _inventoryService.UpdateSupplies(
+                facilityId, body, CurrentIdentity);
+            return Ok(items);
+        }
     }
 }

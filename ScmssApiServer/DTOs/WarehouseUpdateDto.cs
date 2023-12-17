@@ -1,7 +1,8 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public class WarehouseUpdateDto<T> where T : WarehouseItemInputDto
+    public class WarehouseUpdateDto
     {
-        public ICollection<T> Items { get; set; } = new List<T>();
+        public ICollection<WarehouseItemInputDto> Items { get; set; }
+            = new List<WarehouseItemInputDto>();
     }
 }
