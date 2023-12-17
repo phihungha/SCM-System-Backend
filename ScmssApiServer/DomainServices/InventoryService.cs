@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ScmssApiServer.Data;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
 using ScmssApiServer.Services;
@@ -21,6 +22,8 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<WarehouseProductItemDto?> GetProduct(int facilityId, int id, Identity identity)
         {
+            IsAuthorizedOrThrow(identity, facilityId);
+
             WarehouseProductItem? item = await _dbContext.WarehouseProductItems
                 .AsNoTracking()
                 .Include(i => i.Product)
@@ -31,19 +34,70 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<WarehouseProductItemDto?>(item);
         }
 
-        public Task<IList<ProductionOrderDto>> GetProductionOrdersForIssue(int facilityId, InventoryOrderQueryDto query, Identity identity)
+        public async Task<IList<ProductionOrderDto>> GetProductionOrdersToIssue(
+            int facilityId, InventoryOrderQueryDto dto, Identity identity)
         {
-            throw new NotImplementedException();
+            IsAuthorizedOrThrow(identity, facilityId);
+
+            var query = _dbContext.ProductionOrders
+                .AsNoTracking()
+                .Where(i => i.ProductionFacilityId == facilityId)
+                .Where(i => i.ApprovalStatus == ApprovalStatus.Approved);
+
+            if (dto.Id != null)
+            {
+                query = query.Where(i => i.Id == dto.Id);
+            }
+
+            if (!dto.All ?? true)
+            {
+                query = query.Where(i => i.Status == OrderStatus.Processing);
+            }
+
+            IList<ProductionOrder> orders = await query
+                .Include(i => i.ProductionFacility)
+                .Include(i => i.CreateUser)
+                .Include(i => i.ApproveProductionManager)
+                .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
+                .ToListAsync();
+            return _mapper.Map<IList<ProductionOrderDto>>(orders);
         }
 
-        public Task<IList<ProductionOrderDto>> GetProductionOrdersForReceive(int facilityId, InventoryOrderQueryDto query, Identity identity)
+        public async Task<IList<ProductionOrderDto>> GetProductionOrdersToReceive(
+            int facilityId, InventoryOrderQueryDto dto, Identity identity)
         {
-            throw new NotImplementedException();
+            IsAuthorizedOrThrow(identity, facilityId);
+
+            var query = _dbContext.ProductionOrders
+                .AsNoTracking()
+                .Where(i => i.ProductionFacilityId == facilityId);
+
+            if (dto.Id != null)
+            {
+                query = query.Where(i => i.Id == dto.Id);
+            }
+
+            if (!dto.All ?? true)
+            {
+                query = query.Where(i => i.Status == OrderStatus.WaitingAcceptance);
+            }
+
+            IList<ProductionOrder> orders = await query
+                .Include(i => i.ProductionFacility)
+                .Include(i => i.CreateUser)
+                .Include(i => i.ApproveProductionManager)
+                .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
+                .ToListAsync();
+            return _mapper.Map<IList<ProductionOrderDto>>(orders);
         }
 
-        public async Task<IList<WarehouseProductItemDto>?> GetProducts(
+        public async Task<IList<WarehouseProductItemDto>> GetProducts(
             int facilityId, SimpleQueryDto dto, Identity identity)
         {
+            IsAuthorizedOrThrow(identity, facilityId);
+
             string? searchTerm = dto.SearchTerm?.ToLower();
             SimpleSearchCriteria? searchCriteria = dto.SearchCriteria;
             bool? displayAll = dto.All;
@@ -74,18 +128,66 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<WarehouseProductItemDto>>(items);
         }
 
-        public Task<IList<PurchaseOrderDto>> GetPurchaseOrdersForReceive(int facilityId, InventoryOrderQueryDto query, Identity identity)
+        public async Task<IList<PurchaseOrderDto>> GetPurchaseOrdersToReceive(
+            int facilityId, InventoryOrderQueryDto dto, Identity identity)
         {
-            throw new NotImplementedException();
+            IsAuthorizedOrThrow(identity, facilityId);
+
+            var query = _dbContext.PurchaseOrders
+                .AsNoTracking()
+                .Where(i => i.ProductionFacilityId == facilityId);
+
+            if (dto.Id != null)
+            {
+                query = query.Where(i => i.Id == dto.Id);
+            }
+
+            if (!dto.All ?? true)
+            {
+                query = query.Where(i => i.Status == OrderStatus.WaitingAcceptance);
+            }
+
+            IList<PurchaseOrder> orders = await query
+                .Include(i => i.ProductionFacility)
+                .Include(i => i.CreateUser)
+                .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
+                .ToListAsync();
+            return _mapper.Map<IList<PurchaseOrderDto>>(orders);
         }
 
-        public Task<IList<SalesOrderDto>> GetSalesOrdersForIssue(int facilityId, InventoryOrderQueryDto query, Identity identity)
+        public async Task<IList<SalesOrderDto>> GetSalesOrdersToIssue(
+            int facilityId, InventoryOrderQueryDto dto, Identity identity)
         {
-            throw new NotImplementedException();
+            IsAuthorizedOrThrow(identity, facilityId);
+
+            var query = _dbContext.SalesOrders
+                .AsNoTracking()
+                .Where(i => i.ProductionFacilityId == facilityId);
+
+            if (dto.Id != null)
+            {
+                query = query.Where(i => i.Id == dto.Id);
+            }
+
+            if (!dto.All ?? true)
+            {
+                query = query.Where(i => i.Status == OrderStatus.Processing);
+            }
+
+            IList<SalesOrder> orders = await query
+                .Include(i => i.ProductionFacility)
+                .Include(i => i.CreateUser)
+                .Include(i => i.EndUser)
+                .OrderBy(i => i.Id)
+                .ToListAsync();
+            return _mapper.Map<IList<SalesOrderDto>>(orders);
         }
 
         public async Task<IList<WarehouseSupplyItemDto>> GetSupplies(int facilityId, SimpleQueryDto dto, Identity identity)
         {
+            IsAuthorizedOrThrow(identity, facilityId);
+
             string? searchTerm = dto.SearchTerm?.ToLower();
             SimpleSearchCriteria? searchCriteria = dto.SearchCriteria;
             bool? displayAll = dto.All;
@@ -118,6 +220,8 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<WarehouseSupplyItemDto?> GetSupply(int facilityId, int id, Identity identity)
         {
+            IsAuthorizedOrThrow(identity, facilityId);
+
             WarehouseSupplyItem? item = await _dbContext.WarehouseSupplyItems
                 .AsNoTracking()
                 .Include(i => i.Supply)
@@ -136,6 +240,14 @@ namespace ScmssApiServer.DomainServices
         public Task<IList<WarehouseSupplyItemDto>> UpdateSupplies(int facilityId, WarehouseUpdateDto<WarehouseSupplyItemInputDto> dto, Identity identity)
         {
             throw new NotImplementedException();
+        }
+
+        private void IsAuthorizedOrThrow(Identity identity, int facilityId)
+        {
+            if (!identity.IsSuperUser && identity.ProductionFacilityId != facilityId)
+            {
+                throw new UnauthorizedException("Unauthorized to access inventory of another facility.");
+            }
         }
     }
 }

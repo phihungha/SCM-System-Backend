@@ -31,27 +31,51 @@ namespace ScmssApiServer.Controllers
             return Ok(dto);
         }
 
-        [HttpGet("{facilityId}/Products")]
-        public async Task<ActionResult<IList<WarehouseProductItemDto>>> GetProducts(int facilityId, [FromQuery] SimpleQueryDto query)
+        [HttpGet("{facilityId}/ProductionOrdersToReceive")]
+        public async Task<ActionResult<IList<ProductionOrderDto>>> GetProductionOrdersForIssue(
+            int facilityId, [FromQuery] InventoryOrderQueryDto query)
         {
-            IList<WarehouseProductItemDto>? dtos
-                = await _inventoryService.GetProducts(facilityId, query, CurrentIdentity);
-            if (dtos == null)
-            {
-                return NotFound();
-            }
+            IList<ProductionOrderDto> dtos = await _inventoryService.GetProductionOrdersToReceive(facilityId, query, CurrentIdentity);
+            return Ok(dtos);
+        }
+
+        [HttpGet("{facilityId}/ProductionOrdersToIssue")]
+        public async Task<ActionResult<IList<ProductionOrderDto>>> GetProductionOrdersToIssue(
+            int facilityId, [FromQuery] InventoryOrderQueryDto query)
+        {
+            IList<ProductionOrderDto> dtos = await _inventoryService.GetProductionOrdersToIssue(facilityId, query, CurrentIdentity);
+            return Ok(dtos);
+        }
+
+        [HttpGet("{facilityId}/Products")]
+        public async Task<ActionResult<IList<WarehouseProductItemDto>>> GetProducts(
+            int facilityId, [FromQuery] SimpleQueryDto query)
+        {
+            IList<WarehouseProductItemDto> dtos = await _inventoryService.GetProducts(facilityId, query, CurrentIdentity);
+            return Ok(dtos);
+        }
+
+        [HttpGet("{facilityId}/PurchaseOrdersToReceive")]
+        public async Task<ActionResult<IList<PurchaseOrderDto>>> GetPurchaseOrdersToReceive(
+            int facilityId, [FromQuery] InventoryOrderQueryDto query)
+        {
+            IList<PurchaseOrderDto> dtos = await _inventoryService.GetPurchaseOrdersToReceive(facilityId, query, CurrentIdentity);
+            return Ok(dtos);
+        }
+
+        [HttpGet("{facilityId}/SalesOrdersToIssue")]
+        public async Task<ActionResult<IList<SalesOrderDto>>> GetSalesOrdersToIssue(
+            int facilityId, [FromQuery] InventoryOrderQueryDto query)
+        {
+            IList<SalesOrderDto> dtos = await _inventoryService.GetSalesOrdersToIssue(facilityId, query, CurrentIdentity);
             return Ok(dtos);
         }
 
         [HttpGet("{facilityId}/Supplies")]
-        public async Task<ActionResult<IList<WarehouseSupplyItemDto>>> GetSupplies(int facilityId, [FromQuery] SimpleQueryDto query)
+        public async Task<ActionResult<IList<WarehouseSupplyItemDto>>> GetSupplies(
+            int facilityId, [FromQuery] SimpleQueryDto query)
         {
-            IList<WarehouseSupplyItemDto>? dtos
-                = await _inventoryService.GetSupplies(facilityId, query, CurrentIdentity);
-            if (dtos == null)
-            {
-                return NotFound();
-            }
+            IList<WarehouseSupplyItemDto> dtos = await _inventoryService.GetSupplies(facilityId, query, CurrentIdentity);
             return Ok(dtos);
         }
 

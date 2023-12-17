@@ -7,19 +7,19 @@ namespace ScmssApiServer.IDomainServices
     {
         public Task<WarehouseProductItemDto?> GetProduct(int facilityId, int id, Identity identity);
 
-        public Task<IList<ProductionOrderDto>> GetProductionOrdersForIssue(
+        public Task<IList<ProductionOrderDto>> GetProductionOrdersToIssue(
             int facilityId, InventoryOrderQueryDto query, Identity identity);
 
-        public Task<IList<ProductionOrderDto>> GetProductionOrdersForReceive(
+        public Task<IList<ProductionOrderDto>> GetProductionOrdersToReceive(
             int facilityId, InventoryOrderQueryDto query, Identity identity);
 
-        public Task<IList<WarehouseProductItemDto>?> GetProducts(
+        public Task<IList<WarehouseProductItemDto>> GetProducts(
             int facilityId, SimpleQueryDto query, Identity identity);
 
-        public Task<IList<PurchaseOrderDto>> GetPurchaseOrdersForReceive(
+        public Task<IList<PurchaseOrderDto>> GetPurchaseOrdersToReceive(
             int facilityId, InventoryOrderQueryDto query, Identity identity);
 
-        public Task<IList<SalesOrderDto>> GetSalesOrdersForIssue(
+        public Task<IList<SalesOrderDto>> GetSalesOrdersToIssue(
             int facilityId, InventoryOrderQueryDto query, Identity identity);
 
         public Task<IList<WarehouseSupplyItemDto>> GetSupplies(
