@@ -102,20 +102,7 @@ namespace ScmssApiServer.Models
                 WarehouseSupplyItem warehouseItem = item.Supply.WarehouseSupplyItems.First(
                         i => i.ProductionFacilityId == ProductionFacilityId
                     );
-                warehouseItem.Quantity += item.Quantity;
-
-                var warehouseEvent = new WarehouseSupplyItemEvent
-                {
-                    Time = DateTime.UtcNow,
-                    Quantity = warehouseItem.Quantity,
-                    Change = item.Quantity,
-                    PurchaseOrder = this,
-                    PurchaseOrderId = Id,
-                    WarehouseSupplyItem = warehouseItem,
-                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
-                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
-                };
-                warehouseItem.Events.Add(warehouseEvent);
+                warehouseItem.ReceiveFromPurchase(item.Quantity, this);
             }
 
             PurchaseRequisition.Complete(user);

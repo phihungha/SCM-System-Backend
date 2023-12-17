@@ -31,7 +31,7 @@ namespace ScmssApiServer.Models
                     if (value != null && !CheckStock(Items, value.Id))
                     {
                         throw new InvalidDomainOperationException(
-                                "Not enough stock in selected warehouse for the order items."
+                                "Not enough stock in selected facility for the order items."
                             );
                     }
                 }
@@ -56,7 +56,7 @@ namespace ScmssApiServer.Models
                     if (value != null && !CheckStock(Items, (int)value))
                     {
                         throw new InvalidDomainOperationException(
-                                "Not enough stock in selected warehouse for the order items."
+                                "Not enough stock in selected facility for the order items."
                             );
                     }
                 }
@@ -75,7 +75,7 @@ namespace ScmssApiServer.Models
             if (ProductionFacility != null && !CheckStock(items, ProductionFacility))
             {
                 throw new InvalidDomainOperationException(
-                        "Not enough stock in selected warehouse for the order items."
+                        "Not enough stock in selected facility for the order items."
                     );
             }
             base.AddItems(items);
@@ -90,6 +90,13 @@ namespace ScmssApiServer.Models
                     );
             }
 
+            if (!CheckStock(Items, (int)ProductionFacilityId))
+            {
+                throw new InvalidDomainOperationException(
+                        "Not enough product stock in selected facility to issue."
+                    );
+            }
+
             base.StartExecution();
 
             foreach (SalesOrderItem item in Items)
@@ -97,24 +104,11 @@ namespace ScmssApiServer.Models
                 WarehouseProductItem warehouseItem = item.Product.WarehouseProductItems.First(
                         i => i.ProductionFacilityId == ProductionFacilityId
                     );
-                warehouseItem.Quantity -= item.Quantity;
-
-                var warehouseEvent = new WarehouseProductItemEvent
-                {
-                    Time = DateTime.UtcNow,
-                    Quantity = warehouseItem.Quantity,
-                    Change = -item.Quantity,
-                    SalesOrder = this,
-                    SalesOrderId = Id,
-                    WarehouseProductItem = warehouseItem,
-                    WarehouseProductItemProductId = warehouseItem.ProductId,
-                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
-                };
-                warehouseItem.Events.Add(warehouseEvent);
+                warehouseItem.IssueForSales(item.Quantity, this);
             }
         }
 
-        private bool CheckStock(IEnumerable<SalesOrderItem> items, int facilityId)
+        private static bool CheckStock(IEnumerable<SalesOrderItem> items, int facilityId)
         {
             foreach (SalesOrderItem item in items)
             {
@@ -129,7 +123,7 @@ namespace ScmssApiServer.Models
             return true;
         }
 
-        private bool CheckStock(IEnumerable<SalesOrderItem> items, ProductionFacility facility)
+        private static bool CheckStock(IEnumerable<SalesOrderItem> items, ProductionFacility facility)
         {
             return CheckStock(items, facility.Id);
         }
