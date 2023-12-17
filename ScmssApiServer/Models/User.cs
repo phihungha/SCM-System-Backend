@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using ScmssApiServer.DTOs;
+using ScmssApiServer.Services;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -8,6 +9,8 @@ namespace ScmssApiServer.Models
 {
     public class User : IdentityUser, ISoftDeletable
     {
+        public static readonly string ImageFolderKey = "user-profile-images";
+
         [PersonalData]
         public string? Address { get; set; }
 
@@ -54,6 +57,8 @@ namespace ScmssApiServer.Models
         [PersonalData]
         public required Gender Gender { get; set; }
 
+        public bool HasImage { get; set; }
+
         [PersonalData]
         [StringLength(maximumLength: 12, MinimumLength = 12)]
         [Column(TypeName = "char(12)")]
@@ -68,6 +73,9 @@ namespace ScmssApiServer.Models
         public ProductionFacility? ProductionFacility { get; set; }
 
         public int? ProductionFacilityId { get; set; }
+
+        [NotMapped]
+        public Uri? ImageUrl => HasImage ? FileHostService.GetUri(ImageFolderKey, Id) : null;
 
         public DateTime? UpdateTime { get; set; }
     }

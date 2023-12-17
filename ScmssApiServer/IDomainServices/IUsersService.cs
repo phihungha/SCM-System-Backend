@@ -9,7 +9,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<UserDto> CreateAsync(UserCreateDto dto);
 
-        string GetProfileImageUploadUrl(Identity identity);
+        string GenerateProfileImageUploadUrl(string id);
 
         Task<UserDto?> GetAsync(string id);
 

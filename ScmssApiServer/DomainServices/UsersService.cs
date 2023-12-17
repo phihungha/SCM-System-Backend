@@ -8,25 +8,24 @@ using ScmssApiServer.Exceptions;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
-using ScmssApiServer.Services;
 
 namespace ScmssApiServer.DomainServices
 {
     public class UsersService : IUsersService
     {
         private readonly AppDbContext _dbContext;
-        private readonly IImageHostService _imageService;
+        private readonly IFileHostService _fileHostService;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
 
         public UsersService(AppDbContext dbContext,
                             IMapper mapper,
-                            IImageHostService imageService,
+                            IFileHostService fileHostService,
                             UserManager<User> userManager)
         {
             _dbContext = dbContext;
             _mapper = mapper;
-            _imageService = imageService;
+            _fileHostService = fileHostService;
             _userManager = userManager;
         }
 
@@ -126,10 +125,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<UserDto>>(users);
         }
 
-        public string GetProfileImageUploadUrl(Identity identity)
+        public string GenerateProfileImageUploadUrl(string id)
         {
-            string key = $"user-profile-images/{identity.Id}";
-            return _imageService.GenerateUploadUrl(key);
+            return _fileHostService.GenerateUploadUrl(User.ImageFolderKey, id);
         }
 
         public async Task<UserDto> UpdateAsync(string id, UserInputDto dto)

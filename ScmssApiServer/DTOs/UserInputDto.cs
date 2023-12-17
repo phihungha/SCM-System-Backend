@@ -21,9 +21,13 @@ namespace ScmssApiServer.DTOs
         public required Gender Gender { get; set; }
 
         [Required]
+        public bool HasImage { get; set; }
+
+        [Required]
         [IdCardNumber]
         public required string IdCardNumber { get; set; }
 
+        [Required]
         public bool IsActive { get; set; }
 
         [Required]

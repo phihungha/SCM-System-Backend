@@ -9,11 +9,15 @@ namespace ScmssApiServer.Models
     /// </summary>
     public class Product : Goods
     {
+        public const string ImageFolderKey = "product-images";
+
         /// <summary>
         /// Production cost of this product = SupplyCost + MiscCost
         /// </summary>
         [NotMapped]
         public decimal Cost => SupplyCost + MiscCost;
+
+        public override string ImageFolderKeyInstance => ImageFolderKey;
 
         public decimal MiscCost { get; set; }
         public double NetWeight { get; set; }

@@ -4,6 +4,7 @@ using ScmssApiServer.Data;
 using ScmssApiServer.DomainExceptions;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
+using ScmssApiServer.IServices;
 using ScmssApiServer.Models;
 
 namespace ScmssApiServer.DomainServices
@@ -11,11 +12,13 @@ namespace ScmssApiServer.DomainServices
     public class SuppliesService : ISuppliesService
     {
         private readonly AppDbContext _dbContext;
+        private readonly IFileHostService _fileHostService;
         private readonly IMapper _mapper;
 
-        public SuppliesService(IMapper mapper, AppDbContext dbContext)
+        public SuppliesService(IFileHostService fileHostService, IMapper mapper, AppDbContext dbContext)
         {
             _dbContext = dbContext;
+            _fileHostService = fileHostService;
             _mapper = mapper;
         }
 
@@ -53,6 +56,11 @@ namespace ScmssApiServer.DomainServices
 
             await _dbContext.Entry(supply).Reference(i => i.Vendor).LoadAsync();
             return _mapper.Map<SupplyDto>(supply);
+        }
+
+        public string GenerateImageUploadUrl(int id)
+        {
+            return _fileHostService.GenerateUploadUrl(Supply.ImageFolderKey, id);
         }
 
         public async Task<SupplyDto?> GetAsync(int id)

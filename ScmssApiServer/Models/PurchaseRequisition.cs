@@ -120,6 +120,13 @@ namespace ScmssApiServer.Models
                     );
             }
 
+            if (IsEnded)
+            {
+                throw new InvalidDomainOperationException(
+                        "Cannot create purchase order from an ended requisition."
+                    );
+            }
+
             if (Status == PurchaseRequisitionStatus.Purchasing)
             {
                 throw new InvalidDomainOperationException(

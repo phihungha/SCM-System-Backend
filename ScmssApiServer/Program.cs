@@ -54,7 +54,7 @@ namespace ScmssApiServer
             });
 
             builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformation>();
-            builder.Services.AddSingleton<IImageHostService, ImageHostService>();
+            builder.Services.AddSingleton<IFileHostService, FileHostService>();
 
             // Add domain services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -67,7 +67,6 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IProductionFacilitiesService, ProductionFacilitiesService>();
             builder.Services.AddScoped<IPurchaseRequisitionsService, PurchaseRequisitionsService>();
             builder.Services.AddScoped<IPurchaseOrdersService, PurchaseOrdersService>();
-            builder.Services.AddScoped<IInventoryService, InventoryService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IVendorsService, VendorsService>();
 

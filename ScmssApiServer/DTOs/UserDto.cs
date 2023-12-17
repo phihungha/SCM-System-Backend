@@ -10,8 +10,10 @@ namespace ScmssApiServer.DTOs
         public string? Description { get; set; }
         public string? Email { get; set; }
         public required Gender Gender { get; set; }
+        public bool HasImage { get; set; }
         public required string Id { get; set; }
         public required string IdCardNumber { get; set; }
+        public Uri? ImageUrl { get; set; }
         public bool IsActive { get; set; }
         public required string Name { get; set; }
         public string? PhoneNumber { get; set; }
