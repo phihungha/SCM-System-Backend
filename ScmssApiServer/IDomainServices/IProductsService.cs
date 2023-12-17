@@ -6,6 +6,8 @@ namespace ScmssApiServer.IDomainServices
     {
         Task<ProductDto> AddAsync(ProductInputDto dto);
 
+        string GenerateImageUploadUrl(int id);
+
         Task<ProductDto?> GetAsync(int id);
 
         Task<IList<ProductDto>> GetManyAsync(SimpleQueryDto queryDto);

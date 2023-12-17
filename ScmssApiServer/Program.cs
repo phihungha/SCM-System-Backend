@@ -54,7 +54,7 @@ namespace ScmssApiServer
             });
 
             builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformation>();
-            builder.Services.AddSingleton<IImageHostService, ImageHostService>();
+            builder.Services.AddSingleton<IFileHostService, FileHostService>();
 
             // Add domain services
             builder.Services.AddScoped<IAuthService, AuthService>();

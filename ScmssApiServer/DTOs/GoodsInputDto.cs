@@ -11,6 +11,9 @@ namespace ScmssApiServer.DTOs
         public int ExpirationMonth { get; set; }
 
         [Required]
+        public bool HasImage { get; set; }
+
+        [Required]
         public bool IsActive { get; set; }
 
         [Required]

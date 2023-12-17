@@ -27,6 +27,8 @@ namespace ScmssApiServer.Data
         public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<Supply> Supplies { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
+        public DbSet<WarehouseProductItem> WarehouseProductItems { get; set; }
+        public DbSet<WarehouseSupplyItem> WarehouseSupplyItems { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
         {
@@ -351,6 +353,7 @@ namespace ScmssApiServer.Data
                 Id = 1,
                 VendorId = 1,
                 Name = "PVFCCo Urea",
+                HasImage = true,
                 ExpirationMonth = 12,
                 Unit = "Kg",
                 Price = 5000,
@@ -424,6 +427,7 @@ namespace ScmssApiServer.Data
             {
                 Id = 1,
                 Name = "NPK 16-8-8+13S",
+                HasImage = true,
                 NetWeight = 50,
                 ExpirationMonth = 48,
                 Unit = "Item(s)",

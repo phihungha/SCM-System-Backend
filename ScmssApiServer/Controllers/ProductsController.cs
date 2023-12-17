@@ -45,6 +45,13 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
+        [HttpGet("{id}/ImageUploadUrl")]
+        public ActionResult<string> GetImageUploadUrl(int id)
+        {
+            string url = _productsService.GenerateImageUploadUrl(id);
+            return Ok(new { Url = url });
+        }
+
         [HttpGet]
         public async Task<ActionResult<IList<ProductDto>>> GetMany([FromQuery] SimpleQueryDto query)
         {

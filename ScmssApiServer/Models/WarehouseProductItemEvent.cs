@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using ScmssApiServer.DTOs;
 
 namespace ScmssApiServer.Models
 {
@@ -14,5 +16,13 @@ namespace ScmssApiServer.Models
         public WarehouseProductItem WarehouseProductItem { get; set; } = null!;
         public int WarehouseProductItemProductId { get; set; }
         public int WarehouseProductItemProductionFacilityId { get; set; }
+    }
+
+    public class WarehouseProductItemEventMP : Profile
+    {
+        public WarehouseProductItemEventMP()
+        {
+            CreateMap<WarehouseProductItemEvent, WarehouseProductItemEventDto>();
+        }
     }
 }

@@ -9,6 +9,10 @@ namespace ScmssApiServer.IDomainServices
 
         Task<PurchaseOrderDto> CreateAsync(PurchaseOrderCreateDto dto, Identity identity);
 
+        string GenerateInvoiceUploadUrl(int id);
+
+        string GenerateReceiptUploadUrl(int id);
+
         Task<PurchaseOrderDto?> GetAsync(int id, Identity identity);
 
         Task<IList<PurchaseOrderDto>> GetManyAsync(

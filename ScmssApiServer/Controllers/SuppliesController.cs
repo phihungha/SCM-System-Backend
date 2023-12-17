@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DomainExceptions;
+using ScmssApiServer.DomainServices;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
 using ScmssApiServer.Models;
@@ -38,6 +39,13 @@ namespace ScmssApiServer.Controllers
                 return NotFound();
             }
             return Ok(item);
+        }
+
+        [HttpGet("{id}/ImageUploadUrl")]
+        public ActionResult<string> GetImageUploadUrl(int id)
+        {
+            string url = _suppliesService.GenerateImageUploadUrl(id);
+            return Ok(new { Url = url });
         }
 
         [HttpGet]
