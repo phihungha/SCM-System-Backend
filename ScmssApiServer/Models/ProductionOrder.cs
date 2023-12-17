@@ -149,20 +149,7 @@ namespace ScmssApiServer.Models
                 WarehouseProductItem warehouseItem = item.Product.WarehouseProductItems.First(
                         i => i.ProductionFacilityId == ProductionFacilityId
                     );
-                warehouseItem.Quantity += item.Quantity;
-
-                var warehouseEvent = new WarehouseProductItemEvent
-                {
-                    Time = DateTime.UtcNow,
-                    Quantity = warehouseItem.Quantity,
-                    Change = item.Quantity,
-                    ProductionOrder = this,
-                    ProductionOrderId = Id,
-                    WarehouseProductItem = warehouseItem,
-                    WarehouseProductItemProductId = warehouseItem.ProductId,
-                    WarehouseProductItemProductionFacilityId = warehouseItem.ProductionFacilityId,
-                };
-                warehouseItem.Events.Add(warehouseEvent);
+                warehouseItem.ReceiveFromProduction(item.Quantity, this);
             }
         }
 
@@ -210,20 +197,7 @@ namespace ScmssApiServer.Models
                 WarehouseSupplyItem warehouseItem = item.Supply.WarehouseSupplyItems.First(
                     i => i.ProductionFacilityId == ProductionFacilityId
                 );
-                warehouseItem.Quantity -= item.Quantity;
-
-                var warehouseEvent = new WarehouseSupplyItemEvent
-                {
-                    Time = DateTime.UtcNow,
-                    Quantity = warehouseItem.Quantity,
-                    Change = -item.Quantity,
-                    ProductionOrder = this,
-                    ProductionOrderId = Id,
-                    WarehouseSupplyItem = warehouseItem,
-                    WarehouseSupplyItemSupplyId = warehouseItem.SupplyId,
-                    WarehouseSupplyItemProductionFacilityId = warehouseItem.ProductionFacilityId,
-                };
-                warehouseItem.Events.Add(warehouseEvent);
+                warehouseItem.IssueForProduction(item.Quantity, this);
             }
         }
 

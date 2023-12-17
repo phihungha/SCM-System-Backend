@@ -248,7 +248,7 @@ namespace ScmssApiServer.DomainServices
             foreach (WarehouseItemInputDto input in dto.Items)
             {
                 WarehouseProductItem item = items[input.Id];
-                item.SetQuantityManually(input.Quantity);
+                item.UpdateQuantityManually(input.Quantity);
             }
 
             await _dbContext.SaveChangesAsync();

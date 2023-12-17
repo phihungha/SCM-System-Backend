@@ -18,7 +18,7 @@ namespace ScmssApiServer.Models
         [NotMapped]
         public override decimal UnitValue => Supply.Price;
 
-        public WarehouseSupplyItemEvent AddProductionIssueEvent(double orderQuantity, ProductionOrder order)
+        public WarehouseSupplyItemEvent IssueForProduction(double orderQuantity, ProductionOrder order)
         {
             Quantity -= orderQuantity;
             var warehouseEvent = new WarehouseSupplyItemEvent
@@ -36,7 +36,7 @@ namespace ScmssApiServer.Models
             return warehouseEvent;
         }
 
-        public WarehouseSupplyItemEvent AddPurchaseReceiveEvent(double orderQuantity, PurchaseOrder order)
+        public WarehouseSupplyItemEvent ReceiveFromPurchase(double orderQuantity, PurchaseOrder order)
         {
             Quantity += orderQuantity;
             var warehouseEvent = new WarehouseSupplyItemEvent
