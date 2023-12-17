@@ -116,7 +116,7 @@ namespace ScmssApiServer.Models
             if (ApprovalStatus != ApprovalStatus.Approved)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot create purchase order from an unapproved requisition"
+                        "Cannot create purchase order from an unapproved requisition."
                     );
             }
 

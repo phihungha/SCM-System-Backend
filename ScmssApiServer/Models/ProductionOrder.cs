@@ -42,7 +42,7 @@ namespace ScmssApiServer.Models
                 );
             }
 
-            if (!CheckStock(items))
+            if (!CheckStock(items, ProductionFacilityId))
             {
                 throw new InvalidDomainOperationException(
                         "Not enough supply stock in the selected warehouse to produce the order items."
@@ -189,6 +189,14 @@ namespace ScmssApiServer.Models
             {
                 throw new InvalidDomainOperationException("Cannot start an unapproved production order.");
             }
+
+            if (!CheckStock(Items, ProductionFacilityId))
+            {
+                throw new InvalidDomainOperationException(
+                        "Not enough supply stock in selected facility to issue."
+                    );
+            }
+
             base.StartExecution();
             AddEvent(ProductionOrderEventType.Producing);
 
@@ -214,7 +222,7 @@ namespace ScmssApiServer.Models
             return item;
         }
 
-        private bool CheckStock(IEnumerable<ProductionOrderItem> items)
+        private static bool CheckStock(IEnumerable<ProductionOrderItem> items, int facilityId)
         {
             var totalSupplyUsage = new Dictionary<int, double>();
             var warehouseItems = new Dictionary<int, WarehouseSupplyItem>();
@@ -231,7 +239,7 @@ namespace ScmssApiServer.Models
                         totalSupplyUsage[supplyId] = supplyUsage;
                         warehouseItems[supplyId] = costItem.Supply
                             .WarehouseSupplyItems
-                            .First(i => i.ProductionFacilityId == ProductionFacilityId);
+                            .First(i => i.ProductionFacilityId == facilityId);
                     }
                     else
                     {
