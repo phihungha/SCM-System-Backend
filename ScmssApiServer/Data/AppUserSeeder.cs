@@ -89,6 +89,7 @@ namespace ScmssApiServer.Data
             var newUser = new User()
             {
                 UserName = userName,
+                HasImage = false,
                 Email = email,
                 Name = name,
                 Gender = Gender.Male,
