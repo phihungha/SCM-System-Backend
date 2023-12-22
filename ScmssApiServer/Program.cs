@@ -113,8 +113,6 @@ namespace ScmssApiServer
 
             app.UseProblemDetails();
 
-            app.UseHttpsRedirection();
-
             app.UseCors(CorsPolicyName);
 
             app.UseAuthorization();
