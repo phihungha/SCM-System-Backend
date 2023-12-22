@@ -35,13 +35,8 @@ namespace ScmssApiServer
 
             // Add external services.
             builder.Services.AddAutoMapper(typeof(Program));
-
-            string? dbConnectionString = builder.Configuration.GetConnectionString("AppDb");
-            builder.Services.AddDbContext<AppDbContext>(
-                    o => o.UseNpgsql(dbConnectionString)
-                );
-
-            // Add infrastructure services
+            AddCors(builder);
+            AddDb(builder);
             AddAuthentication(builder);
             AddAwsS3(builder, logger);
             builder.Services.AddProblemDetails(o =>
@@ -53,6 +48,7 @@ namespace ScmssApiServer
                 o.MapToStatusCode<UnauthenticatedException>(StatusCodes.Status401Unauthorized);
             });
 
+            // Add infrastructure services
             builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformation>();
             builder.Services.AddSingleton<IFileHostService, FileHostService>();
 
@@ -69,18 +65,6 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IPurchaseOrdersService, PurchaseOrdersService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IVendorsService, VendorsService>();
-
-            string? clientUrl = builder.Configuration.GetValue<string>("Cors:ClientUrl");
-            if (clientUrl != null)
-            {
-                builder.Services.AddCors(o => o.AddPolicy(
-                    name: CorsPolicyName,
-                    builder => builder.WithOrigins(clientUrl)
-                                      .WithHeaders(HeaderNames.ContentType)
-                                      .WithMethods("GET", "POST", "PATCH", "PUT")
-                                      .AllowCredentials())
-                );
-            }
 
             builder.Services.AddControllers()
                 .AddProblemDetailsConventions()
@@ -121,7 +105,6 @@ namespace ScmssApiServer
         /// <summary>
         /// Setup and add authentication service.
         /// </summary>
-        /// <param name="builder">Web application builder</param>
         private static void AddAuthentication(WebApplicationBuilder builder)
         {
             builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -144,8 +127,6 @@ namespace ScmssApiServer
         /// <summary>
         /// Add AWS S3 client service.
         /// </summary>
-        /// <param name="builder">Web application builder</param>
-        /// <param name="logger">Logger</param>
         private static void AddAwsS3(WebApplicationBuilder builder, ILogger logger)
         {
             try
@@ -165,6 +146,37 @@ namespace ScmssApiServer
                     throw;
                 }
             }
+        }
+
+        /// <summary>
+        /// Setup and add CORS.
+        /// </summary>
+        private static void AddCors(WebApplicationBuilder builder)
+        {
+            string? clientUrl = builder.Configuration.GetValue<string>("Cors:ClientUrl");
+            if (clientUrl != null)
+            {
+                builder.Services.AddCors(o => o.AddPolicy(
+                    name: CorsPolicyName,
+                    builder => builder.WithOrigins(clientUrl)
+                                      .WithHeaders(HeaderNames.ContentType)
+                                      .WithMethods("GET", "POST", "PATCH", "PUT")
+                                      .AllowCredentials())
+                );
+            }
+        }
+
+        /// <summary>
+        /// Setup and add database service.
+        /// </summary>
+        private static void AddDb(WebApplicationBuilder builder)
+        {
+            string? dbConnectionString = builder.Configuration.GetConnectionString("AppDb");
+            builder.Services.AddDbContext<AppDbContext>(
+                    o => o.UseNpgsql(
+                        dbConnectionString,
+                        o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+                );
         }
 
         /// <summary>
