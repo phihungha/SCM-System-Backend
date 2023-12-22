@@ -84,7 +84,7 @@ namespace ScmssApiServer.DomainServices
         {
             ProductionFacility? facility = await _dbContext.ProductionFacilities
                 .AsNoTracking()
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<ProductionFacilityDto?>(facility);
         }
 

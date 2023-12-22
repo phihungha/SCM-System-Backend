@@ -35,7 +35,7 @@ namespace ScmssApiServer.DomainServices
 
             User user = await _userManager.Users.AsNoTracking()
                                                 .Include(i => i.ProductionFacility)
-                                                .FirstAsync(i => i.UserName == dto.UserName);
+                                                .SingleAsync(i => i.UserName == dto.UserName);
             var userDto = _mapper.Map<UserDto>(user);
             userDto.Roles = await _userManager.GetRolesAsync(user);
             return userDto;

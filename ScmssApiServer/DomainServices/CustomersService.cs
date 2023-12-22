@@ -31,7 +31,7 @@ namespace ScmssApiServer.DomainServices
         {
             Customer? customer = await _dbContext.Customers
                 .AsNoTracking()
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<CompanyDto?>(customer);
         }
 

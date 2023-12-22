@@ -29,6 +29,8 @@ namespace ScmssApiServer.Data
 
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+            bool rolesCreated = false;
+
             foreach (string role in Roles)
             {
                 if (roleManager.FindByNameAsync(role).Result != null)
@@ -37,13 +39,20 @@ namespace ScmssApiServer.Data
                 }
 
                 IdentityResult result = roleManager.CreateAsync(new IdentityRole(role)).Result;
-                if (!result.Succeeded)
+                if (result.Succeeded)
+                {
+                    rolesCreated = true;
+                }
+                else
                 {
                     throw new ApplicationException($"Failed to create role {role}.");
                 }
             }
 
-            logger.LogInformation("Created roles.");
+            if (rolesCreated)
+            {
+                logger.LogInformation("Created roles.");
+            }
         }
 
         /// <summary>

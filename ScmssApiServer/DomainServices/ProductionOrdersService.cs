@@ -32,7 +32,7 @@ namespace ScmssApiServer.DomainServices
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -57,7 +57,7 @@ namespace ScmssApiServer.DomainServices
             }
 
             User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(i => i.Id == identity.Id);
+                                                .SingleAsync(i => i.Id == identity.Id);
             ProductionFacility facility = user.ProductionFacility!;
 
             var order = new ProductionOrder
@@ -94,7 +94,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<ProductionOrderDto?>(order);
         }
 
@@ -171,7 +171,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.CreateUser)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -219,7 +219,7 @@ namespace ScmssApiServer.DomainServices
         {
             ProductionOrder? order = await _dbContext.ProductionOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();

@@ -68,7 +68,7 @@ namespace ScmssApiServer.DomainServices
             Supply? supply = await _dbContext.Supplies
                 .AsNoTracking()
                 .Include(i => i.Vendor)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<SupplyDto?>(supply);
         }
 
@@ -108,7 +108,7 @@ namespace ScmssApiServer.DomainServices
             Supply? supply = await _dbContext.Supplies
                 .Include(i => i.Vendor)
                 .Include(i => i.WarehouseSupplyItems)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             if (supply == null)
             {
                 throw new EntityNotFoundException();

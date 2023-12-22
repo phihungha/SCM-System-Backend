@@ -39,7 +39,7 @@ namespace ScmssApiServer.DomainServices
         {
             PurchaseOrder? order = await _dbContext.PurchaseOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -58,7 +58,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Vendor)
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
-                .FirstOrDefaultAsync(i => i.Id == dto.PurchaseRequisitionId);
+                .SingleOrDefaultAsync(i => i.Id == dto.PurchaseRequisitionId);
             if (requistion == null)
             {
                 throw new EntityNotFoundException("Purchase requisition with provided ID not found.");
@@ -118,7 +118,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<PurchaseOrderDto?>(orders);
         }
 
@@ -196,7 +196,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -274,7 +274,7 @@ namespace ScmssApiServer.DomainServices
         {
             PurchaseOrder? order = await _dbContext.PurchaseOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();

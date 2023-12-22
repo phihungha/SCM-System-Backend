@@ -42,7 +42,7 @@ namespace ScmssApiServer.DomainServices
             }
 
             Vendor? vendor = await _dbContext.Vendors.Where(i => i.IsActive)
-                                                     .FirstOrDefaultAsync(i => i.Id == dto.VendorId);
+                                                     .SingleOrDefaultAsync(i => i.Id == dto.VendorId);
             if (vendor == null)
             {
                 throw new EntityNotFoundException("Vendor not found.");
@@ -51,7 +51,7 @@ namespace ScmssApiServer.DomainServices
             Config config = await _configService.GetAsync();
 
             User user = await _userManager.Users.Include(i => i.ProductionFacility)
-                                                .FirstAsync(i => i.Id == identity.Id);
+                                                .SingleAsync(i => i.Id == identity.Id);
             ProductionFacility facility = user.ProductionFacility!;
 
             var requisition = new PurchaseRequisition
@@ -92,7 +92,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ApproveFinance)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<PurchaseRequisitionDto?>(requisition);
         }
 
@@ -167,7 +167,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ApproveFinance)
                 .Include(i => i.ApproveProductionManager)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             if (requisition == null)
             {
                 throw new EntityNotFoundException();

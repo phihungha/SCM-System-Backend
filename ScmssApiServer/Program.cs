@@ -107,11 +107,6 @@ namespace ScmssApiServer
                 app.UseSwaggerUI();
             }
 
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/error");
-            }
-
             app.UseProblemDetails();
 
             app.UseCors(CorsPolicyName);
