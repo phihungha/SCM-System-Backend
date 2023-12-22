@@ -75,9 +75,10 @@ namespace ScmssApiServer
             {
                 builder.Services.AddCors(o => o.AddPolicy(
                     name: CorsPolicyName,
-                    builder => builder.WithHeaders(HeaderNames.ContentType)
-                                      .AllowCredentials()
-                                      .WithOrigins(clientUrl))
+                    builder => builder.WithOrigins(clientUrl)
+                                      .WithHeaders(HeaderNames.ContentType)
+                                      .WithMethods("GET", "POST", "PATCH", "PUT")
+                                      .AllowCredentials())
                 );
             }
 
