@@ -30,7 +30,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Where(i => i.ProductionFacilityId == facilityId)
-                .FirstOrDefaultAsync(i => i.ProductId == id);
+                .SingleOrDefaultAsync(i => i.ProductId == id);
             return _mapper.Map<WarehouseProductItemDto?>(item);
         }
 
@@ -228,7 +228,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Events)
                 .Where(i => i.ProductionFacilityId == facilityId)
-                .FirstOrDefaultAsync(i => i.SupplyId == id);
+                .SingleOrDefaultAsync(i => i.SupplyId == id);
             return _mapper.Map<WarehouseSupplyItemDto?>(item);
         }
 

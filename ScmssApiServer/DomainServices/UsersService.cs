@@ -84,7 +84,7 @@ namespace ScmssApiServer.DomainServices
             User? user = await _userManager.Users
                 .AsNoTracking()
                 .Include(i => i.ProductionFacility)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
 
             if (user == null)
             {
@@ -144,7 +144,7 @@ namespace ScmssApiServer.DomainServices
                 }
             }
 
-            User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == id);
+            User? user = await _userManager.Users.SingleOrDefaultAsync(x => x.Id == id);
             if (user == null)
             {
                 throw new EntityNotFoundException();
