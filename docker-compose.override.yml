@@ -4,18 +4,3 @@ services:
   scmss-api-server:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
-      - ConnectionStrings__AppDb=${DB_CONNECTION:-Host=scmss-db:5432;Database=${DB_NAME:-app};Username=${DB_USER:-app};Password=${DB_PASSWORD:-app}}
-      - AWS_PROFILE=${AWS_PROFILE}
-    ports:
-      - 5000:80
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
-      - ${AWS_DIR-${HOME-${userprofile}}}/.aws:/root/.aws:ro
-
-  scmss-db:
-    environment:
-      - POSTGRES_DB=${DB_NAME:-app}
-      - POSTGRES_USER=${DB_USER:-app}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-app}
