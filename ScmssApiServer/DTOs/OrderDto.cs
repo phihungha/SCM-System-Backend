@@ -9,6 +9,9 @@ namespace ScmssApiServer.DTOs
         public required ICollection<TEventDto> Events { get; set; }
         public DateTime? ExecutionFinishTime { get; set; }
         public int Id { get; set; }
+        public bool IsExecuting { get; set; }
+        public bool IsExecutionFinished { get; set; }
+        public bool IsExecutionStarted { get; set; }
         public required ICollection<TItemDto> Items { get; set; }
         public OrderStatus Status { get; set; }
     }
