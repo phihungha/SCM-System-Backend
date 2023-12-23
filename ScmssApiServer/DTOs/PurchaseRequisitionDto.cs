@@ -10,6 +10,10 @@ namespace ScmssApiServer.DTOs
         public UserDto? ApproveProductionManager { get; set; }
         public string? ApproveProductionManagerId { get; set; }
         public int Id { get; set; }
+        public bool IsApprovalAllowed { get; set; }
+        public bool IsCancelAllowed { get; set; }
+        public bool IsInfoUpdateAllowed { get; set; }
+        public bool IsPurchaseOrderCreateAllowed { get; set; }
         public required ICollection<PurchaseRequisitionItemDto> Items { get; set; }
         public required ProductionFacilityDto ProductionFacility { get; set; }
         public int ProductionFacilityId { get; set; }

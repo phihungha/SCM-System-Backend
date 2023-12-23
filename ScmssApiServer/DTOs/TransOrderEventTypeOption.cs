@@ -1,6 +1,6 @@
 ﻿namespace ScmssApiServer.DTOs
 {
-    public enum TransOrderEventTypeSelection
+    public enum TransOrderEventTypeOption
     {
         Left,
         Arrived,

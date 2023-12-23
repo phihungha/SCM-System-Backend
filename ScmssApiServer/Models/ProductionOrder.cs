@@ -9,6 +9,15 @@ namespace ScmssApiServer.Models
         public ApprovalStatus ApprovalStatus { get; protected set; }
         public User? ApproveProductionManager { get; protected set; }
         public string? ApproveProductionManagerId { get; protected set; }
+
+        public bool IsApprovalAllowed => !IsEnded && ApprovalStatus == ApprovalStatus.PendingApproval;
+
+        public override bool IsExecutionInfoUpdateAllowed =>
+            base.IsExecutionInfoUpdateAllowed && ApprovalStatus == ApprovalStatus.PendingApproval;
+
+        public override bool IsExecutionStartAllowed =>
+            base.IsExecutionStartAllowed && ApprovalStatus == ApprovalStatus.Approved;
+
         public ProductionFacility ProductionFacility { get; set; } = null!;
         public int ProductionFacilityId { get; set; }
         public ICollection<Product> Products { get; protected set; } = new List<Product>();

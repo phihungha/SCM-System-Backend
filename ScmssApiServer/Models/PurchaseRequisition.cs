@@ -15,12 +15,22 @@ namespace ScmssApiServer.Models
         public User? ApproveProductionManager { get; protected set; }
         public string? ApproveProductionManagerId { get; protected set; }
         public int Id { get; set; }
+        public bool IsApprovalAllowed => !IsEnded && ApprovalStatus == ApprovalStatus.PendingApproval;
+        public bool IsCancelAllowed => !IsEnded;
         public override bool IsCreated => Id != 0;
 
+        public bool IsInfoUpdateAllowed => !IsEnded && ApprovalStatus == ApprovalStatus.PendingApproval;
+
+        public bool IsPurchaseOrderCreateAllowed =>
+                    !IsEnded &&
+            ApprovalStatus == ApprovalStatus.Approved &&
+            Status != PurchaseRequisitionStatus.Purchasing;
+
         public ICollection<PurchaseRequisitionItem> Items { get; protected set; }
-                    = new List<PurchaseRequisitionItem>();
+                            = new List<PurchaseRequisitionItem>();
 
         public ProductionFacility ProductionFacility { get; set; } = null!;
+
         public int ProductionFacilityId { get; set; }
 
         public ICollection<PurchaseOrder> PurchaseOrders { get; protected set; }
@@ -37,10 +47,10 @@ namespace ScmssApiServer.Models
 
         public void AddItems(ICollection<PurchaseRequisitionItem> items)
         {
-            if (ApprovalStatus != ApprovalStatus.PendingApproval)
+            if (IsEnded || ApprovalStatus != ApprovalStatus.PendingApproval)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add items after the requisition has been approved or rejected."
+                        "Cannot add items after the requisition has ended or approved/rejected."
                 );
             }
 

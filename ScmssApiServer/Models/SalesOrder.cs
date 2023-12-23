@@ -14,6 +14,9 @@ namespace ScmssApiServer.Models
         public Customer Customer { get; set; } = null!;
         public int CustomerId { get; set; }
 
+        public override bool IsExecutionStartAllowed =>
+            base.IsExecutionStartAllowed && ProductionFacilityId != null;
+
         public ProductionFacility? ProductionFacility
         {
             get => productionFacility;
@@ -21,10 +24,10 @@ namespace ScmssApiServer.Models
             {
                 if (value?.Id != productionFacility?.Id)
                 {
-                    if (IsExecutionStarted)
+                    if (!IsProcessing)
                     {
                         throw new InvalidDomainOperationException(
-                                "Cannot change production facility after the order has started delivery."
+                                "Cannot change production facility if order is not in processing."
                             );
                     }
 
@@ -46,10 +49,10 @@ namespace ScmssApiServer.Models
             {
                 if (value != productionFacilityId)
                 {
-                    if (IsExecutionStarted)
+                    if (!IsProcessing)
                     {
                         throw new InvalidDomainOperationException(
-                                "Cannot change production facility after the order has started delivery."
+                                "Cannot change production facility if order is not in processing."
                             );
                     }
 
