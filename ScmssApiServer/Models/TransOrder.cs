@@ -93,7 +93,7 @@ namespace ScmssApiServer.Models
             SubTotal = Items.Sum(i => i.TotalPrice);
         }
 
-        public TEvent AddManualEvent(TransOrderEventTypeSelection typeSel,
+        public TEvent AddManualEvent(TransOrderEventTypeOption typeSel,
                                      string location,
                                      string? message)
         {
@@ -107,17 +107,17 @@ namespace ScmssApiServer.Models
             TransOrderEventType type;
             switch (typeSel)
             {
-                case TransOrderEventTypeSelection.Left:
+                case TransOrderEventTypeOption.Left:
                     type = TransOrderEventType.Left;
                     Status = OrderStatus.Executing;
                     break;
 
-                case TransOrderEventTypeSelection.Arrived:
+                case TransOrderEventTypeOption.Arrived:
                     type = TransOrderEventType.Arrived;
                     Status = OrderStatus.Executing;
                     break;
 
-                case TransOrderEventTypeSelection.Interrupted:
+                case TransOrderEventTypeOption.Interrupted:
                     type = TransOrderEventType.Interrupted;
                     Status = OrderStatus.Interrupted;
                     break;
