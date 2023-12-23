@@ -6,6 +6,8 @@ namespace ScmssApiServer.DTOs
         where TItemDto : TransOrderItemDto
     {
         public string? FromLocation { get; set; }
+        public bool IsPaymentCompleteAllowed { get; set; }
+        public bool IsToLocationUpdateAllowed { get; set; }
         public TransOrderPaymentStatus PaymentStatus { get; set; }
         public decimal RemainingAmount { get; set; }
         public decimal SubTotal { get; set; }

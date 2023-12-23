@@ -13,7 +13,6 @@ namespace ScmssApiServer.Models
         where TEvent : TransOrderEvent, new()
     {
         private string? fromLocation;
-
         private string toLocation = "";
 
         /// <summary>
@@ -24,16 +23,18 @@ namespace ScmssApiServer.Models
             get => fromLocation;
             set
             {
-                if (fromLocation != value && IsExecutionStarted)
+                if (fromLocation != value && !IsProcessing)
                 {
                     throw new InvalidDomainOperationException(
-                            "Cannot change start location after the order has started delivery."
+                            "Cannot change start location if order is not in processing."
                         );
                 }
                 fromLocation = value;
             }
         }
 
+        public bool IsPaymentCompleteAllowed => PaymentStatus == TransOrderPaymentStatus.Due;
+        public bool IsToLocationUpdateAllowed => !IsExecutionFinished && !IsEnded;
         public TransOrderPaymentStatus PaymentStatus { get; protected set; }
 
         /// <summary>
@@ -147,8 +148,8 @@ namespace ScmssApiServer.Models
         public override void Complete(User user)
         {
             base.Complete(user);
-            CreateDuePayment();
             AddEvent(TransOrderEventType.Completed, ToLocation);
+            CreateDuePayment();
         }
 
         public void CompletePayment(decimal amount)

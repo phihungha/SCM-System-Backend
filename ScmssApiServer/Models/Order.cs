@@ -18,14 +18,18 @@ namespace ScmssApiServer.Models
 
         public DateTime? ExecutionFinishTime { get; protected set; }
         public int Id { get; set; }
-
+        public virtual bool IsAcceptAllowed => Status == OrderStatus.WaitingAcceptance;
+        public virtual bool IsCancelAllowed => !IsExecutionFinished && !IsEnded;
         public override bool IsCreated => Id != 0;
 
         public bool IsExecuting => Status == OrderStatus.Executing
                                    || Status == OrderStatus.Interrupted;
 
+        public virtual bool IsExecutionFinishAllowed => IsExecuting;
         public bool IsExecutionFinished => ExecutionFinishTime != null;
-        public bool IsExecutionStarted => Status != OrderStatus.Processing;
+        public virtual bool IsExecutionInfoUpdateAllowed => IsProcessing;
+        public virtual bool IsExecutionStartAllowed => IsProcessing;
+        public bool IsProcessing => Status == OrderStatus.Processing;
 
         /// <summary>
         /// Order lines.
@@ -36,10 +40,10 @@ namespace ScmssApiServer.Models
 
         public virtual void AddItems(ICollection<TItem> items)
         {
-            if (IsExecutionStarted)
+            if (!IsProcessing)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot add items after the order has started execution."
+                        "Cannot add items when order is not in processing."
                 );
             }
 
@@ -60,10 +64,10 @@ namespace ScmssApiServer.Models
 
         public virtual void Cancel(User user, string problem)
         {
-            if (IsExecutionFinished)
+            if (IsExecutionFinished || IsEnded)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot cancel an already executed order."
+                        "Cannot cancel an already executed or canceled order."
                     );
             }
             Status = OrderStatus.Canceled;
@@ -108,10 +112,10 @@ namespace ScmssApiServer.Models
 
         public virtual void StartExecution()
         {
-            if (IsExecutionStarted)
+            if (!IsProcessing)
             {
                 throw new InvalidDomainOperationException(
-                        "Cannot start execution of the order again."
+                        "Cannot start execution of an order that isn't in processing."
                     );
             }
             Status = OrderStatus.Executing;
@@ -119,14 +123,7 @@ namespace ScmssApiServer.Models
 
         public virtual TEvent UpdateEvent(int id, string? message = null, string? location = null)
         {
-            if (IsEnded)
-            {
-                throw new InvalidDomainOperationException(
-                        "Cannot update an event of an ended order."
-                    );
-            }
-
-            TEvent? item = Events.FirstOrDefault(i => i.Id == id);
+            TEvent? item = Events.SingleOrDefault(i => i.Id == id);
             if (item == null)
             {
                 throw new EntityNotFoundException();

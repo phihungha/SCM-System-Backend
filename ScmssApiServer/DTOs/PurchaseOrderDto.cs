@@ -8,6 +8,7 @@
         public bool HasInvoice { get; set; }
         public bool HasReceipt { get; set; }
         public Uri? InvoiceUrl { get; set; }
+        public bool IsDiscountUpdateAllowed { get; set; }
         public decimal NetSubtotal { get; set; }
         public required ProductionFacilityDto ProductionFacility { get; set; }
         public int ProductionFacilityId { get; set; }
