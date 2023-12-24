@@ -225,7 +225,7 @@ namespace ScmssApiServer.DomainServices
                 throw new EntityNotFoundException();
             }
 
-            ProductionOrderEvent orderEvent = order.UpdateEvent(id, dto.Message, dto.Location);
+            ProductionOrderEvent orderEvent = order.UpdateEvent(id, dto.Location, dto.Message);
 
             await _dbContext.SaveChangesAsync();
             return _mapper.Map<ProductionOrderEventDto>(orderEvent);

@@ -121,7 +121,7 @@ namespace ScmssApiServer.Models
             Status = OrderStatus.Executing;
         }
 
-        public virtual TEvent UpdateEvent(int id, string? message = null, string? location = null)
+        public virtual TEvent UpdateEvent(int id, string? location = null, string? message = null)
         {
             TEvent? item = Events.SingleOrDefault(i => i.Id == id);
             if (item == null)
