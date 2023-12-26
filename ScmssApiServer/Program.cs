@@ -56,6 +56,7 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IConfigService, ConfigService>();
             builder.Services.AddScoped<ICustomersService, CustomersService>();
+            builder.Services.AddScoped<IInventoryService, InventoryService>();
             builder.Services.AddScoped<ISalesOrdersService, SalesOrdersService>();
             builder.Services.AddScoped<ISuppliesService, SuppliesService>();
             builder.Services.AddScoped<IProductsService, ProductsService>();
