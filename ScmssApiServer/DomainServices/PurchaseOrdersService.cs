@@ -79,7 +79,10 @@ namespace ScmssApiServer.DomainServices
                 order.AdditionalDiscount = (decimal)dto.AdditionalDiscount;
             }
 
-            order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
+            if (dto.Items != null)
+            {
+                order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
+            }
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
             order.Begin(user);
