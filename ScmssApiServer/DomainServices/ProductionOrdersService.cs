@@ -45,7 +45,7 @@ namespace ScmssApiServer.DomainServices
         }
 
         public async Task<ProductionOrderDto> CreateAsync(
-            OrderCreateDto<OrderItemInputDto> dto,
+            ProductionOrderCreateDto dto,
             Identity identity)
         {
             if (!identity.IsInProductionFacility)

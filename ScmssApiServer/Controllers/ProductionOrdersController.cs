@@ -34,7 +34,7 @@ namespace ScmssApiServer.Controllers
         [Authorize(Roles = "ProductionPlanner,ProductionManager")]
         [HttpPost]
         public async Task<ActionResult<ProductionOrderDto>> Create(
-            [FromBody] OrderCreateDto<OrderItemInputDto> body)
+            [FromBody] ProductionOrderCreateDto body)
         {
             ProductionOrderDto item = await _productionOrdersService.CreateAsync(body, CurrentIdentity);
             return Ok(item);

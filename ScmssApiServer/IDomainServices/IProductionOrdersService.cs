@@ -7,7 +7,7 @@ namespace ScmssApiServer.IDomainServices
     {
         Task<ProductionOrderEventDto> AddManualEventAsync(int orderId, ProductionOrderEventCreateDto dto);
 
-        Task<ProductionOrderDto> CreateAsync(OrderCreateDto<OrderItemInputDto> dto, Identity identity);
+        Task<ProductionOrderDto> CreateAsync(ProductionOrderCreateDto dto, Identity identity);
 
         Task<ProductionOrderDto?> GetAsync(int id, Identity identity);
 
