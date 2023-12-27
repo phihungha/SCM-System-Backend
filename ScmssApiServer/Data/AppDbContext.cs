@@ -20,10 +20,13 @@ namespace ScmssApiServer.Data
         public DbSet<Config> Config { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<ProductionFacility> ProductionFacilities { get; set; }
+        public DbSet<ProductionOrderItem> ProductionOrderItems { get; set; }
         public DbSet<ProductionOrder> ProductionOrders { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
+        public DbSet<SalesOrderItem> SalesOrderItems { get; set; }
         public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<Supply> Supplies { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
