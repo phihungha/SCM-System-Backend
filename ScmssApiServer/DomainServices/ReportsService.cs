@@ -38,7 +38,7 @@ namespace ScmssApiServer.DomainServices
                 .GroupBy(i => new { i.EndTime!.Value.Month, i.EndTime.Value.Year })
                 .Select(i => new ReportChartPointDto<string, decimal>
                 {
-                    Name = $"{i.Key.Month}/{i.Key.Year}",
+                    Name = $"{i.Key.Year}-{i.Key.Month}",
                     Value = i.Sum(j => j.TotalAmount)
                 }).ToListAsync();
             decimal totalRevenue = await paidSalesQuery.SumAsync(i => i.TotalAmount);
@@ -47,10 +47,14 @@ namespace ScmssApiServer.DomainServices
             var completedSalesQuery = salesQuery.Where(i => i.Status == OrderStatus.Completed);
 
             var averageDeliveryTimeByMonth = await completedSalesQuery
-                .GroupBy(i => new { i.ExecutionFinishTime!.Value.Month, i.ExecutionFinishTime.Value.Year })
+                .GroupBy(i => new
+                {
+                    i.ExecutionFinishTime!.Value.Month,
+                    i.ExecutionFinishTime.Value.Year
+                })
                 .Select(i => new ReportChartPointDto<string, double>
                 {
-                    Name = $"{i.Key.Month}/{i.Key.Year}",
+                    Name = $"{i.Key.Year}-{i.Key.Month}",
                     Value = i.Average(j => j.ExecutionDuration!.Value.TotalDays),
                 }).ToListAsync();
             var averageDeliveryTime = await completedSalesQuery
