@@ -24,5 +24,12 @@ namespace ScmssApiServer.Controllers
             SalesReportDto item = await _reportsService.GetSales(query);
             return Ok(item);
         }
+
+        [HttpGet("production")]
+        public async Task<ActionResult<ProductionReportDto>> GetProduction([FromQuery] ReportQueryDto query)
+        {
+            ProductionReportDto item = await _reportsService.GetProduction(query);
+            return Ok(item);
+        }
     }
 }

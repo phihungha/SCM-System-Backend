@@ -22,6 +22,7 @@ namespace ScmssApiServer.Data
         public DbSet<ProductionFacility> ProductionFacilities { get; set; }
         public DbSet<ProductionOrderItem> ProductionOrderItems { get; set; }
         public DbSet<ProductionOrder> ProductionOrders { get; set; }
+        public DbSet<ProductionOrderSupplyUsageItem> ProductionOrderSupplyUsageItems { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
