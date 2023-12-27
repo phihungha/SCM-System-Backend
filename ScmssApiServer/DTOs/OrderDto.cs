@@ -7,6 +7,7 @@ namespace ScmssApiServer.DTOs
         where TEventDto : OrderEventDto
     {
         public required ICollection<TEventDto> Events { get; set; }
+        public TimeSpan? ExecutionDuration { get; set; }
         public DateTime? ExecutionFinishTime { get; set; }
         public int Id { get; set; }
         public bool IsAcceptAllowed { get; set; }

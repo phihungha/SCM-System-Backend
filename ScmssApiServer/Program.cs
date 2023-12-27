@@ -64,6 +64,7 @@ namespace ScmssApiServer
             builder.Services.AddScoped<IProductionFacilitiesService, ProductionFacilitiesService>();
             builder.Services.AddScoped<IPurchaseRequisitionsService, PurchaseRequisitionsService>();
             builder.Services.AddScoped<IPurchaseOrdersService, PurchaseOrdersService>();
+            builder.Services.AddScoped<IReportsService, ReportsService>();
             builder.Services.AddScoped<IUsersService, UsersService>();
             builder.Services.AddScoped<IVendorsService, VendorsService>();
 
