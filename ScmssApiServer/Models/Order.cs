@@ -16,6 +16,12 @@ namespace ScmssApiServer.Models
         /// </summary>
         public ICollection<TEvent> Events { get; protected set; } = new List<TEvent>();
 
+        public TimeSpan? ExecutionDuration
+        {
+            get => ExecutionFinishTime - CreateTime;
+            set => _ = value;
+        }
+
         public DateTime? ExecutionFinishTime { get; protected set; }
         public int Id { get; set; }
         public virtual bool IsAcceptAllowed => Status == OrderStatus.WaitingAcceptance;
