@@ -1,5 +1,4 @@
 ﻿using ScmssApiServer.DTOs;
-using ScmssApiServer.Services;
 
 namespace ScmssApiServer.IDomainServices
 {
@@ -9,7 +8,7 @@ namespace ScmssApiServer.IDomainServices
 
         Task<UserDto> CreateAsync(UserCreateDto dto);
 
-        string GenerateProfileImageUploadUrl(string id);
+        FileUploadInfoDto GenerateProfileImageUploadUrl();
 
         Task<UserDto?> GetAsync(string id);
 

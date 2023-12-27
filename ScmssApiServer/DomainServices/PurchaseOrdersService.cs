@@ -93,14 +93,14 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseOrderDto>(order);
         }
 
-        public string GenerateInvoiceUploadUrl(int id)
+        public FileUploadInfoDto GenerateInvoiceUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(PurchaseOrder.InvoiceFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.InvoiceFolderKey);
         }
 
-        public string GenerateReceiptUploadUrl(int id)
+        public FileUploadInfoDto GenerateReceiptUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(PurchaseOrder.ReceiptFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.ReceiptFolderKey);
         }
 
         public async Task<PurchaseOrderDto?> GetAsync(int id, Identity identity)

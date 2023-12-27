@@ -62,9 +62,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductDto>(product);
         }
 
-        public string GenerateImageUploadUrl(int id)
+        public FileUploadInfoDto GenerateImageUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(Product.ImageFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(Product.ImageFolderKey);
         }
 
         public async Task<ProductDto?> GetAsync(int id)
