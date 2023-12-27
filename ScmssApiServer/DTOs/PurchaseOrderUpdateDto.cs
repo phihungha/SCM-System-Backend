@@ -4,7 +4,7 @@
     {
         public decimal? AdditionalDiscount { get; set; }
         public string? FromLocation { get; set; }
-        public bool? HasInvoice { get; set; }
-        public bool? HasReceipt { get; set; }
+        public string? InvoiceName { get; set; }
+        public string? ReceiptName { get; set; }
     }
 }

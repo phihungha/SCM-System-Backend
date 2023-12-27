@@ -57,12 +57,15 @@ namespace ScmssApiServer.Models
         [PersonalData]
         public required Gender Gender { get; set; }
 
-        public bool HasImage { get; set; }
-
         [PersonalData]
         [StringLength(maximumLength: 12, MinimumLength = 12)]
         [Column(TypeName = "char(12)")]
         public string? IdCardNumber { get; set; }
+
+        public string? ImageName { get; set; }
+
+        [NotMapped]
+        public Uri? ImageUrl => ImageName != null ? FileHostService.GetUri(ImageFolderKey, ImageName) : null;
 
         public bool IsActive { get; set; }
 
@@ -73,10 +76,6 @@ namespace ScmssApiServer.Models
         public ProductionFacility? ProductionFacility { get; set; }
 
         public int? ProductionFacilityId { get; set; }
-
-        [NotMapped]
-        public Uri? ImageUrl => HasImage ? FileHostService.GetUri(ImageFolderKey, Id) : null;
-
         public DateTime? UpdateTime { get; set; }
     }
 

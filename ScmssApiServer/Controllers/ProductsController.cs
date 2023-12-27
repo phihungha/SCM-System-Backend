@@ -45,11 +45,11 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpGet("{id}/ImageUploadUrl")]
-        public ActionResult<string> GetImageUploadUrl(int id)
+        [HttpGet("ImageUploadUrl")]
+        public ActionResult<FileUploadInfoDto> GetImageUploadUrl()
         {
-            string url = _productsService.GenerateImageUploadUrl(id);
-            return Ok(new { Url = url });
+            FileUploadInfoDto dto = _productsService.GenerateImageUploadUrl();
+            return Ok(dto);
         }
 
         [HttpGet]

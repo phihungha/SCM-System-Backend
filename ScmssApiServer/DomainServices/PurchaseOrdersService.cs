@@ -93,14 +93,14 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseOrderDto>(order);
         }
 
-        public string GenerateInvoiceUploadUrl(int id)
+        public FileUploadInfoDto GenerateInvoiceUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(PurchaseOrder.InvoiceFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.InvoiceFolderKey);
         }
 
-        public string GenerateReceiptUploadUrl(int id)
+        public FileUploadInfoDto GenerateReceiptUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(PurchaseOrder.ReceiptFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.ReceiptFolderKey);
         }
 
         public async Task<PurchaseOrderDto?> GetAsync(int id, Identity identity)
@@ -224,22 +224,22 @@ namespace ScmssApiServer.DomainServices
                 order.FromLocation = dto.FromLocation;
             }
 
-            if (dto.HasInvoice != null)
+            if (dto.InvoiceName != null)
             {
                 if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change invoice.");
                 }
-                order.HasInvoice = (bool)dto.HasInvoice;
+                order.InvoiceName = dto.InvoiceName;
             }
 
-            if (dto.HasReceipt != null)
+            if (dto.ReceiptName != null)
             {
                 if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change invoice.");
                 }
-                order.HasReceipt = (bool)dto.HasReceipt;
+                order.ReceiptName = dto.ReceiptName;
             }
 
             if (dto.AdditionalDiscount != null)

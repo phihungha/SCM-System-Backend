@@ -50,11 +50,11 @@ namespace ScmssApiServer.Controllers
             return Ok(item);
         }
 
-        [HttpGet("{id}/InvoiceUploadUrl")]
-        public ActionResult<string> GetInvoiceUploadUrl(int id)
+        [HttpGet("InvoiceUploadUrl")]
+        public ActionResult<FileUploadInfoDto> GetInvoiceUploadUrl()
         {
-            string url = _purchaseOrdersService.GenerateInvoiceUploadUrl(id);
-            return Ok(new { Url = url });
+            FileUploadInfoDto dto = _purchaseOrdersService.GenerateInvoiceUploadUrl();
+            return Ok(dto);
         }
 
         [HttpGet]
@@ -65,11 +65,11 @@ namespace ScmssApiServer.Controllers
             return Ok(items);
         }
 
-        [HttpGet("{id}/ReceiptUploadUrl")]
-        public ActionResult<string> GetReceiptUploadUrl(int id)
+        [HttpGet("ReceiptUploadUrl")]
+        public ActionResult<FileUploadInfoDto> GetReceiptUploadUrl()
         {
-            string url = _purchaseOrdersService.GenerateReceiptUploadUrl(id);
-            return Ok(new { Url = url });
+            FileUploadInfoDto dto = _purchaseOrdersService.GenerateReceiptUploadUrl();
+            return Ok(dto);
         }
 
         [Authorize(Roles = "Finance,PurchaseSpecialist,PurchaseManager")]

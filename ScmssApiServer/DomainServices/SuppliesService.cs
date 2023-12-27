@@ -58,9 +58,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<SupplyDto>(supply);
         }
 
-        public string GenerateImageUploadUrl(int id)
+        public FileUploadInfoDto GenerateImageUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(Supply.ImageFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(Supply.ImageFolderKey);
         }
 
         public async Task<SupplyDto?> GetAsync(int id)

@@ -125,9 +125,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<IList<UserDto>>(users);
         }
 
-        public string GenerateProfileImageUploadUrl(string id)
+        public FileUploadInfoDto GenerateProfileImageUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(User.ImageFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(User.ImageFolderKey);
         }
 
         public async Task<UserDto> UpdateAsync(string id, UserInputDto dto)
