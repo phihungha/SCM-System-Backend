@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ScmssApiServer.DTOs;
 using ScmssApiServer.IDomainServices;
@@ -6,6 +7,7 @@ using ScmssApiServer.Models;
 
 namespace ScmssApiServer.Controllers
 {
+    [Authorize(Roles = "Director")]
     [Route("api/[controller]")]
     [ApiController]
     public class ReportsController : CustomControllerBase
@@ -18,21 +20,21 @@ namespace ScmssApiServer.Controllers
             _reportsService = reportsService;
         }
 
-        [HttpGet("production")]
+        [HttpGet("Production")]
         public async Task<ActionResult<ProductionReportDto>> GetProduction([FromQuery] ReportQueryDto query)
         {
             ProductionReportDto item = await _reportsService.GetProduction(query);
             return Ok(item);
         }
 
-        [HttpGet("purchase")]
+        [HttpGet("Purchase")]
         public async Task<ActionResult<PurchaseReportDto>> GetPurchase([FromQuery] ReportQueryDto query)
         {
             PurchaseReportDto item = await _reportsService.GetPurchase(query);
             return Ok(item);
         }
 
-        [HttpGet("sales")]
+        [HttpGet("Sales")]
         public async Task<ActionResult<SalesReportDto>> GetSales([FromQuery] ReportQueryDto query)
         {
             SalesReportDto item = await _reportsService.GetSales(query);
