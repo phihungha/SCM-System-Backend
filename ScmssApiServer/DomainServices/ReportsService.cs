@@ -140,6 +140,102 @@ namespace ScmssApiServer.DomainServices
             };
         }
 
+        public async Task<PurchaseReportDto> GetPurchase(ReportQueryDto dto)
+        {
+            var startTime = new DateTime(dto.StartYear, dto.StartMonth, 1).ToUniversalTime();
+            var endTime = new DateTime(
+                dto.EndYear,
+                dto.EndMonth,
+                DateTime.DaysInMonth(dto.EndYear, dto.EndMonth)).ToUniversalTime();
+
+            var orderQuery = _dbContext.PurchaseOrders
+                .Where(i => i.EndTime != null &&
+                       i.EndTime.Value >= startTime &&
+                       i.EndTime.Value <= endTime);
+
+            var paidOrderQuery = orderQuery.Where(
+                i => i.PaymentStatus == TransOrderPaymentStatus.Completed);
+
+            var costByMonth = await paidOrderQuery
+                .GroupBy(i => new { i.EndTime!.Value.Month, i.EndTime.Value.Year })
+                .Select(i => new ReportChartPointDto<string, decimal>
+                {
+                    Name = $"{i.Key.Year}-{i.Key.Month}",
+                    Value = i.Sum(j => j.TotalAmount)
+                }).ToListAsync();
+            decimal totalCost = await paidOrderQuery.SumAsync(i => i.TotalAmount);
+            decimal averageCost = await paidOrderQuery.AverageAsync(i => (decimal?)i.TotalAmount) ?? 0;
+
+            var completedOrderQuery = orderQuery.Where(i => i.Status == OrderStatus.Completed);
+
+            var averageDeliveryTimeByMonth = await completedOrderQuery
+                .GroupBy(i => new
+                {
+                    i.ExecutionFinishTime!.Value.Month,
+                    i.ExecutionFinishTime.Value.Year
+                })
+                .Select(i => new ReportChartPointDto<string, double>
+                {
+                    Name = $"{i.Key.Year}-{i.Key.Month}",
+                    Value = i.Average(j => j.ExecutionDuration!.Value.TotalDays),
+                }).ToListAsync();
+            var averageDeliveryTime = await completedOrderQuery
+                .AverageAsync(i => (double?)i.ExecutionDuration!.Value.TotalDays) ?? 0;
+
+            var highestCostOrders = await completedOrderQuery
+                .OrderByDescending(i => i.TotalAmount)
+                .Select(i => new ReportListItemDto<PurchaseOrderDto, decimal>
+                {
+                    Item = _mapper.Map<PurchaseOrderDto>(i),
+                    Value = i.TotalAmount,
+                }).ToListAsync();
+
+            var mostFrequentVendors = await completedOrderQuery
+                .Include(i => i.Vendor)
+                .GroupBy(i => i.Vendor)
+                .Select(i => new ReportListItemDto<CompanyDto, int>
+                {
+                    Item = _mapper.Map<CompanyDto>(i.Key),
+                    Value = i.Count(),
+                }).ToListAsync();
+
+            var mostBoughtSupplies = await _dbContext.PurchaseOrderItems
+                .Include(i => i.PurchaseOrder)
+                .Include(i => i.Supply)
+                .Where(i => i.PurchaseOrder.EndTime != null &&
+                       i.PurchaseOrder.EndTime.Value >= startTime &&
+                       i.PurchaseOrder.EndTime.Value <= endTime)
+                .GroupBy(i => i.Supply)
+                .Select(i => new ReportListItemDto<SupplyDto, double>
+                {
+                    Item = _mapper.Map<SupplyDto>(i.Key),
+                    Value = i.Sum(j => j.Quantity)
+                })
+                .OrderByDescending(i => i.Value)
+                .ToListAsync();
+
+            var orderCountByFinalStatus = await orderQuery
+            .GroupBy(i => i.Status)
+            .Select(i => new ReportChartPointDto<string, int>
+            {
+                Name = i.Key.ToString(),
+                Value = i.Count()
+            }).ToListAsync();
+
+            return new PurchaseReportDto
+            {
+                CostByMonth = costByMonth,
+                TotalCost = totalCost,
+                AverageCost = averageCost,
+                AverageDeliveryTimeByMonth = averageDeliveryTimeByMonth,
+                AverageDeliveryTime = averageDeliveryTime,
+                OrderCountByFinalStatus = orderCountByFinalStatus,
+                HighestCostOrders = highestCostOrders,
+                MostBoughtSupplies = mostBoughtSupplies,
+                MostFrequentVendors = mostFrequentVendors,
+            };
+        }
+
         public async Task<SalesReportDto> GetSales(ReportQueryDto dto)
         {
             var startTime = new DateTime(dto.StartYear, dto.StartMonth, 1).ToUniversalTime();

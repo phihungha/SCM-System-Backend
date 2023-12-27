@@ -18,17 +18,24 @@ namespace ScmssApiServer.Controllers
             _reportsService = reportsService;
         }
 
-        [HttpGet("sales")]
-        public async Task<ActionResult<SalesReportDto>> GetSales([FromQuery] ReportQueryDto query)
-        {
-            SalesReportDto item = await _reportsService.GetSales(query);
-            return Ok(item);
-        }
-
         [HttpGet("production")]
         public async Task<ActionResult<ProductionReportDto>> GetProduction([FromQuery] ReportQueryDto query)
         {
             ProductionReportDto item = await _reportsService.GetProduction(query);
+            return Ok(item);
+        }
+
+        [HttpGet("purchase")]
+        public async Task<ActionResult<PurchaseReportDto>> GetPurchase([FromQuery] ReportQueryDto query)
+        {
+            PurchaseReportDto item = await _reportsService.GetPurchase(query);
+            return Ok(item);
+        }
+
+        [HttpGet("sales")]
+        public async Task<ActionResult<SalesReportDto>> GetSales([FromQuery] ReportQueryDto query)
+        {
+            SalesReportDto item = await _reportsService.GetSales(query);
             return Ok(item);
         }
     }
