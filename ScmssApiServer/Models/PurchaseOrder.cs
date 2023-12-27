@@ -46,11 +46,10 @@ namespace ScmssApiServer.Models
         /// </summary>
         public decimal DiscountSubtotal { get; set; }
 
-        public bool HasInvoice { get; set; }
-        public bool HasReceipt { get; set; }
+        public string? InvoiceName { get; set; }
 
         [NotMapped]
-        public Uri? InvoiceUrl => HasInvoice ? FileHostService.GetUri(InvoiceFolderKey, Id) : null;
+        public Uri? InvoiceUrl => InvoiceName != null ? FileHostService.GetUri(InvoiceFolderKey, InvoiceName) : null;
 
         public bool IsDiscountUpdateAllowed => PaymentStatus == TransOrderPaymentStatus.Pending;
 
@@ -67,9 +66,10 @@ namespace ScmssApiServer.Models
         public int ProductionFacilityId { get; set; }
         public PurchaseRequisition PurchaseRequisition { get; set; } = null!;
         public int? PurchaseRequisitionId { get; set; }
+        public string? ReceiptName { get; set; }
 
         [NotMapped]
-        public Uri? ReceiptUrl => HasReceipt ? FileHostService.GetUri(ReceiptFolderKey, Id) : null;
+        public Uri? ReceiptUrl => ReceiptName != null ? FileHostService.GetUri(ReceiptFolderKey, ReceiptName) : null;
 
         public ICollection<Supply> Supplies { get; protected set; } = new List<Supply>();
 

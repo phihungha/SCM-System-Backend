@@ -224,22 +224,22 @@ namespace ScmssApiServer.DomainServices
                 order.FromLocation = dto.FromLocation;
             }
 
-            if (dto.HasInvoice != null)
+            if (dto.InvoiceName != null)
             {
                 if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change invoice.");
                 }
-                order.HasInvoice = (bool)dto.HasInvoice;
+                order.InvoiceName = dto.InvoiceName;
             }
 
-            if (dto.HasReceipt != null)
+            if (dto.ReceiptName != null)
             {
                 if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change invoice.");
                 }
-                order.HasReceipt = (bool)dto.HasReceipt;
+                order.ReceiptName = dto.ReceiptName;
             }
 
             if (dto.AdditionalDiscount != null)

@@ -10,8 +10,7 @@ namespace ScmssApiServer.DTOs
         [Range(1, double.MaxValue)]
         public int ExpirationMonth { get; set; }
 
-        [Required]
-        public bool HasImage { get; set; }
+        public string? ImageName { get; set; }
 
         [Required]
         public bool IsActive { get; set; }
