@@ -20,12 +20,12 @@ namespace ScmssApiServer.DomainServices
 
         public async Task<Config> GetAsync()
         {
-            return await _dbContext.Config.AsNoTracking().FirstAsync();
+            return await _dbContext.Config.AsNoTracking().SingleAsync();
         }
 
         public async Task<Config> SetAsync(ConfigInputDto dto)
         {
-            var config = await _dbContext.Config.FirstAsync();
+            var config = await _dbContext.Config.SingleAsync();
             _mapper.Map(dto, config);
             await _dbContext.SaveChangesAsync();
             return config;

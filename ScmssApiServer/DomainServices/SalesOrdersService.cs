@@ -34,7 +34,7 @@ namespace ScmssApiServer.DomainServices
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -49,7 +49,7 @@ namespace ScmssApiServer.DomainServices
         public async Task<SalesOrderDto> CreateAsync(SalesOrderCreateDto dto, Identity identity)
         {
             Customer? customer = await _dbContext.Customers.Where(i => i.IsActive)
-                                                           .FirstOrDefaultAsync(i => i.Id == dto.CustomerId);
+                                                           .SingleOrDefaultAsync(i => i.Id == dto.CustomerId);
             if (customer == null)
             {
                 throw new EntityNotFoundException("Customer not found");
@@ -103,7 +103,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<SalesOrderDto?>(order);
         }
 
@@ -180,7 +180,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -250,7 +250,7 @@ namespace ScmssApiServer.DomainServices
         {
             SalesOrder? order = await _dbContext.SalesOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -337,8 +337,9 @@ namespace ScmssApiServer.DomainServices
 
         private async Task<ProductionFacility> GetProductionFacilityAsync(int facilityId)
         {
-            ProductionFacility? facility = await _dbContext.ProductionFacilities.Where(i => i.IsActive)
-                                                                                .FirstOrDefaultAsync(i => i.Id == facilityId);
+            ProductionFacility? facility = await _dbContext.ProductionFacilities
+                .Where(i => i.IsActive)
+                .SingleOrDefaultAsync(i => i.Id == facilityId);
             if (facility == null)
             {
                 throw new EntityNotFoundException("Production facility not found.");

@@ -20,10 +20,14 @@ namespace ScmssApiServer.Data
         public DbSet<Config> Config { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<ProductionFacility> ProductionFacilities { get; set; }
+        public DbSet<ProductionOrderItem> ProductionOrderItems { get; set; }
         public DbSet<ProductionOrder> ProductionOrders { get; set; }
+        public DbSet<ProductionOrderSupplyUsageItem> ProductionOrderSupplyUsageItems { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
+        public DbSet<SalesOrderItem> SalesOrderItems { get; set; }
         public DbSet<SalesOrder> SalesOrders { get; set; }
         public DbSet<Supply> Supplies { get; set; }
         public DbSet<Vendor> Vendors { get; set; }
@@ -353,7 +357,7 @@ namespace ScmssApiServer.Data
                 Id = 1,
                 VendorId = 1,
                 Name = "PVFCCo Urea",
-                HasImage = true,
+                ImageName = "1",
                 ExpirationMonth = 12,
                 Unit = "Kg",
                 Price = 5000,
@@ -366,6 +370,7 @@ namespace ScmssApiServer.Data
                 Id = 2,
                 VendorId = 1,
                 Name = "PVFCCo Phosphorous",
+                ImageName = "2",
                 ExpirationMonth = 12,
                 Unit = "Kg",
                 Price = 6000,
@@ -427,7 +432,7 @@ namespace ScmssApiServer.Data
             {
                 Id = 1,
                 Name = "NPK 16-8-8+13S",
-                HasImage = true,
+                ImageName = "1",
                 NetWeight = 50,
                 ExpirationMonth = 48,
                 Unit = "Item(s)",
@@ -450,6 +455,7 @@ namespace ScmssApiServer.Data
             {
                 Id = 2,
                 Name = "NPK 16-7-18+12S+TE",
+                ImageName = "2",
                 NetWeight = 50,
                 ExpirationMonth = 48,
                 Unit = "Item(s)",

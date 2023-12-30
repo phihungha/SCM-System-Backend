@@ -27,6 +27,8 @@ namespace ScmssApiServer.DTOs
         [IdCardNumber]
         public required string IdCardNumber { get; set; }
 
+        public string? ImageName { get; set; }
+
         [Required]
         public bool IsActive { get; set; }
 

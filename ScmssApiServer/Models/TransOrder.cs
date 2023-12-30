@@ -13,7 +13,6 @@ namespace ScmssApiServer.Models
         where TEvent : TransOrderEvent, new()
     {
         private string? fromLocation;
-
         private string toLocation = "";
 
         /// <summary>
@@ -24,16 +23,18 @@ namespace ScmssApiServer.Models
             get => fromLocation;
             set
             {
-                if (fromLocation != value && IsExecutionStarted)
+                if (fromLocation != value && !IsProcessing)
                 {
                     throw new InvalidDomainOperationException(
-                            "Cannot change start location after the order has started delivery."
+                            "Cannot change start location if order is not in processing."
                         );
                 }
                 fromLocation = value;
             }
         }
 
+        public bool IsPaymentCompleteAllowed => PaymentStatus == TransOrderPaymentStatus.Due;
+        public bool IsToLocationUpdateAllowed => !IsExecutionFinished && !IsEnded;
         public TransOrderPaymentStatus PaymentStatus { get; protected set; }
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace ScmssApiServer.Models
             SubTotal = Items.Sum(i => i.TotalPrice);
         }
 
-        public TEvent AddManualEvent(TransOrderEventTypeSelection typeSel,
+        public TEvent AddManualEvent(TransOrderEventTypeOption typeSel,
                                      string location,
                                      string? message)
         {
@@ -107,17 +108,17 @@ namespace ScmssApiServer.Models
             TransOrderEventType type;
             switch (typeSel)
             {
-                case TransOrderEventTypeSelection.Left:
+                case TransOrderEventTypeOption.Left:
                     type = TransOrderEventType.Left;
                     Status = OrderStatus.Executing;
                     break;
 
-                case TransOrderEventTypeSelection.Arrived:
+                case TransOrderEventTypeOption.Arrived:
                     type = TransOrderEventType.Arrived;
                     Status = OrderStatus.Executing;
                     break;
 
-                case TransOrderEventTypeSelection.Interrupted:
+                case TransOrderEventTypeOption.Interrupted:
                     type = TransOrderEventType.Interrupted;
                     Status = OrderStatus.Interrupted;
                     break;
@@ -147,8 +148,8 @@ namespace ScmssApiServer.Models
         public override void Complete(User user)
         {
             base.Complete(user);
-            CreateDuePayment();
             AddEvent(TransOrderEventType.Completed, ToLocation);
+            CreateDuePayment();
         }
 
         public void CompletePayment(decimal amount)

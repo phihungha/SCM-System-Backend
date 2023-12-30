@@ -1,9 +1,9 @@
-﻿namespace ScmssApiServer.IServices
+﻿using ScmssApiServer.DTOs;
+
+namespace ScmssApiServer.IServices
 {
     public interface IFileHostService
     {
-        string GenerateUploadUrl(string folderKey, string key);
-
-        string GenerateUploadUrl(string folderKey, int key);
+        FileUploadInfoDto GenerateUploadUrl(string folderKey);
     }
 }

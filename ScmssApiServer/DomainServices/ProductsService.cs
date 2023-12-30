@@ -31,7 +31,7 @@ namespace ScmssApiServer.DomainServices
             await _dbContext.SaveChangesAsync();
             product = await _dbContext.Products.Include(i => i.SupplyCostItems)
                                                .ThenInclude(i => i.Supply)
-                                               .FirstAsync(i => i.Id == product.Id);
+                                               .SingleAsync(i => i.Id == product.Id);
 
             IList<ProductionFacility> facilities = await _dbContext.ProductionFacilities.ToListAsync();
             foreach (ProductionFacility facility in facilities)
@@ -62,9 +62,9 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<ProductDto>(product);
         }
 
-        public string GenerateImageUploadUrl(int id)
+        public FileUploadInfoDto GenerateImageUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(Product.ImageFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(Product.ImageFolderKey);
         }
 
         public async Task<ProductDto?> GetAsync(int id)
@@ -73,7 +73,7 @@ namespace ScmssApiServer.DomainServices
                 .AsNoTracking()
                 .Include(i => i.SupplyCostItems)
                 .ThenInclude(i => i.Supply)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<ProductDto?>(product);
         }
 
@@ -112,7 +112,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.WarehouseProductItems)
                 .Include(i => i.SupplyCostItems)
                 .ThenInclude(i => i.Supply)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .SingleOrDefaultAsync(x => x.Id == id);
             if (product == null)
             {
                 throw new EntityNotFoundException();
@@ -124,7 +124,7 @@ namespace ScmssApiServer.DomainServices
             await _dbContext.SaveChangesAsync();
             product = await _dbContext.Products.Include(i => i.SupplyCostItems)
                                                .ThenInclude(i => i.Supply)
-                                               .FirstAsync(i => i.Id == product.Id);
+                                               .SingleAsync(i => i.Id == product.Id);
 
             return _mapper.Map<ProductDto>(product);
         }

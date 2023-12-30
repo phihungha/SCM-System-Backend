@@ -39,7 +39,7 @@ namespace ScmssApiServer.DomainServices
         {
             PurchaseOrder? order = await _dbContext.PurchaseOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -58,7 +58,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.ProductionFacility)
                 .Include(i => i.Vendor)
                 .Include(i => i.Items).ThenInclude(i => i.Supply)
-                .FirstOrDefaultAsync(i => i.Id == dto.PurchaseRequisitionId);
+                .SingleOrDefaultAsync(i => i.Id == dto.PurchaseRequisitionId);
             if (requistion == null)
             {
                 throw new EntityNotFoundException("Purchase requisition with provided ID not found.");
@@ -79,7 +79,10 @@ namespace ScmssApiServer.DomainServices
                 order.AdditionalDiscount = (decimal)dto.AdditionalDiscount;
             }
 
-            order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
+            if (dto.Items != null)
+            {
+                order.EditItemDiscounts(MapOrderItemDiscountDtosToDict(dto.Items));
+            }
 
             User user = (await _userManager.FindByIdAsync(identity.Id))!;
             order.Begin(user);
@@ -90,14 +93,14 @@ namespace ScmssApiServer.DomainServices
             return _mapper.Map<PurchaseOrderDto>(order);
         }
 
-        public string GenerateInvoiceUploadUrl(int id)
+        public FileUploadInfoDto GenerateInvoiceUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(PurchaseOrder.InvoiceFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.InvoiceFolderKey);
         }
 
-        public string GenerateReceiptUploadUrl(int id)
+        public FileUploadInfoDto GenerateReceiptUploadUrl()
         {
-            return _fileHostService.GenerateUploadUrl(PurchaseOrder.ReceiptFolderKey, id);
+            return _fileHostService.GenerateUploadUrl(PurchaseOrder.ReceiptFolderKey);
         }
 
         public async Task<PurchaseOrderDto?> GetAsync(int id, Identity identity)
@@ -118,7 +121,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             return _mapper.Map<PurchaseOrderDto?>(orders);
         }
 
@@ -196,7 +199,7 @@ namespace ScmssApiServer.DomainServices
                 .Include(i => i.Events)
                 .Include(i => i.CreateUser)
                 .Include(i => i.EndUser)
-                .FirstOrDefaultAsync(i => i.Id == id);
+                .SingleOrDefaultAsync(i => i.Id == id);
             if (order == null)
             {
                 throw new EntityNotFoundException();
@@ -221,22 +224,22 @@ namespace ScmssApiServer.DomainServices
                 order.FromLocation = dto.FromLocation;
             }
 
-            if (dto.HasInvoice != null)
+            if (dto.InvoiceName != null)
             {
                 if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change invoice.");
                 }
-                order.HasInvoice = (bool)dto.HasInvoice;
+                order.InvoiceName = dto.InvoiceName;
             }
 
-            if (dto.HasReceipt != null)
+            if (dto.ReceiptName != null)
             {
                 if (!identity.IsPurchaseUser)
                 {
                     throw new UnauthorizedException("Unauthorized to change invoice.");
                 }
-                order.HasReceipt = (bool)dto.HasReceipt;
+                order.ReceiptName = dto.ReceiptName;
             }
 
             if (dto.AdditionalDiscount != null)
@@ -274,7 +277,7 @@ namespace ScmssApiServer.DomainServices
         {
             PurchaseOrder? order = await _dbContext.PurchaseOrders
                 .Include(i => i.Events)
-                .FirstOrDefaultAsync(i => i.Id == orderId);
+                .SingleOrDefaultAsync(i => i.Id == orderId);
             if (order == null)
             {
                 throw new EntityNotFoundException();

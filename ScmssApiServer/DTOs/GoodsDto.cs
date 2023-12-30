@@ -4,8 +4,9 @@
     {
         public DateTime CreateTime { get; set; }
         public string? Description { get; set; }
-        public bool HasImage { get; set; }
+        public int ExpirationMonth { get; set; }
         public int Id { get; set; }
+        public string? ImageName { get; set; }
         public Uri? ImageUrl { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }

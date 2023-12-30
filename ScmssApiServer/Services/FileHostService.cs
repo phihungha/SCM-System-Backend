@@ -1,5 +1,6 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
+using ScmssApiServer.DTOs;
 using ScmssApiServer.Exceptions;
 using ScmssApiServer.IServices;
 
@@ -35,26 +36,21 @@ namespace ScmssApiServer.Services
 
         public static Uri GetUri(string folderKey, int key) => new Uri($"{BaseUrl}/{folderKey}/{key}");
 
-        public string GenerateUploadUrl(string folderKey, string key)
+        public FileUploadInfoDto GenerateUploadUrl(string folderKey)
         {
-            return GeneratePresignedUrl($"public/{folderKey}/{key}", HttpVerb.PUT);
-        }
+            Guid guid = Guid.NewGuid();
+            string name = guid.ToString();
 
-        public string GenerateUploadUrl(string folderKey, int key)
-        {
-            return GeneratePresignedUrl($"public/{folderKey}/{key}", HttpVerb.PUT);
-        }
-
-        private string GeneratePresignedUrl(string key, HttpVerb verb)
-        {
             var request = new GetPreSignedUrlRequest
             {
                 BucketName = _bucketName,
-                Key = key,
-                Verb = verb,
+                Key = $"public/{folderKey}/{name}",
+                Verb = HttpVerb.PUT,
                 Expires = DateTime.UtcNow.AddHours(_expiresInHours)
             };
-            return _s3Client.GetPreSignedURL(request);
+            string uploadUrl = _s3Client.GetPreSignedURL(request);
+
+            return new FileUploadInfoDto { Name = name, UploadUrl = uploadUrl };
         }
     }
 }
